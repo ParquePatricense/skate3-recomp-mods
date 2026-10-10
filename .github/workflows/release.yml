@@ -1,0 +1,35 @@
+name: release
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install pyinstaller
+      - run: pyinstaller --onefile --console --name Skate3-PS-Buttons --paths src src/skate3_ps_buttons.py
+      - shell: pwsh
+        run: |
+          New-Item -ItemType Directory pkg | Out-Null
+          Copy-Item dist/Skate3-PS-Buttons.exe pkg/
+          Copy-Item dist-extras/*.bat pkg/
+          Copy-Item README.md, LICENSE pkg/
+          Compress-Archive -Path pkg/* -DestinationPath Skate3-PS-Buttons.zip
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Skate3-PS-Buttons
+          path: Skate3-PS-Buttons.zip
+      - if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: Skate3-PS-Buttons.zip
