@@ -8,6 +8,10 @@ Pack de mods **modular** para [skate3recomp](https://github.com/mchughalex/skate
 | 🖼️ **Presets gráficos** | Máxima calidad, Equilibrado o Rendimiento, con un clic |
 | 🔭 **FOV y ultrawide** | Campo de visión (40–120) y modo 21:9 |
 | ⌨️ **Alt+F4** | Cierra el juego con Alt+F4 (el recomp no lo deja) |
+| 🖥️ **Acceso directo** | Crea "Skate 3" en el escritorio, con mods incluidos |
+| 🧉 **Textos rioplatenses** | Pasa los textos del juego a español rioplatense: voseo y vocabulario de acá |
+
+➕ El menú sale en español o en inglés según el idioma de Windows (se cambia con `L`), y avisa cuando hay una versión nueva.
 
 ![preview](preview/preview.png)
 
@@ -20,7 +24,7 @@ Pack de mods **modular** para [skate3recomp](https://github.com/mchughalex/skate
 1. ⬇️ Descargá `Skate3-Mods.zip` desde [Releases](../../releases).
 2. 📂 Descomprimilo **en la carpeta de skate3recomp** (donde está `skate3.exe`).
 3. 🖱️ Abrí `Skate3-Mods.exe` y activá lo que quieras desde el menú.
-4. 🛹 Jugá con `Jugar Skate 3 (mods).bat` (hace falta para Alt+F4; los iconos y presets funcionan igual abriendo `skate3.exe`).
+4. 🛹 Jugá con el acceso directo "Skate 3" (opción 5 del menú) o con `Jugar Skate 3 (mods).bat`. Hace falta para Alt+F4; el resto funciona igual abriendo `skate3.exe`.
 
 > ⚠️ El juego tiene que haberse instalado al menos una vez (botón *Select ISO*). Cerralo antes de cambiar iconos o presets.
 > 🛡️ Si aparece SmartScreen: "Más información" ➡️ "Ejecutar de todas formas" (el .exe no está firmado).
@@ -40,11 +44,17 @@ Los iconos están en `game/data/big/fedynamic.big` ➡️ `buttons.rx2`. El mod 
 
 Escriben valores en `skate3.toml` (el mismo archivo que usa el menú *Settings* del juego, así que después podés seguir ajustando ahí). La primera vez se guarda tu `skate3.toml` como `skate3.toml.mods-original`; "Volver a mi configuración de antes" lo restaura.
 
+## 🧉 Textos rioplatenses
+
+Reescribe la tabla de textos en español del juego (`miscboot.big` ➡️ `LANGUAGE_Spanish_Global_skate3ng.BIN`) con reglas: "¿Quieres jugar? Puedes..." ➡️ "¿Querés jugar? Podés...", "Haz un kickflip y presiona Ⓐ" ➡️ "Hacé un kickflip y presioná Ⓐ", "colega" ➡️ "loco", "coches" ➡️ "autos", "piscina" ➡️ "pileta", "mola" ➡️ "garpa", y así (cambia unos 2700 textos). Las reglas están en [`go/rioplatense.txt`](go/rioplatense.txt): si ves algo raro, se corrige ahí.
+
+Al activarlo pone el juego en español (`user_language = 5` en `skate3.toml`). Guarda el original como `miscboot.big.original` y al desactivarlo lo restaura byte a byte.
+
 ## ⚙️ Cómo funciona
 
-- **Iconos:** reemplaza solo las texturas de `buttons.rx2` y agrega la versión nueva al final del `.big`; el resto del archivo queda intacto.
+- **Iconos y textos:** reemplazan solo su archivo dentro del `.big` (agregan la versión nueva al final); el resto queda intacto.
 - **Alt+F4:** `Jugar Skate 3 (mods).bat` abre el juego y deja corriendo un ayudante chico (sin ventana) que se cierra solo cuando cerrás el juego. Alt+F4 le pide al juego que se cierre, igual que la X de la ventana.
-- 🚫 No incluye ni distribuye archivos de EA: los iconos son arte original y todo se aplica sobre tu propia copia.
+- 🚫 No incluye ni distribuye archivos de EA: los iconos son arte original, los textos se generan con reglas sobre tu propia copia.
 
 ### 🐧 Linux / 🍎 macOS
 
@@ -76,4 +86,4 @@ Fuente: Inter (SIL Open Font License, ver `tools/fonts/Inter-LICENSE.txt`).
 
 ### 🇬🇧 English
 
-Modular mod pack for skate3recomp: PlayStation button icons (PS3/PS4/PS5), graphics presets, FOV/ultrawide and Alt+F4 to quit. Unzip next to `skate3.exe`, run `Skate3-Mods.exe` to toggle modules, and play through `Jugar Skate 3 (mods).bat` for Alt+F4. Every module is reversible. Not affiliated with EA, Sony or the skate3recomp project.
+Modular mod pack for skate3recomp: PlayStation button icons (PS3/PS4/PS5), graphics presets, FOV/ultrawide, Alt+F4 to quit, a desktop shortcut and Rioplatense (Argentine) Spanish texts. Unzip next to `skate3.exe`, run `Skate3-Mods.exe` to toggle modules (the menu follows your Windows language, press `L` to switch), and play through the "Skate 3" shortcut or `Jugar Skate 3 (mods).bat` for Alt+F4. Every module is reversible. Not affiliated with EA, Sony or the skate3recomp project.

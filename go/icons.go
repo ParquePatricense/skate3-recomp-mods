@@ -283,10 +283,14 @@ func findArchive(game string) (string, error) {
 			}
 		}
 	}
-	return "", fmt.Errorf("no encontré game\\data\\big\\%s.\n"+
+	return "", fmt.Errorf(T("no encontré game\\data\\big\\%s.\n"+
 		"Poné Skate3-Mods.exe en la carpeta de skate3recomp (al lado de skate3.exe),\n"+
 		"o usá --game \"<carpeta de skate3recomp>\".\n"+
-		"El juego tiene que haberse instalado al menos una vez (Select ISO).", archiveName)
+		"El juego tiene que haberse instalado al menos una vez (Select ISO).",
+		"could not find game\\data\\big\\%s.\n"+
+			"Put Skate3-Mods.exe in the skate3recomp folder (next to skate3.exe),\n"+
+			"or use --game \"<skate3recomp folder>\".\n"+
+			"The game must have been installed at least once (Select ISO)."), archiveName)
 }
 
 func loadStyle(style string) (map[int][]byte, error) {
@@ -312,11 +316,11 @@ func loadStyle(style string) (map[int][]byte, error) {
 
 func patchRx2(rx2 []byte, style string) ([]byte, error) {
 	if len(rx2) != rx2Size || !bytes.Equal(rx2[:8], []byte("\x89RW4xb2\x00")) {
-		return nil, errors.New(entryName + " tiene un formato inesperado; esta versión del juego no está soportada")
+		return nil, errors.New(entryName + T(" tiene un formato inesperado; esta versión del juego no está soportada", " has an unexpected format; this game version is not supported"))
 	}
 	base := int(binary.BigEndian.Uint32(rx2[0x44:]))
 	if base+66*texBytes != rx2Size {
-		return nil, errors.New(entryName + " tiene un layout de texturas inesperado")
+		return nil, errors.New(entryName + T(" tiene un layout de texturas inesperado", " has an unexpected texture layout"))
 	}
 	tex, err := loadStyle(style)
 	if err != nil {
@@ -345,7 +349,7 @@ func exists(p string) bool { _, err := os.Stat(p); return err == nil }
 
 func installIcons(style, game string) error {
 	if _, ok := styleNames[style]; !ok {
-		return fmt.Errorf("estilo desconocido %q (usá ps3, ps4 o ps5)", style)
+		return fmt.Errorf(T("estilo desconocido %q (usá ps3, ps4 o ps5)", "unknown style %q (use ps3, ps4 or ps5)"), style)
 	}
 	archive, err := findArchive(game)
 	if err != nil {
@@ -353,7 +357,7 @@ func installIcons(style, game string) error {
 	}
 	backup, state := archive+backupSuffix, archive+stateSuffix
 	if !exists(backup) {
-		fmt.Printf("Guardando copia del %s original...\n", archiveName)
+		fmt.Printf(T("Guardando copia del %s original...\n", "Backing up the original %s...\n"), archiveName)
 		if err := copyFile(archive, backup); err != nil {
 			return err
 		}
@@ -370,7 +374,7 @@ func installIcons(style, game string) error {
 	if err != nil {
 		return err
 	}
-	fmt.Printf("Instalando iconos de %s...\n", styleNames[style])
+	fmt.Printf(T("Instalando iconos de %s...\n", "Installing %s icons...\n"), styleNames[style])
 	rx2, err := big.read(idx)
 	if err != nil {
 		return err
@@ -388,12 +392,12 @@ func installIcons(style, game string) error {
 	}
 	if err := os.Rename(tmp, archive); err != nil {
 		os.Remove(tmp)
-		return fmt.Errorf("no pude reemplazar %s (¿el juego está abierto?): %v", archiveName, err)
+		return fmt.Errorf(T("no pude reemplazar %s (¿el juego está abierto?): %v", "could not replace %s (is the game running?): %v"), archiveName, err)
 	}
 	if err := os.WriteFile(state, []byte(style), 0o644); err != nil {
 		return err
 	}
-	fmt.Printf("Listo: iconos de %s instalados.\n", styleNames[style])
+	fmt.Printf(T("Listo: iconos de %s instalados.\n", "Done: %s icons installed.\n"), styleNames[style])
 	return nil
 }
 
@@ -404,15 +408,15 @@ func uninstallIcons(game string) error {
 	}
 	backup, state := archive+backupSuffix, archive+stateSuffix
 	if !exists(backup) {
-		fmt.Println("No hay nada que desinstalar: ya están los iconos originales de Xbox.")
+		fmt.Println(T("No hay nada que desinstalar: ya están los iconos originales de Xbox.", "Nothing to uninstall: the original Xbox icons are already in place."))
 		return nil
 	}
 	os.Remove(archive)
 	if err := os.Rename(backup, archive); err != nil {
-		return fmt.Errorf("no pude restaurar %s (¿el juego está abierto?): %v", archiveName, err)
+		return fmt.Errorf(T("no pude restaurar %s (¿el juego está abierto?): %v", "could not restore %s (is the game running?): %v"), archiveName, err)
 	}
 	os.Remove(state)
-	fmt.Println("Listo: iconos originales de Xbox restaurados.")
+	fmt.Println(T("Listo: iconos originales de Xbox restaurados.", "Done: original Xbox icons restored."))
 	return nil
 }
 

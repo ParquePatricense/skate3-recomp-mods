@@ -117,12 +117,13 @@ func msgBox(text string) {
 
 func play(root string) error {
 	c := loadConfig(root)
+	setLang(c)
 	pid, running := findGamePID()
 	if !running {
 		cmd := exec.Command(filepath.Join(root, gameExe))
 		cmd.Dir = root
 		if err := cmd.Start(); err != nil {
-			return fmt.Errorf("no pude abrir %s: %v", gameExe, err)
+			return fmt.Errorf(T("no pude abrir %s: %v", "could not start %s: %v"), gameExe, err)
 		}
 		pid = uint32(cmd.Process.Pid)
 		cmd.Process.Release()
@@ -136,12 +137,12 @@ func play(root string) error {
 	gamePID = pid
 	proc, err := syscall.OpenProcess(synchronize|processTerminate, false, pid)
 	if err != nil {
-		msgBox("No pude vigilar el juego: " + err.Error())
+		msgBox(T("No pude vigilar el juego: ", "Could not watch the game: ") + err.Error())
 		return nil
 	}
 	inst, _, _ := pGetModuleHandleW.Call(0)
 	if r, _, e := pSetWindowsHookExW.Call(whKeyboardLL, syscall.NewCallback(keyboardProc), inst, 0); r == 0 {
-		msgBox("No pude activar Alt+F4: " + e.Error())
+		msgBox(T("No pude activar Alt+F4: ", "Could not enable Alt+F4: ") + e.Error())
 		return nil
 	}
 	pSetTimer.Call(0, 0, 250, 0)
@@ -164,4 +165,47 @@ func play(root string) error {
 		pDispatchMessageW.Call(uintptr(unsafe.Pointer(&m)))
 	}
 	return nil
+}
+
+var pGetUserDefaultUILanguage = kernel32.NewProc("GetUserDefaultUILanguage")
+
+func systemSpanish() bool {
+	l, _, _ := pGetUserDefaultUILanguage.Call()
+	return l&0x3FF == 0x0A // LANG_SPANISH
+}
+
+const shortcutName = "Skate 3.lnk"
+
+func psQuote(s string) string { return "'" + strings.ReplaceAll(s, "'", "''") + "'" }
+
+func powershell(script string) error {
+	cmd := exec.Command("powershell", "-NoProfile", "-NonInteractive", "-Command", script)
+	cmd.SysProcAttr = &syscall.SysProcAttr{HideWindow: true}
+	out, err := cmd.CombinedOutput()
+	if err != nil {
+		return fmt.Errorf("%v: %s", err, strings.TrimSpace(string(out)))
+	}
+	return nil
+}
+
+func desktopShortcut() string {
+	return "(Join-Path ([Environment]::GetFolderPath('Desktop')) " + psQuote(shortcutName) + ")"
+}
+
+// createShortcut puts a "Skate 3" shortcut on the desktop that starts the
+// game through the mods helper (minimized, so no console flashes).
+func createShortcut(root string) error {
+	exe, err := os.Executable()
+	if err != nil {
+		return err
+	}
+	return powershell("$s=(New-Object -ComObject WScript.Shell).CreateShortcut(" + desktopShortcut() + ");" +
+		"$s.TargetPath=" + psQuote(exe) + ";$s.Arguments='play';" +
+		"$s.WorkingDirectory=" + psQuote(root) + ";" +
+		"$s.IconLocation=" + psQuote(filepath.Join(root, gameExe)+",0") + ";" +
+		"$s.WindowStyle=7;$s.Description='Skate 3 Recomp (mods)';$s.Save()")
+}
+
+func removeShortcut() error {
+	return powershell("$p=" + desktopShortcut() + ";if(Test-Path -LiteralPath $p){Remove-Item -LiteralPath $p}")
 }

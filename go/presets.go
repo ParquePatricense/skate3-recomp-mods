@@ -23,7 +23,7 @@ type preset struct {
 }
 
 var presets = []preset{
-	{"max", "Maxima calidad", [][2]string{
+	{"max", "Máxima calidad|Maximum quality", [][2]string{
 		{"skate3_native_render_scene", "true"},
 		{"skate3_native_render_scene_msaa", "8"},
 		{"skate3_native_render_scene_shadows", "true"},
@@ -37,7 +37,7 @@ var presets = []preset{
 		{"skate3_lod_distance_scale", "4.0"},
 		{"anisotropic_override", "16"},
 	}},
-	{"balanced", "Equilibrado (valores por defecto del recomp)", [][2]string{
+	{"balanced", "Equilibrado (valores por defecto del recomp)|Balanced (recomp defaults)", [][2]string{
 		{"skate3_native_render_scene", "true"},
 		{"skate3_native_render_scene_msaa", "4"},
 		{"skate3_native_render_scene_shadows", "true"},
@@ -51,7 +51,7 @@ var presets = []preset{
 		{"skate3_lod_distance_scale", "2.0"},
 		{"anisotropic_override", "-1"},
 	}},
-	{"perf", "Rendimiento (PC de pocos recursos)", [][2]string{
+	{"perf", "Rendimiento (PC de pocos recursos)|Performance (low-end PCs)", [][2]string{
 		{"skate3_native_render_scene", "true"},
 		{"skate3_native_render_scene_msaa", "1"},
 		{"skate3_native_render_scene_shadows", "true"},
@@ -65,6 +65,12 @@ var presets = []preset{
 		{"skate3_lod_distance_scale", "1.0"},
 		{"anisotropic_override", "-1"},
 	}},
+}
+
+// label returns the preset name in the UI language ("es|en").
+func (p preset) label() string {
+	es, en, _ := strings.Cut(p.name, "|")
+	return T(es, en)
 }
 
 func findPreset(key string) *preset {
@@ -112,7 +118,7 @@ func setTomlValues(root string, values [][2]string) error {
 func applyPreset(root, key string) error {
 	p := findPreset(key)
 	if p == nil {
-		return fmt.Errorf("preset desconocido %q (usa max, balanced o perf)", key)
+		return fmt.Errorf(T("preset desconocido %q (usá max, balanced o perf)", "unknown preset %q (use max, balanced or perf)"), key)
 	}
 	if err := setTomlValues(root, p.values); err != nil {
 		return err
@@ -142,5 +148,11 @@ func restoreToml(root string) error {
 	delete(c, "preset")
 	delete(c, "fov")
 	delete(c, "ultrawide")
-	return c.save(root)
+	if err := c.save(root); err != nil {
+		return err
+	}
+	if c.on("texts") { // the texts module needs the game in Spanish
+		return setTomlValues(root, [][2]string{{"user_language", spanishLang}})
+	}
+	return nil
 }
