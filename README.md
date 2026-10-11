@@ -4,6 +4,10 @@ Mod para [skate3recomp](https://github.com/mchughalex/skate3recomp) que cambia l
 
 ![preview](preview/preview.png)
 
+| PS4 | PS5 |
+|---|---|
+| ![PS4 en el juego](preview/ingame-ps4.jpg) | ![PS5 en el juego](preview/ingame-ps5.jpg) |
+
 | Xbox | PlayStation |
 |---|---|
 | A / B / X / Y | ✕ / ○ / □ / △ |
@@ -43,7 +47,7 @@ El instalador:
 - reemplaza únicamente las texturas de `buttons.rx2` y agrega la versión nueva al final del `.big` (el resto del archivo queda intacto),
 - al desinstalar, restaura el original byte a byte.
 
-El D-Pad queda igual (la cruz es la misma en PlayStation).
+El D-Pad queda igual (la cruz es la misma en PlayStation). El dibujo del stick en el Trick Guide ("RS") es otra textura y por ahora no se cambia.
 
 El mod no incluye ni distribuye archivos de EA: los iconos son arte original generado con `tools/gen_icons.py` y se aplican sobre tu propia copia del juego.
 
