@@ -148,11 +148,5 @@ func restoreToml(root string) error {
 	delete(c, "preset")
 	delete(c, "fov")
 	delete(c, "ultrawide")
-	if err := c.save(root); err != nil {
-		return err
-	}
-	if c.on("texts") { // the texts module needs the game in Spanish
-		return setTomlValues(root, [][2]string{{"user_language", spanishLang}})
-	}
-	return nil
+	return c.save(root)
 }

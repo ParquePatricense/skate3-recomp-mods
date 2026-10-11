@@ -9,7 +9,7 @@ Pack de mods **modular** para [skate3recomp](https://github.com/mchughalex/skate
 | 🔭 **FOV y ultrawide** | Campo de visión (40–120) y modo 21:9 |
 | ⌨️ **Alt+F4** | Cierra el juego con Alt+F4 (el recomp no lo deja) |
 | 🖥️ **Acceso directo** | Crea "Skate 3" en el escritorio, con mods incluidos |
-| 🧉 **Textos rioplatenses** | Pasa los textos del juego a español rioplatense: voseo y vocabulario de acá |
+| 🧉 **Español ARG** | Agrega el idioma "Español ARG" (voseo y vocabulario rioplatense) en lugar del neerlandés; el español original queda igual |
 
 ➕ El menú sale en español o en inglés según el idioma de Windows (se cambia con `L`), y avisa cuando hay una versión nueva.
 
@@ -44,11 +44,11 @@ Los iconos están en `game/data/big/fedynamic.big` ➡️ `buttons.rx2`. El mod 
 
 Escriben valores en `skate3.toml` (el mismo archivo que usa el menú *Settings* del juego, así que después podés seguir ajustando ahí). La primera vez se guarda tu `skate3.toml` como `skate3.toml.mods-original`; "Volver a mi configuración de antes" lo restaura.
 
-## 🧉 Textos rioplatenses
+## 🧉 Español ARG
 
-Reescribe la tabla de textos en español del juego (`miscboot.big` ➡️ `LANGUAGE_Spanish_Global_skate3ng.BIN`) con reglas: "¿Quieres jugar? Puedes..." ➡️ "¿Querés jugar? Podés...", "Haz un kickflip y presiona Ⓐ" ➡️ "Hacé un kickflip y presioná Ⓐ", "colega" ➡️ "loco", "coches" ➡️ "autos", "piscina" ➡️ "pileta", "mola" ➡️ "garpa", y así (cambia unos 2700 textos). Las reglas están en [`go/rioplatense.txt`](go/rioplatense.txt): si ves algo raro, se corrige ahí.
+En la pantalla de idiomas del juego, "Nederlands" pasa a ser **"Español ARG"**. Ese idioma son los textos en español del juego reescritos con reglas: "¿Quieres jugar? Puedes..." ➡️ "¿Querés jugar? Podés...", "Haz un kickflip y presiona Ⓐ" ➡️ "Hacé un kickflip y presioná Ⓐ", "colega" ➡️ "loco", "coches" ➡️ "autos", "piscina" ➡️ "pileta", "mola" ➡️ "garpa", y así (unos 2700 textos). El español original queda tal cual. Las reglas están en [`go/rioplatense.txt`](go/rioplatense.txt): si ves algo raro, se corrige ahí.
 
-Al activarlo pone el juego en español (`user_language = 5` en `skate3.toml`). Guarda el original como `miscboot.big.original` y al desactivarlo lo restaura byte a byte.
+Toca solo `miscboot.big` (lo guarda como `miscboot.big.original`); al desactivarlo vuelve el neerlandés, byte a byte.
 
 ## ⚙️ Cómo funciona
 
@@ -86,4 +86,4 @@ Fuente: Inter (SIL Open Font License, ver `tools/fonts/Inter-LICENSE.txt`).
 
 ### 🇬🇧 English
 
-Modular mod pack for skate3recomp: PlayStation button icons (PS3/PS4/PS5), graphics presets, FOV/ultrawide, Alt+F4 to quit, a desktop shortcut and Rioplatense (Argentine) Spanish texts. Unzip next to `skate3.exe`, run `Skate3-Mods.exe` to toggle modules (the menu follows your Windows language, press `L` to switch), and play through the "Skate 3" shortcut or `Jugar Skate 3 (mods).bat` for Alt+F4. Every module is reversible. Not affiliated with EA, Sony or the skate3recomp project.
+Modular mod pack for skate3recomp: PlayStation button icons (PS3/PS4/PS5), graphics presets, FOV/ultrawide, Alt+F4 to quit, a desktop shortcut and an "Español ARG" (Rioplatense Spanish) language that takes Dutch's slot. Unzip next to `skate3.exe`, run `Skate3-Mods.exe` to toggle modules (the menu follows your Windows language, press `L` to switch), and play through the "Skate 3" shortcut or `Jugar Skate 3 (mods).bat` for Alt+F4. Every module is reversible. Not affiliated with EA, Sony or the skate3recomp project.

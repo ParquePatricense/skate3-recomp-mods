@@ -5,7 +5,7 @@
 //   - Graphics presets, FOV, ultrawide              -> skate3.toml
 //   - Alt+F4 to quit                                 -> helper ("play" mode)
 //   - Desktop shortcut                               -> Skate 3.lnk
-//   - Rioplatense Spanish texts (voseo)              -> game files
+//   - "Español ARG" language (replaces Dutch)      -> game files
 package main
 
 import (
@@ -55,7 +55,7 @@ func printStatus(root string) {
 	}
 	fmt.Printf(T("  Alt+F4 para salir : %s\n", "  Alt+F4 to quit    : %s\n"), onOff(c.on("altf4")))
 	fmt.Printf(T("  Acceso directo    : %s\n", "  Desktop shortcut  : %s\n"), onOff(c.on("shortcut")))
-	fmt.Printf(T("  Textos rioplatense: %s\n", "  Rioplatense texts : %s\n"), onOff(textsOn(root)))
+	fmt.Printf(T("  Español ARG       : %s\n", "  Español ARG       : %s\n"), onOff(textsOn(root)))
 }
 
 func toggleTexts(root string) {
@@ -223,7 +223,7 @@ func menu() int {
 			"  3) Campo de visión / ultrawide\n"+
 			"  4) Alt+F4 para salir (activar/desactivar)\n"+
 			"  5) Acceso directo \"Skate 3\" en el escritorio (crear/quitar)\n"+
-			"  6) Textos en español rioplatense, con voseo (activar/desactivar)\n"+
+			"  6) Idioma \"Español ARG\" (rioplatense) en lugar del neerlandés (activar/desactivar)\n"+
 			"  L) Language: English\n"+
 			"  0) Salir\n\n",
 			"\n  1) Button icons (PS3 / PS4 / PS5 / Xbox)\n"+
@@ -231,7 +231,7 @@ func menu() int {
 				"  3) Field of view / ultrawide\n"+
 				"  4) Alt+F4 to quit (on/off)\n"+
 				"  5) \"Skate 3\" desktop shortcut (create/remove)\n"+
-				"  6) Rioplatense (Argentine) Spanish texts (on/off)\n"+
+				"  6) \"Español ARG\" language (Rioplatense) instead of Dutch (on/off)\n"+
 				"  L) Idioma: español\n"+
 				"  0) Exit\n\n"))
 		switch strings.ToLower(ask(T("Elegí una opción: ", "Choose an option: "))) {

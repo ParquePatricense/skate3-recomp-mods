@@ -1,6 +1,6 @@
-// Rioplatense texts module: rewrites the game's Spanish string table
-// (LANGUAGE_Spanish_Global_skate3ng.BIN inside game/data/big/miscboot.big)
-// with voseo and Argentine vocabulary, using the rules in rioplatense.txt.
+// Rioplatense texts module: adds "Español ARG" to the game's language
+// screen (in Dutch's slot, inside game/data/big/miscboot.big), built from the
+// Spanish texts with voseo and Argentine vocabulary (rules in rioplatense.txt).
 // Only rules ship with the mod; the game text comes from the user's copy.
 package main
 
@@ -20,7 +20,8 @@ const (
 	textsEntry   = "LANGUAGE_Spanish_Global_skate3ng.BIN"
 	textsBackup  = ".original"
 	textsState   = ".rioplatense"
-	spanishLang  = "5" // XLanguage id for Spanish (user_language cvar)
+	langNameHash = 0x802244c6 // the "Nederlands" entry of the language list
+	langNameAR   = "Español ARG"
 )
 
 //go:embed rioplatense.txt
@@ -187,41 +188,41 @@ func stringToLatin1(s string) ([]byte, error) {
 	return out, nil
 }
 
-// rioplatensize rewrites a LANGUAGE_*_Global .BIN string table.
-// Layout (little endian): +0 magic, +4 size-8, +8 count, +12 table offset
-// (from +8), +16 strings offset (from +8), +20 name; table = count x
-// (hash, offset into strings); strings are latin-1, NUL terminated.
-func rioplatensize(bin []byte) ([]byte, int, error) {
+// rewriteTable rewrites every string of a LANGUAGE_*_Global .BIN table
+// through fn. Layout (little endian): +0 magic, +4 size-8, +8 count,
+// +12 table offset (from +8), +16 strings offset (from +8), +20 name;
+// table = count x (hash, offset into strings); strings are latin-1, NUL
+// terminated.
+func rewriteTable(bin []byte, fn func(hash uint32, s string) string) ([]byte, int, error) {
+	bad := errors.New(T("tabla de textos con formato inesperado", "unexpected text table format"))
 	if len(bin) < 0x24 || int(binary.LittleEndian.Uint32(bin[4:]))+8 != len(bin) {
-		return nil, 0, errors.New("tabla de textos con formato inesperado")
+		return nil, 0, bad
 	}
 	n := int(binary.LittleEndian.Uint32(bin[8:]))
 	tab := 8 + int(binary.LittleEndian.Uint32(bin[12:]))
 	base := 8 + int(binary.LittleEndian.Uint32(bin[16:]))
 	if tab+n*8 > base || base > len(bin) {
-		return nil, 0, errors.New("tabla de textos con formato inesperado")
+		return nil, 0, bad
 	}
-	rules := loadRules()
 	out := append([]byte(nil), bin[:base]...)
 	newOff := map[uint32]uint32{}
 	changed := 0
 	for i := 0; i < n; i++ {
-		e := tab + i*8 + 4
-		off := binary.LittleEndian.Uint32(bin[e:])
+		e := tab + i*8
+		hash, off := binary.LittleEndian.Uint32(bin[e:]), binary.LittleEndian.Uint32(bin[e+4:])
 		if no, ok := newOff[off]; ok {
-			binary.LittleEndian.PutUint32(out[e:], no)
+			binary.LittleEndian.PutUint32(out[e+4:], no)
 			continue
 		}
 		start := base + int(off)
 		if start >= len(bin) {
-			return nil, 0, errors.New("tabla de textos con formato inesperado")
+			return nil, 0, bad
 		}
 		end := start
 		for end < len(bin) && bin[end] != 0 {
 			end++
 		}
-		orig := latin1ToString(bin[start:end])
-		str, err := stringToLatin1(rules.apply(orig))
+		str, err := stringToLatin1(fn(hash, latin1ToString(bin[start:end])))
 		if err != nil {
 			return nil, 0, err
 		}
@@ -230,7 +231,7 @@ func rioplatensize(bin []byte) ([]byte, int, error) {
 		}
 		no := uint32(len(out) - base)
 		newOff[off] = no
-		binary.LittleEndian.PutUint32(out[e:], no)
+		binary.LittleEndian.PutUint32(out[e+4:], no)
 		out = append(out, str...)
 		out = append(out, 0)
 	}
@@ -239,6 +240,17 @@ func rioplatensize(bin []byte) ([]byte, int, error) {
 	}
 	binary.LittleEndian.PutUint32(out[4:], uint32(len(out)-8))
 	return out, changed, nil
+}
+
+// rioplatensize turns a Spanish table into the Rioplatense one.
+func rioplatensize(bin []byte) ([]byte, int, error) {
+	rules := loadRules()
+	return rewriteTable(bin, func(h uint32, s string) string {
+		if h == langNameHash {
+			return langNameAR
+		}
+		return rules.apply(s)
+	})
 }
 
 func textsArchivePath(game string) (string, error) {
@@ -253,6 +265,10 @@ func textsArchivePath(game string) (string, error) {
 	return p, nil
 }
 
+// installTexts turns the Dutch slot of the language screen into
+// "Español ARG": Dutch gets the Rioplatense version of the Spanish texts
+// (plus Spanish's glyph histogram and locale file), and every language's
+// list shows "Español ARG" instead of "Nederlands". Spanish stays as is.
 func installTexts(root, game string) error {
 	archive, err := textsArchivePath(game)
 	if err != nil {
@@ -273,21 +289,58 @@ func installTexts(root, game string) error {
 	if err != nil {
 		return err
 	}
-	idx, err := big.find(textsEntry)
+	get := func(name string) (int, []byte, error) {
+		i, err := big.find(name)
+		if err != nil {
+			return 0, nil, err
+		}
+		d, err := big.read(i)
+		return i, d, err
+	}
+	fmt.Println(T("Armando el idioma \"Español ARG\"...", "Building the \"Español ARG\" language..."))
+	_, es, err := get(textsEntry)
 	if err != nil {
 		return err
 	}
-	fmt.Println(T("Pasando los textos a rioplatense...", "Converting the texts to Rioplatense Spanish..."))
-	bin, err := big.read(idx)
+	ar, changed, err := rioplatensize(es)
 	if err != nil {
 		return err
 	}
-	patched, changed, err := rioplatensize(bin)
-	if err != nil {
-		return err
+	copies := [][2]string{
+		{"LANGUAGE_Spanish_HISTOGRAM_skate3ng.BIN", "LANGUAGE_Dutch_HISTOGRAM_skate3ng.BIN"},
+		{"LOCALE_SPANISH.loc", "LOCALE_DUTCH.loc"},
 	}
-	if err := big.replace(idx, patched); err != nil {
-		return err
+	for _, c := range copies {
+		_, d, err := get(c[0])
+		if err != nil {
+			return err
+		}
+		i, _, err := get(c[1])
+		if err != nil {
+			return err
+		}
+		if err := big.replace(i, d); err != nil {
+			return err
+		}
+	}
+	for _, lang := range []string{"English", "Spanish", "French", "German", "Italian", "Largest", "Dutch"} {
+		i, d, err := get("LANGUAGE_" + lang + "_Global_skate3ng.BIN")
+		if err != nil {
+			return err
+		}
+		if lang == "Dutch" {
+			d = ar
+		} else if d, _, err = rewriteTable(d, func(h uint32, s string) string {
+			if h == langNameHash {
+				return langNameAR
+			}
+			return s
+		}); err != nil {
+			return err
+		}
+		if err := big.replace(i, d); err != nil {
+			return err
+		}
 	}
 	tmp := archive + ".tmp"
 	if err := os.WriteFile(tmp, big.data, 0o644); err != nil {
@@ -300,15 +353,13 @@ func installTexts(root, game string) error {
 	if err := os.WriteFile(archive+textsState, []byte("1"), 0o644); err != nil {
 		return err
 	}
-	if err := setTomlValues(root, [][2]string{{"user_language", spanishLang}}); err != nil {
-		return err
-	}
 	c := loadConfig(root)
 	c["texts"] = "1"
 	if err := c.save(root); err != nil {
 		return err
 	}
-	fmt.Printf(T("Listo: %d textos cambiados. El juego queda en español.\n", "Done: %d texts changed. The game is set to Spanish.\n"), changed)
+	fmt.Printf(T("Listo: %d textos en rioplatense. Elegí \"Español ARG\" en la pantalla de idiomas del juego.\n",
+		"Done: %d texts in Rioplatense. Pick \"Español ARG\" on the game's language screen.\n"), changed)
 	return nil
 }
 
@@ -330,7 +381,7 @@ func uninstallTexts(root, game string) error {
 	if err := c.save(root); err != nil {
 		return err
 	}
-	fmt.Println(T("Listo: textos originales restaurados.", "Done: original texts restored."))
+	fmt.Println(T("Listo: idiomas originales restaurados (vuelve el neerlandés).", "Done: original languages restored (Dutch is back)."))
 	return nil
 }
 
