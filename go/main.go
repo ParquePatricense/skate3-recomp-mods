@@ -3,7 +3,7 @@
 // Modules (each one can be turned on or off on its own):
 //   - PlayStation button icons (PS3/PS4/PS5)       -> game files
 //   - Graphics presets, FOV, ultrawide              -> skate3.toml
-//   - Alt+F4 to quit, speedometer                    -> helper ("play" mode)
+//   - Alt+F4 to quit                                 -> helper ("play" mode)
 package main
 
 import (
@@ -15,7 +15,7 @@ import (
 	"strings"
 )
 
-const version = "2.0.0"
+const version = "2.1.0"
 
 var stdin = bufio.NewReader(os.Stdin)
 
@@ -41,10 +41,6 @@ func printStatus(root string) {
 	if p := findPreset(c["preset"]); p != nil {
 		preset = p.name
 	}
-	speed := onOff(c.on("speedometer"))
-	if c.on("speedometer") && c["speed_chain"] == "" {
-		speed += " (falta calibrar)"
-	}
 	fmt.Printf("  Carpeta del juego: %s\n\n", root)
 	fmt.Printf("  Iconos de botones : %s\n", icons)
 	fmt.Printf("  Preset grafico    : %s\n", preset)
@@ -55,7 +51,6 @@ func printStatus(root string) {
 		fmt.Printf("  Ultrawide         : %s\n", onOff(c["ultrawide"] == "1"))
 	}
 	fmt.Printf("  Alt+F4 para salir : %s\n", onOff(c.on("altf4")))
-	fmt.Printf("  Velocimetro       : %s\n", speed)
 }
 
 func menuIcons(root string) {
@@ -162,8 +157,6 @@ func menu() int {
 			"  2) Preset grafico\n" +
 			"  3) Campo de vision / ultrawide\n" +
 			"  4) Alt+F4 para salir (activar/desactivar)\n" +
-			"  5) Velocimetro (activar/desactivar)\n" +
-			"  6) Calibrar velocimetro (con el juego abierto)\n" +
 			"  0) Salir\n\n")
 		switch ask("Elegi una opcion: ") {
 		case "1":
@@ -174,45 +167,11 @@ func menu() int {
 			menuView(root)
 		case "4":
 			toggle(root, "altf4", "Alt+F4")
-		case "5":
-			toggle(root, "speedometer", "Velocimetro")
-		case "6":
-			report(calibrateCommand(root))
 		case "0", "":
 			return 0
 		}
 		pause()
 	}
-}
-
-func calibrateCommand(root string) error {
-	m, err := openGame()
-	if err != nil {
-		return err
-	}
-	defer m.close()
-	fmt.Println("\nCalibracion del velocimetro. Segui los pitidos:")
-	fmt.Println("  1 pitido  = quedate quieto")
-	fmt.Println("  2 pitidos = patina derecho y rapido")
-	fmt.Println("  3 pitidos = termino")
-	fmt.Println("Hace falta hacerla 2 veces, cerrando y abriendo el juego en el medio.")
-	ch, err := runCalibration(m, root, consoleUI())
-	if err != nil {
-		return err
-	}
-	c := loadConfig(root)
-	if ch == nil {
-		fmt.Println("\nPrimera parte lista. Ahora CERRA el juego, abrilo de nuevo, entra a patinar")
-		fmt.Println("y volve a elegir \"Calibrar velocimetro\" para confirmar.")
-		return nil
-	}
-	c["speed_chain"] = ch.String()
-	c["speedometer"] = "1"
-	if err := c.save(root); err != nil {
-		return err
-	}
-	fmt.Println("\nVelocimetro calibrado y activado. Abri el juego con \"Jugar Skate 3 (mods).bat\".")
-	return nil
 }
 
 func run(args []string) int {
@@ -247,16 +206,14 @@ func run(args []string) int {
 			}
 		case "play":
 			err = play(root)
-		case "calibrate":
-			err = calibrateCommand(root)
 		default:
-			fmt.Println("Uso: Skate3-Mods [install ps3|ps4|ps5 | uninstall | status | preset max|balanced|perf|restore | play | calibrate] [--game CARPETA]")
+			fmt.Println("Uso: Skate3-Mods [install ps3|ps4|ps5 | uninstall | status | preset max|balanced|perf|restore | play] [--game CARPETA]")
 			return 2
 		}
 	}
 	if err != nil {
 		fmt.Fprintln(os.Stderr, "Error:", err)
-		if cmd == "play" || cmd == "calibrate" {
+		if cmd == "play" {
 			pause()
 		}
 		return 1

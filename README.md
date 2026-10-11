@@ -8,7 +8,6 @@ Pack de mods **modular** para [skate3recomp](https://github.com/mchughalex/skate
 | 🖼️ **Presets gráficos** | Máxima calidad, Equilibrado o Rendimiento, con un clic |
 | 🔭 **FOV y ultrawide** | Campo de visión (40–120) y modo 21:9 |
 | ⌨️ **Alt+F4** | Cierra el juego con Alt+F4 (el recomp no lo deja) |
-| 🏎️ **Velocímetro** | Muestra tu velocidad en km/h mientras patinás |
 
 ![preview](preview/preview.png)
 
@@ -21,7 +20,7 @@ Pack de mods **modular** para [skate3recomp](https://github.com/mchughalex/skate
 1. ⬇️ Descargá `Skate3-Mods.zip` desde [Releases](../../releases).
 2. 📂 Descomprimilo **en la carpeta de skate3recomp** (donde está `skate3.exe`).
 3. 🖱️ Abrí `Skate3-Mods.exe` y activá lo que quieras desde el menú.
-4. 🛹 Jugá con `Jugar Skate 3 (mods).bat` (hace falta para Alt+F4 y el velocímetro; los iconos y presets funcionan igual abriendo `skate3.exe`).
+4. 🛹 Jugá con `Jugar Skate 3 (mods).bat` (hace falta para Alt+F4; los iconos y presets funcionan igual abriendo `skate3.exe`).
 
 > ⚠️ El juego tiene que haberse instalado al menos una vez (botón *Select ISO*). Cerralo antes de cambiar iconos o presets.
 > 🛡️ Si aparece SmartScreen: "Más información" ➡️ "Ejecutar de todas formas" (el .exe no está firmado).
@@ -41,23 +40,10 @@ Los iconos están en `game/data/big/fedynamic.big` ➡️ `buttons.rx2`. El mod 
 
 Escriben valores en `skate3.toml` (el mismo archivo que usa el menú *Settings* del juego, así que después podés seguir ajustando ahí). La primera vez se guarda tu `skate3.toml` como `skate3.toml.mods-original`; "Volver a mi configuración de antes" lo restaura.
 
-## 🏎️ Velocímetro
-
-El velocímetro lee la posición del skater de la memoria del juego, así que primero hay que **calibrarlo una vez** (2 pasadas de ~40 segundos):
-
-1. Abrí el juego y entrá a patinar.
-2. En `Skate3-Mods.exe` elegí **Calibrar velocímetro** y volvé al juego. Seguí los pitidos:
-   - 🔔 1 pitido = quedate quieto
-   - 🔔🔔 2 pitidos = patiná derecho y rápido
-   - 🔔🔔🔔 3 pitidos = terminó
-3. Cerrá el juego, abrilo de nuevo y repetí la calibración. Con eso confirma que la encuentra siempre y queda activado.
-
-Se muestra a la derecha de la pantalla solo cuando el juego está en primer plano. Para mph: agregá `speed_unit = mph` en `skate3-mods.ini`.
-
 ## ⚙️ Cómo funciona
 
 - **Iconos:** reemplaza solo las texturas de `buttons.rx2` y agrega la versión nueva al final del `.big`; el resto del archivo queda intacto.
-- **Alt+F4 y velocímetro:** `Jugar Skate 3 (mods).bat` abre el juego y deja corriendo un ayudante chico que se cierra solo cuando cerrás el juego. Alt+F4 le pide al juego que se cierre (igual que la X de la ventana). El velocímetro es una ventana transparente encima del juego.
+- **Alt+F4:** `Jugar Skate 3 (mods).bat` abre el juego y deja corriendo un ayudante chico (sin ventana) que se cierra solo cuando cerrás el juego. Alt+F4 le pide al juego que se cierre, igual que la X de la ventana.
 - 🚫 No incluye ni distribuye archivos de EA: los iconos son arte original y todo se aplica sobre tu propia copia.
 
 ### 🐧 Linux / 🍎 macOS
@@ -72,7 +58,7 @@ python3 src/skate3_ps_buttons.py uninstall    --game /ruta/a/skate3recomp
 ## 🛠️ Compilar
 
 ```sh
-cd go && go test ./... && GOOS=windows GOARCH=amd64 go build -ldflags "-s -w" -o ../dist/Skate3-Mods.exe .
+cd go && GOOS=windows GOARCH=amd64 go build -ldflags "-s -w" -o ../dist/Skate3-Mods.exe .
 ```
 
 Al publicar un tag `v*`, GitHub Actions compila el `.exe` y sube el zip a Releases.
@@ -90,4 +76,4 @@ Fuente: Inter (SIL Open Font License, ver `tools/fonts/Inter-LICENSE.txt`).
 
 ### 🇬🇧 English
 
-Modular mod pack for skate3recomp: PlayStation button icons (PS3/PS4/PS5), graphics presets, FOV/ultrawide, Alt+F4 to quit and a speedometer. Unzip next to `skate3.exe`, run `Skate3-Mods.exe` to toggle modules, and play through `Jugar Skate 3 (mods).bat` for Alt+F4 and the speedometer (calibrate it once from the menu). Every module is reversible. Not affiliated with EA, Sony or the skate3recomp project.
+Modular mod pack for skate3recomp: PlayStation button icons (PS3/PS4/PS5), graphics presets, FOV/ultrawide and Alt+F4 to quit. Unzip next to `skate3.exe`, run `Skate3-Mods.exe` to toggle modules, and play through `Jugar Skate 3 (mods).bat` for Alt+F4. Every module is reversible. Not affiliated with EA, Sony or the skate3recomp project.
