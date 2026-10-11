@@ -1,7 +1,7 @@
-__pycache__/
 *.pyc
+*.spec
+Skate3-Mods.exe
+__pycache__/
 build/
 dist/
-*.spec
 preview/png/
-Skate3-PS-Buttons.exe

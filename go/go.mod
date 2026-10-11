@@ -1,3 +1,3 @@
-module skate3psbuttons
+module skate3mods
 
 go 1.21
