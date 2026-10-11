@@ -18,7 +18,7 @@ import (
 	"time"
 )
 
-const version = "2.2.0"
+const version = "2.3.0"
 
 var stdin = bufio.NewReader(os.Stdin)
 
@@ -194,11 +194,19 @@ func report(err error) {
 }
 
 func menu() int {
+	setLang(config{})
 	root, err := findRoot("")
+	if err != nil {
+		if d, ok := askGameFolder(true); ok {
+			root, err = findRoot(d)
+		}
+	}
 	if err == nil {
 		setLang(loadConfig(root))
-	} else {
-		setLang(config{})
+		if settleIn(root) {
+			fmt.Printf(T("Me copié a %s: de ahora en más podés abrirme desde ahí o desde el acceso directo.\n",
+				"Copied myself to %s: from now on open me from there or from the shortcut.\n"), root)
+		}
 	}
 	update := make(chan string, 1)
 	go func() { update <- newerVersion() }()
@@ -224,6 +232,7 @@ func menu() int {
 			"  4) Alt+F4 para salir (activar/desactivar)\n"+
 			"  5) Acceso directo \"Skate 3\" en el escritorio (crear/quitar)\n"+
 			"  6) Idioma \"Español ARG\" (rioplatense) en lugar del neerlandés (activar/desactivar)\n"+
+			"  C) Cambiar la carpeta del juego\n"+
 			"  L) Language: English\n"+
 			"  0) Salir\n\n",
 			"\n  1) Button icons (PS3 / PS4 / PS5 / Xbox)\n"+
@@ -232,6 +241,7 @@ func menu() int {
 				"  4) Alt+F4 to quit (on/off)\n"+
 				"  5) \"Skate 3\" desktop shortcut (create/remove)\n"+
 				"  6) \"Español ARG\" language (Rioplatense) instead of Dutch (on/off)\n"+
+				"  C) Change the game folder\n"+
 				"  L) Idioma: español\n"+
 				"  0) Exit\n\n"))
 		switch strings.ToLower(ask(T("Elegí una opción: ", "Choose an option: "))) {
@@ -249,6 +259,15 @@ func menu() int {
 			toggleTexts(root)
 		case "l":
 			toggleLang(root)
+			continue
+		case "c":
+			if d, ok := askGameFolder(false); ok {
+				if r, e := findRoot(d); e == nil {
+					root = r
+					setLang(loadConfig(root))
+					settleIn(root)
+				}
+			}
 			continue
 		case "0", "":
 			return 0

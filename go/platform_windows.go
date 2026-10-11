@@ -195,9 +195,12 @@ func desktopShortcut() string {
 // createShortcut puts a "Skate 3" shortcut on the desktop that starts the
 // game through the mods helper (minimized, so no console flashes).
 func createShortcut(root string) error {
-	exe, err := os.Executable()
-	if err != nil {
-		return err
+	exe := filepath.Join(root, modsExe)
+	if !exists(exe) {
+		var err error
+		if exe, err = os.Executable(); err != nil {
+			return err
+		}
 	}
 	return powershell("$s=(New-Object -ComObject WScript.Shell).CreateShortcut(" + desktopShortcut() + ");" +
 		"$s.TargetPath=" + psQuote(exe) + ";$s.Arguments='play';" +

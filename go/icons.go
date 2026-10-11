@@ -267,12 +267,11 @@ func appDir() string {
 }
 
 func findArchive(game string) (string, error) {
-	roots := []string{appDir()}
-	if wd, err := os.Getwd(); err == nil {
-		roots = append(roots, wd)
-	}
+	var roots []string
 	if game != "" {
 		roots = []string{game}
+	} else if d, ok := locateGame(); ok {
+		roots = []string{d}
 	}
 	rels := [][]string{{"game", "data", "big"}, {"data", "big"}, {"big"}, {}}
 	for _, root := range roots {
@@ -284,11 +283,11 @@ func findArchive(game string) (string, error) {
 		}
 	}
 	return "", fmt.Errorf(T("no encontré game\\data\\big\\%s.\n"+
-		"Poné Skate3-Mods.exe en la carpeta de skate3recomp (al lado de skate3.exe),\n"+
+		"Abrí Skate3-Mods.exe y arrastrá la carpeta de skate3recomp cuando te la pida,\n"+
 		"o usá --game \"<carpeta de skate3recomp>\".\n"+
 		"El juego tiene que haberse instalado al menos una vez (Select ISO).",
 		"could not find game\\data\\big\\%s.\n"+
-			"Put Skate3-Mods.exe in the skate3recomp folder (next to skate3.exe),\n"+
+			"Open Skate3-Mods.exe and drag the skate3recomp folder in when asked,\n"+
 			"or use --game \"<skate3recomp folder>\".\n"+
 			"The game must have been installed at least once (Select ISO)."), archiveName)
 }

@@ -21,9 +21,9 @@ Pack de mods **modular** para [skate3recomp](https://github.com/mchughalex/skate
 
 ## 📦 Instalación (Windows)
 
-1. ⬇️ Descargá `Skate3-Mods.zip` desde [Releases](../../releases).
-2. 📂 Descomprimilo **en la carpeta de skate3recomp** (donde está `skate3.exe`).
-3. 🖱️ Abrí `Skate3-Mods.exe` y activá lo que quieras desde el menú.
+1. ⬇️ Descargá `Skate3-Mods.zip` desde [Releases](../../releases) y descomprimilo donde quieras (Descargas sirve).
+2. 🖱️ Abrí `Skate3-Mods.exe`: busca solo la carpeta de skate3recomp, se copia ahí y la recuerda. Si no la encuentra, arrastrás la carpeta a la ventana.
+3. ✅ Activá lo que quieras desde el menú.
 4. 🛹 Jugá con el acceso directo "Skate 3" (opción 5 del menú) o con `Jugar Skate 3 (mods).bat`. Hace falta para Alt+F4; el resto funciona igual abriendo `skate3.exe`.
 
 > ⚠️ El juego tiene que haberse instalado al menos una vez (botón *Select ISO*). Cerralo antes de cambiar iconos o presets.
@@ -86,4 +86,4 @@ Fuente: Inter (SIL Open Font License, ver `tools/fonts/Inter-LICENSE.txt`).
 
 ### 🇬🇧 English
 
-Modular mod pack for skate3recomp: PlayStation button icons (PS3/PS4/PS5), graphics presets, FOV/ultrawide, Alt+F4 to quit, a desktop shortcut and an "Español ARG" (Rioplatense Spanish) language that takes Dutch's slot. Unzip next to `skate3.exe`, run `Skate3-Mods.exe` to toggle modules (the menu follows your Windows language, press `L` to switch), and play through the "Skate 3" shortcut or `Jugar Skate 3 (mods).bat` for Alt+F4. Every module is reversible. Not affiliated with EA, Sony or the skate3recomp project.
+Modular mod pack for skate3recomp: PlayStation button icons (PS3/PS4/PS5), graphics presets, FOV/ultrawide, Alt+F4 to quit, a desktop shortcut and an "Español ARG" (Rioplatense Spanish) language that takes Dutch's slot. Unzip anywhere and run `Skate3-Mods.exe` (it finds the skate3recomp folder by itself and copies itself there) to toggle modules (the menu follows your Windows language, press `L` to switch), and play through the "Skate 3" shortcut or `Jugar Skate 3 (mods).bat` for Alt+F4. Every module is reversible. Not affiliated with EA, Sony or the skate3recomp project.
