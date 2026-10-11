@@ -47,11 +47,19 @@ El D-Pad queda igual (la cruz es la misma en PlayStation).
 
 El mod no incluye ni distribuye archivos de EA: los iconos son arte original generado con `tools/gen_icons.py` y se aplican sobre tu propia copia del juego.
 
+## Compilar el .exe
+
+```sh
+cd go && GOOS=windows GOARCH=amd64 go build -ldflags "-s -w" -o ../dist/Skate3-PS-Buttons.exe .
+```
+
+Al publicar un tag `v*`, GitHub Actions compila el `.exe` y sube el zip a Releases.
+
 ## Regenerar los iconos
 
 ```sh
 pip install pillow numpy
-python tools/build_payload.py preview/png   # redibuja y regenera src/payload.py
+python tools/build_payload.py preview/png   # redibuja y regenera src/payload.py y go/payload/
 ```
 
 Fuente: Inter (SIL Open Font License, ver `tools/fonts/Inter-LICENSE.txt`).

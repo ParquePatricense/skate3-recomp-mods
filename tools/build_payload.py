@@ -56,6 +56,7 @@ def main():
         for k in range(0, len(b64), 100):
             lines.append(f'    {b64[k:k + 100]!r}')
         lines.append(')')
+        open(os.path.join(os.path.dirname(__file__), '..', 'go', 'payload', f'{style}.bin'), 'wb').write(zlib.compress(bytes(blob), 9))
     out = os.path.join(os.path.dirname(__file__), '..', 'src', 'payload.py')
     open(out, 'w', newline='\n').write('\n'.join(lines) + '\n')
     print('wrote', os.path.normpath(out))
