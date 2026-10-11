@@ -284,7 +284,7 @@ func findArchive(game string) (string, error) {
 		}
 	}
 	return "", fmt.Errorf("no encontré game\\data\\big\\%s.\n"+
-		"Poné Skate3-PS-Buttons.exe en la carpeta de skate3recomp (al lado de skate3.exe),\n"+
+		"Poné Skate3-Mods.exe en la carpeta de skate3recomp (al lado de skate3.exe),\n"+
 		"o usá --game \"<carpeta de skate3recomp>\".\n"+
 		"El juego tiene que haberse instalado al menos una vez (Select ISO).", archiveName)
 }
