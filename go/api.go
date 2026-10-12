@@ -55,7 +55,9 @@ func apiState(root string) map[string]any {
 	st["radio"] = c["radio"]
 	st["ctl"] = controlsState(root)
 	st["afterPlay"] = c["after_play"]
-	st["prefs"] = map[string]string{"deck": c["ui_deck"], "sfx": c["ui_sfx"], "seen": c["ui_seen"], "dj": c["ui_dj"]}
+	st["prefs"] = map[string]string{"deck": c["ui_deck"], "sfx": c["ui_sfx"], "seen": c["ui_seen"], "zoom": c["ui_zoom"], "sofa": c["ui_sofa"]}
+	st["steam"] = c.on("steam")
+	st["hasSteam"] = steamDir() != ""
 	st["uiWindow"] = c["ui_window"]
 	st["recomp"] = c["recomp_version"]
 	return st
@@ -192,12 +194,16 @@ func apiDo(root *string, cmd, arg string) (string, error) {
 		return T("Reflejos ", "Reflections ") + onOff(onArg(arg)), setBool(r, "skate3_native_render_scene_ssr", onArg(arg))
 	case "pref":
 		key, val, _ := strings.Cut(arg, "=")
-		if key != "deck" && key != "sfx" && key != "seen" && key != "dj" {
+		if key != "deck" && key != "sfx" && key != "seen" && key != "zoom" && key != "sofa" {
 			return "", errors.New("?")
 		}
 		c := loadConfig(r)
 		c["ui_"+key] = val
 		return "", c.save(r)
+	case "steam":
+		return setSteam(r, onArg(arg))
+	case "gamelog":
+		return "", openLog(r)
 	case "bootlang":
 		return setBootLang(r, arg)
 	case "afterplay":

@@ -22,6 +22,7 @@ func systemSpanish() bool { return envSpanish() }
 
 func createShortcut(string) error { return errors.New("only on Windows") }
 func removeShortcut() error       { return nil }
+func openLog(string) error        { return errors.New("only on Windows") }
 
 func dndOff(string) {}
 
@@ -56,3 +57,6 @@ func pickFolder(string) (string, error) {
 func monitors() []screen { return nil }
 
 func copyToClipboard(string) error { return errors.New("only on Windows") }
+
+func steamDir() string   { return "" }
+func steamRunning() bool { return false }

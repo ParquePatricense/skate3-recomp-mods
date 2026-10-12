@@ -1,11 +1,26 @@
 {
   "RT_GROUP_ICON": {
-    "#1": { "0000": ["icon256.png"] }
+    "#1": {
+      "0000": [
+        "icon256.png",
+        "icon128.png",
+        "icon64.png",
+        "icon48.png",
+        "icon40.png",
+        "icon32.png",
+        "icon24.png",
+        "icon20.png",
+        "icon16.png"
+      ]
+    }
   },
   "RT_MANIFEST": {
     "#1": {
       "0409": {
-        "identity": {"name": "Skate3Mods", "version": "3.0.0.0"},
+        "identity": {
+          "name": "Skate3Mods",
+          "version": "3.4.0.0"
+        },
         "description": "Skate 3 Recomp Mods",
         "minimum-os": "win10",
         "execution-level": "as invoker",
@@ -17,8 +32,19 @@
   "RT_VERSION": {
     "#1": {
       "0000": {
-        "fixed": {"file_version": "3.0.0.0", "product_version": "3.0.0.0"},
-        "info": {"0409": {"FileDescription": "Skate 3 Recomp Mods", "ProductName": "Skate 3 Recomp Mods", "ProductVersion": "3.0.0", "FileVersion": "3.0.0", "LegalCopyright": "MIT"}}
+        "fixed": {
+          "file_version": "3.4.0.0",
+          "product_version": "3.4.0.0"
+        },
+        "info": {
+          "0409": {
+            "FileDescription": "Skate 3 Recomp Mods",
+            "ProductName": "Skate 3 Recomp Mods",
+            "ProductVersion": "3.4.0",
+            "FileVersion": "3.4.0",
+            "LegalCopyright": "MIT"
+          }
+        }
       }
     }
   }

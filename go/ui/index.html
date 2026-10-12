@@ -103,6 +103,9 @@ nav button.on i{filter:none;opacity:1}
 /* rows + skateboard toggles */
 .row{display:flex;align-items:center;gap:16px;padding:14px 16px;background:#191919;border:1px solid #262626;border-radius:12px}
 .row+.row{margin-top:8px}
+.rows{display:grid;grid-template-columns:repeat(auto-fit,minmax(480px,1fr));gap:8px}
+.rows .row+.row{margin-top:0}
+body.sofa :focus-visible{outline:5px solid var(--lime);outline-offset:4px;box-shadow:0 0 0 10px rgba(198,255,61,.18)}
 .row .tx{flex:1;min-width:0}
 .row .tx b{display:block;font-size:15.5px}
 .row .tx span{color:var(--dim);font-size:13px}
@@ -159,6 +162,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:30px;heigh
 #radio .meta span{white-space:nowrap;font-size:11.5px;color:var(--mute);letter-spacing:1px;text-transform:uppercase}
 #radio canvas{flex:1;height:38px;min-width:60px}
 .rb{width:38px;height:38px;border-radius:50%;border:0;background:#2a2a2a;font-size:15px}
+.rb.on{background:var(--lime);color:#111}
 .rb.main{width:44px;height:44px;background:var(--orange);color:#111;font-size:18px}
 #vol{width:90px;height:20px;margin:0}
 #vol::-webkit-slider-runnable-track{height:5px;clip-path:none;background:#333}
@@ -249,6 +253,7 @@ textarea{width:100%;min-height:110px;background:#111;color:var(--ink);border:1px
   <div class="meta"><b id="track">—</b><span>Radio Carverton · <span data-t="original"></span></span></div>
   <button class="rb" id="rfav" onclick="radio.fav()" title="★">☆</button>
   <button class="rb" id="rgen" onclick="radio.menu()">Mix</button>
+  <button class="rb" id="rshuf" onclick="radio.shuffle()" title="🔀">🔀</button>
   <button class="rb" onclick="radio.prev()" title="⏮">⏮</button>
   <button class="rb main" id="rplay" onclick="radio.toggle()">▶</button>
   <button class="rb" onclick="radio.next()" title="⏭">⏭</button>
@@ -264,7 +269,7 @@ textarea{width:100%;min-height:110px;background:#111;color:var(--ink);border:1px
 "use strict";
 // ------------------------------------------------------------------ texts
 const L = {
- es:{foot:"Mod pack modular · todo se puede deshacer",drop:"Drop in",dropsub:"JUGAR CON MODS",folder:"JUEGO",original:"música propia",
+ es:{foot:"Mod pack modular · todo se puede deshacer",drop:"Drop in",dropsub:"JUGAR CON MODS",folder:"JUEGO",original:"música original",
   t_buttons:"Botones",t_gfx:"Gráficos",t_session:"En sesión",t_lang:"Idioma",t_shop:"El taller",
   s_buttons:"Elegí cómo se ven los botones en el juego. Se cambian al toque y vuelven a Xbox cuando quieras.",
   s_gfx:"Presets de un toque, pantalla, campo de visión y ultrawide. Después podés seguir ajustando en Settings del juego.",
@@ -274,7 +279,12 @@ const L = {
   installed:"puesto",ps3d:"Clásicos de PS3, con los colores de siempre.",ps4d:"Share / Options, estilo PS4.",ps5d:"Blancos y limpios, Create / Options.",xbd:"Los originales del juego.",
   presets:"Presets gráficos",restore:"Volver a mi configuración de antes",fov:"Campo de visión",fovd:"El original es 60°. Más alto = ves más de la calle.",
   apply:"Aplicar",uw:"Ultrawide (21:9 o más)",uwd:"Para monitores anchos: sin bandas negras a los costados.",
-  helper:"El ayudante",shortcut:"Acceso directo \"Skate 3\" en el escritorio",shortcutd:"Abre el juego con todos los mods y el ayudante.",
+  helper:"El ayudante",shortcut:"Accesos directos en el escritorio",shortcutd:"Skate 3 Mods abre este modeador; Skate 3 (directo) y Skate 3 (normal) abren el juego con los mods y eligen cómo arranca.",
+  steamT:"Skate 3 en Steam",steamD:"Lo suma a tu biblioteca como juego externo: Big Picture, Steam Input y la captura de Steam. Hacelo con Steam cerrado.",
+  logT:"Registro del juego",logD:"El log de la última vez que abriste el juego, por si algo falló. También va dentro del reporte.",open:"Abrir",
+  zoomT:"Tamaño del modeador",zoomD:"Se adapta solo a tu pantalla. Movelo si lo querés más grande o más chico (también con Ctrl + rueda del mouse).",
+  sofaT:"Modo sofá",sofaD:"Todo más grande y el foco bien marcado, para usarlo desde la tele con el joystick.",
+  shuffle:"Aleatorio",
   argT:"Español ARG",argd:"Reemplaza \"Nederlands\" en la pantalla de idiomas por \"Español ARG\": voseo y vocabulario de acá. El español de siempre queda igual.",
   argBefore:"¿Quieres jugar? Haz un kickflip, colega.",argAfter:"¿Querés jugar? Hacé un kickflip, loco.",
   uiLang:"Idioma de esta ventana",
@@ -282,11 +292,10 @@ const L = {
   imgT:"Imagen",lbox:"Bandas negras",lboxD:"En pantallas que no son 16:9 deja bandas a los costados. Apagado estira la imagen.",
   ssr:"Reflejos en vidrios y agua (experimental)",ssrD:"Reflejos en tiempo real. Pide más placa de video y a veces se ven manchas.",
   modder:"El modeador",deckT:"Gráfico de la tabla",sfxT:"Sonidos del modeador",sfxD:"Los ruidos de ollie y aterrizaje al tocar botones.",
-  djT:"DJ de la radio",djD:"Una voz presenta cada tema de Radio Carverton.",
   report:"Reportar un problema",reportD:"Arma el reporte con lo que pasó y lo copia para pegarlo en el chat.",reportQ:"¿Qué pasó? Contalo con tus palabras.",send:"Armar reporte",
   favs:"Favoritos",noFavs:"Marcá temas con ☆ para armar tus favoritos.",
-  news:"Novedades de la v{v}",keysHelp:"Atajos: 1 a 7 cambian de pestaña, Enter hace Drop in, F11 pantalla completa. Con joystick: cruz para moverte, A elegir, LB/RB pestañas, Start Drop in.",
-  bootT:"Al arrancar",direct:"Directo a tu partida",directD:"Saltea la intro, la pantalla de idioma, el Press Start y los avisos de arranque, y entra a tu carrera en el idioma que elijas abajo.",
+  news:"Novedades de la v{v}",keysHelp:"Atajos: 1 a 7 cambian de pestaña, Enter hace Drop in, M pausa la radio, F11 pantalla completa. Con joystick: cruz para moverte, A elegir, LB/RB pestañas, Start Drop in.",
+  bootT:"Al arrancar",direct:"Directo a tu partida",directD:"Una pantalla de carga tapa la intro, los menús y los avisos, y aparecés directo en tu carrera, en el idioma que elijas abajo.",
   afterT:"Al tocar Drop in",aMin:"Minimizar",aMinD:"Se esconde y vuelve sola cuando cerrás el juego.",aClose:"Cerrar",aCloseD:"El modeador se cierra; el ayudante sigue.",aStay:"Dejarlo abierto",aStayD:"Queda abierto detrás del juego.",
   back:"¡De vuelta!",backD:"Sesión terminada.",
   t_ctl:"Controles",s_ctl:"Jugá con teclado y mouse: activalo y elegí qué tecla aprieta cada botón del joystick.",
@@ -305,18 +314,18 @@ const L = {
   folders:"Carpetas",fGame:"Juego",fSaves:"Partidas",fData:"Datos",chg:"Cambiar carpeta del juego",
   update:"Actualización",updated:"Buscar versión nueva y actualizar sola.",check:"Buscar",
   hom:"Zona Hall of Meat",uninst:"Desinstalar todo",uninstd:"Deja el juego exactamente como estaba antes de los mods.",
-  sure:"¿Seguro?",uninstQ:"Se sacan todos los mods, se restauran los archivos y la configuración, y se borra el acceso directo.",
+  sure:"¿Seguro?",uninstQ:"Se sacan todos los mods, se restauran los archivos y la configuración, y se borran los accesos directos y la entrada de Steam.",
   cancel:"Cancelar",yes:"Sí, sacar todo",ok:"Dale",
   looking:"Buscando el juego…",lookingd:"Revisando tu PC para encontrar la carpeta de skate3recomp. Solo pasa la primera vez.",
   notfound:"No encontré el juego",notfoundd:"Elegí la carpeta de skate3recomp, la que tiene skate3.exe.",pick:"Elegir carpeta",
   newver:"Versión nueva",newverd:"Hay una versión nueva ({v}). Se baja, se reemplaza sola y se vuelve a abrir.",updNow:"Actualizar",
   noupd:"Estás en la última versión.",working:"Laburando…",err:"Uh, algo falló",
-  play:"Abriendo el juego",radioHint:"Tocá ▶ para la radio",
+  play:"Abriendo el juego",
   tips:["<b>Tip:</b> Ctrl+Alt+R reinicia el juego si se traba (con el ayudante).","<b>Tip:</b> en la intro, Enter o A la saltean.",
    "<b>Tip:</b> todo lo que actives se puede deshacer desde acá.","<b>Tip:</b> si actualizás el recomp, tus mods se vuelven a poner solos al jugar.",
-   "<b>Tip:</b> el acceso directo del escritorio abre el juego con el ayudante.","<b>Tip:</b> Español ARG aparece en la pantalla de idiomas del juego, en lugar de Nederlands.",
+   "<b>Tip:</b> Skate 3 (directo) en el escritorio te deja en tu partida sin tocar nada.","<b>Tip:</b> Español ARG aparece en la pantalla de idiomas del juego, en lugar de Nederlands.",
    "<b>Tip:</b> Alt+F4 cierra el juego como la X de la ventana.","<b>Tip:</b> en Controles podés jugar con teclado y mouse y cambiar cada tecla.","<b>Tip:</b> con dos monitores, elegí en Gráficos en cuál abre el juego.","<b>Tip:</b> F11 cambia el modeador entre pantalla completa y ventana.","<b>Tip:</b> tocá el género en la radio: boom bap, punk, rock, electro o cumbia.","<b>Tip:</b> el modeador se maneja con el joystick: LB/RB cambian de pestaña.","<b>Tip:</b> marcá con ☆ los temas de la radio que te gusten."]},
- en:{foot:"Modular mod pack · everything can be undone",drop:"Drop in",dropsub:"PLAY WITH MODS",folder:"GAME",original:"own music",
+ en:{foot:"Modular mod pack · everything can be undone",drop:"Drop in",dropsub:"PLAY WITH MODS",folder:"GAME",original:"original music",
   t_buttons:"Buttons",t_gfx:"Graphics",t_session:"Session",t_lang:"Language",t_shop:"The shop",
   s_buttons:"Pick how the buttons look in the game. Swaps instantly and goes back to Xbox whenever you want.",
   s_gfx:"One-tap presets, screen, field of view and ultrawide. You can keep tweaking in the game's Settings.",
@@ -326,7 +335,12 @@ const L = {
   installed:"on",ps3d:"Classic PS3, with the usual colors.",ps4d:"Share / Options, PS4 style.",ps5d:"Clean white, Create / Options.",xbd:"The game's originals.",
   presets:"Graphics presets",restore:"Restore my previous settings",fov:"Field of view",fovd:"Default is 60°. Higher = you see more of the street.",
   apply:"Apply",uw:"Ultrawide (21:9 or wider)",uwd:"For wide monitors: no black bars on the sides.",
-  helper:"The helper",shortcut:"\"Skate 3\" desktop shortcut",shortcutd:"Starts the game with every mod and the helper.",
+  helper:"The helper",shortcut:"Desktop shortcuts",shortcutd:"Skate 3 Mods opens this modder; Skate 3 (directo) and Skate 3 (normal) start the game with the mods and pick how it boots.",
+  steamT:"Skate 3 in Steam",steamD:"Adds it to your library as a non-Steam game: Big Picture, Steam Input and Steam's capture. Do it with Steam closed.",
+  logT:"Game log",logD:"The log from the last time you played, in case something failed. It also goes in the report.",open:"Open",
+  zoomT:"Modder size",zoomD:"Fits your screen by itself. Move it if you want it bigger or smaller (Ctrl + mouse wheel works too).",
+  sofaT:"Couch mode",sofaD:"Everything bigger and a clear focus ring, to use it from the TV with a gamepad.",
+  shuffle:"Shuffle",
   argT:"Español ARG",argd:"Turns \"Nederlands\" on the game's language screen into \"Español ARG\" (Rioplatense Spanish). Regular Spanish stays as is.",
   argBefore:"¿Quieres jugar? Haz un kickflip, colega.",argAfter:"¿Querés jugar? Hacé un kickflip, loco.",
   uiLang:"This window's language",
@@ -334,11 +348,10 @@ const L = {
   imgT:"Picture",lbox:"Black bars",lboxD:"On screens that aren't 16:9 it keeps bars on the sides. Off stretches the picture.",
   ssr:"Glass and water reflections (experimental)",ssrD:"Real-time reflections. Needs more GPU and sometimes shows smudges.",
   modder:"The modder",deckT:"Deck graphic",sfxT:"Modder sounds",sfxD:"The ollie and landing sounds on buttons.",
-  djT:"Radio DJ",djD:"A voice introduces every Radio Carverton track.",
   report:"Report a problem",reportD:"Builds a report with what happened and copies it so you can paste it in the chat.",reportQ:"What happened? Tell it in your own words.",send:"Build report",
   favs:"Favorites",noFavs:"Mark tracks with ☆ to build your favorites.",
-  news:"What's new in v{v}",keysHelp:"Shortcuts: 1 to 7 switch tabs, Enter is Drop in, F11 fullscreen. With a gamepad: D-pad to move, A to pick, LB/RB tabs, Start Drop in.",
-  bootT:"At startup",direct:"Straight to your save",directD:"Skips the intro, the language screen, Press Start and the boot prompts, into your career in the language you pick below.",
+  news:"What's new in v{v}",keysHelp:"Shortcuts: 1 to 7 switch tabs, Enter is Drop in, M pauses the radio, F11 fullscreen. With a gamepad: D-pad to move, A to pick, LB/RB tabs, Start Drop in.",
+  bootT:"At startup",direct:"Straight to your save",directD:"A loading screen covers the intro, menus and prompts, and you show up straight in your career, in the language you pick below.",
   afterT:"When you hit Drop in",aMin:"Minimize",aMinD:"Hides and comes back by itself when you close the game.",aClose:"Close",aCloseD:"The modder closes; the helper keeps going.",aStay:"Keep it open",aStayD:"Stays open behind the game.",
   back:"Back!",backD:"Session over.",
   t_ctl:"Controls",s_ctl:"Play with keyboard and mouse: turn it on and pick which key presses each pad button.",
@@ -357,16 +370,16 @@ const L = {
   folders:"Folders",fGame:"Game",fSaves:"Saves",fData:"Data",chg:"Change game folder",
   update:"Update",updated:"Look for a new version and update by itself.",check:"Check",
   hom:"Hall of Meat zone",uninst:"Uninstall everything",uninstd:"Leaves the game exactly as it was before the mods.",
-  sure:"Sure?",uninstQ:"Every mod comes off, files and settings are restored and the shortcut is deleted.",
+  sure:"Sure?",uninstQ:"Every mod comes off, files and settings are restored, and the shortcuts and the Steam entry are deleted.",
   cancel:"Cancel",yes:"Yes, remove it all",ok:"OK",
   looking:"Looking for the game…",lookingd:"Searching your PC for the skate3recomp folder. Only the first time.",
   notfound:"Game not found",notfoundd:"Pick the skate3recomp folder, the one with skate3.exe.",pick:"Pick folder",
   newver:"New version",newverd:"Version {v} is out. It downloads, replaces itself and reopens.",updNow:"Update",
   noupd:"You're on the latest version.",working:"Working…",err:"Bail! Something failed",
-  play:"Starting the game",radioHint:"Tap ▶ for the radio",
+  play:"Starting the game",
   tips:["<b>Tip:</b> Ctrl+Alt+R restarts the game if it hangs (with the helper).","<b>Tip:</b> Enter or A skips the intro.",
    "<b>Tip:</b> everything you turn on can be undone from here.","<b>Tip:</b> if you update the recomp, your mods come back by themselves when you play.",
-   "<b>Tip:</b> the desktop shortcut starts the game with the helper.","<b>Tip:</b> Español ARG shows up on the game's language screen instead of Nederlands.",
+   "<b>Tip:</b> Skate 3 (directo) on the desktop drops you in your save without touching anything.","<b>Tip:</b> Español ARG shows up on the game's language screen instead of Nederlands.",
    "<b>Tip:</b> Alt+F4 closes the game like the window's X.","<b>Tip:</b> in Controls you can play with keyboard and mouse and change every key.","<b>Tip:</b> with two monitors, pick in Graphics which one the game opens on.","<b>Tip:</b> F11 switches the modder between fullscreen and window.","<b>Tip:</b> tap the genre on the radio: boom bap, punk, rock, electro or cumbia.","<b>Tip:</b> the modder works with a gamepad: LB/RB switch tabs.","<b>Tip:</b> mark the radio tracks you like with ☆."]}
 };
 let S = {en:false}, page = "buttons";
@@ -541,9 +554,10 @@ function session() {
      ${S.ctl.direct ? `<div class="card" style="margin-top:8px"><b>${t("bootLangT")}</b><div class="sub" style="color:var(--dim);font-size:12.5px;margin:2px 0 12px">${t("bootLangD")}</div>
        <div class="langs">${S.ctl.bootLangs.map(l => `<button class="btn ${S.ctl.bootLang === l.key ? "hot" : ""}" onclick="act('bootlang','${l.key}')">${esc(l.name)}</button>`).join("")}</div></div>` : ""}</div>
     <div class="sec"><h2 class="h">${t("afterT")}</h2><div class="opts">${opt("min", t("aMin"), t("aMinD"))}${opt("close", t("aClose"), t("aCloseD"))}${opt("stay", t("aStay"), t("aStayD"))}</div></div>
-    <div class="sec"><h2 class="h">${t("helper")}</h2>
-     ${S.features.map(f => row(FICON[f.key] || "•", f.name, f.desc, sw(f.on, `act('feature','${f.key}=${f.on ? "off" : "on"}')`))).join("")}</div>
-    <div class="sec">${row("🖱️", t("shortcut"), t("shortcutd"), sw(S.shortcut, `act('shortcut','${S.shortcut ? "off" : "on"}')`))}</div>`;
+    <div class="sec"><h2 class="h">${t("helper")}</h2><div class="rows">
+     ${S.features.map(f => row(FICON[f.key] || "•", f.name, f.desc, sw(f.on, `act('feature','${f.key}=${f.on ? "off" : "on"}')`))).join("")}</div></div>
+    <div class="sec rows">${row("🖱️", t("shortcut"), t("shortcutd"), sw(S.shortcut, `act('shortcut','${S.shortcut ? "off" : "on"}')`))}
+     ${S.hasSteam || S.steam ? row("🚂", t("steamT"), t("steamD"), sw(S.steam, `act('steam','${S.steam ? "off" : "on"}')`)) : ""}</div>`;
 }
 function lang() {
   return `<div class="sec"><div class="card"><div style="display:flex;align-items:center;gap:16px">
@@ -565,12 +579,14 @@ function shop() {
          <button class="btn" onclick="act('folder','saves','${t("fSaves")}')">${t("fSaves")}</button>
          <button class="btn" onclick="act('folder','data','${t("fData")}')">${t("fData")}</button></div>`)}
       ${row("🔀", t("chg"), "", `<button class="btn" onclick="pickFolder()">${t("pick")}</button>`)}
-      ${row("📣", t("report"), t("reportD"), `<button class="btn" onclick="askReport()">${t("report")}</button>`)}</div>
+      ${row("📣", t("report"), t("reportD"), `<button class="btn" onclick="askReport()">${t("report")}</button>`)}
+      ${row("📜", t("logT"), t("logD"), `<button class="btn" onclick="act('gamelog')">${t("open")}</button>`)}</div>
     <div class="sec"><h2 class="h">${t("modder")}</h2>
       <div class="card"><b>${t("deckT")}</b><div class="decks" style="margin-top:10px">${Object.keys(DECKS).map(k => `<div class="d ${deckKey() === k ? "sel" : ""}" tabindex="0" style="background:${DECKS[k]}" onclick="setPref('deck','${k}')"></div>`).join("")}</div></div>
       <div style="height:8px"></div>
       ${row("🔊", t("sfxT"), t("sfxD"), sw(sfx.on, `setPref('sfx','${sfx.on ? "0" : "1"}')`))}
-      ${row("🎙️", t("djT"), t("djD"), sw(S.prefs?.dj === "1", `setPref('dj','${S.prefs?.dj === "1" ? "0" : "1"}')`))}
+      ${row("🔍", t("zoomT") + " · " + Math.round(zoomPref() * 100) + "%", t("zoomD"), `<input type="range" min="70" max="150" step="5" value="${Math.round(zoomPref() * 100)}" style="width:220px;margin:0" onchange="setZoom(this.value/100)">`)}
+      ${row("🛋️", t("sofaT"), t("sofaD"), sw(S.prefs?.sofa === "1", `setPref('sofa','${S.prefs?.sofa === "1" ? "0" : "1"}')`))}
       <p style="color:var(--mute);font-size:12.5px;margin-top:12px">${t("keysHelp")}</p></div>
     <div class="sec"><h2 class="h" style="color:#ff8a8a">💀 ${t("hom")}</h2>
       ${row("🧨", t("uninst"), t("uninstd"), `<button class="btn danger" onclick="askUninstall()">${t("uninst")}</button>`)}</div>`;
@@ -616,7 +632,29 @@ const deckKey = () => DECKS[S.prefs?.deck] ? S.prefs.deck : "clasica";
 function applyPrefs() {
   const k = deckKey(); $("deck").style.background = k === "clasica" ? DECKS[k] : "linear-gradient(rgba(8,8,8,.62),rgba(8,8,8,.62))," + DECKS[k];
   sfx.on = S.prefs?.sfx !== "0";
+  document.body.classList.toggle("sofa", S.prefs?.sofa === "1");
+  fitZoom();
 }
+// size: WebView2's zoom fitted to the screen (s3zoom), times the user's size
+// and couch mode. Ctrl + wheel / Ctrl +, -, 0 change the user's size.
+const zoomPref = () => { const z = +(S.prefs?.zoom || 1); return z >= .5 && z <= 2 ? z : 1; };
+let lastZoom = 0;
+function fitZoom() {
+  const m = zoomPref() * (S.prefs?.sofa === "1" ? 1.3 : 1);
+  if (window.s3zoom && m !== lastZoom) { lastZoom = m; window.s3zoom(m); }
+}
+let zoomT = null;
+function setZoom(z) {
+  z = Math.max(.7, Math.min(1.5, Math.round(z * 20) / 20));
+  S.prefs = Object.assign({}, S.prefs, {zoom: String(z)}); fitZoom();
+  clearTimeout(zoomT); zoomT = setTimeout(async () => { await call("pref", "zoom=" + z); await refresh(); }, 500);
+}
+addEventListener("resize", () => { clearTimeout(window._rz); window._rz = setTimeout(() => { lastZoom = 0; fitZoom(); }, 200); });
+addEventListener("wheel", e => { if (e.ctrlKey) { e.preventDefault(); setZoom(zoomPref() + (e.deltaY < 0 ? .05 : -.05)); } }, {passive: false});
+addEventListener("keydown", e => { if (!e.ctrlKey) return;
+  if (e.key === "+" || e.key === "=") { e.preventDefault(); setZoom(zoomPref() + .05); }
+  else if (e.key === "-") { e.preventDefault(); setZoom(zoomPref() - .05); }
+  else if (e.key === "0") { e.preventDefault(); setZoom(1); } });
 async function setPref(k, v) { await call("pref", k + "=" + v); await refresh(); sfx.tick(); }
 function askReport() {
   modal(t("report"), "", [[t("cancel"), "", null], [t("send"), "hot", () => act("report", $("rtext").value, t("report"))]],
@@ -624,6 +662,16 @@ function askReport() {
   setTimeout(() => $("rtext").focus(), 50);
 }
 const CHANGES = {
+  "3.4.0": {es: ["Directo a tu partida ahora es carga directa: una pantalla de carga tapa los menús y aparecés en tu carrera.",
+      "El modeador se adapta solo a tu pantalla, con tamaño a gusto y modo sofá para la tele.",
+      "Radio: arranca sola al abrir, Mix y aleatorio de entrada, temas que cambian solos y la tecla M para pausar. Se sacó el DJ.",
+      "Tres accesos directos: Skate 3 Mods, Skate 3 (directo) y Skate 3 (normal).",
+      "Skate 3 en Steam, registro del juego en El taller y el ícono del modeador en todos los tamaños."],
+    en: ["Straight to your save is now a direct load: a loading screen covers the menus and you show up in your career.",
+      "The modder fits your screen by itself, with your own size and a couch mode for the TV.",
+      "Radio: starts when the modder opens, Mix and shuffle by default, tracks change by themselves and M pauses it. The DJ is gone.",
+      "Three shortcuts: Skate 3 Mods, Skate 3 (directo) and Skate 3 (normal).",
+      "Skate 3 in Steam, game log in The shop and the modder icon at every size."]},
   "3.3.0": {es: ["Directo a tu partida: elegís el idioma en que entra (antes entraba siempre en inglés).",
       "Radio: favoritos (☆) y DJ que presenta los temas.", "Manejo con joystick y atajos de teclado en el modeador.",
       "Gráficos: bandas negras y reflejos en vidrios y agua.", "El taller: reportar un problema, gráfico de la tabla y sonidos del modeador.",
@@ -645,6 +693,7 @@ addEventListener("keydown", e => {
   if ($("modal").classList.contains("on")) { if (e.key === "Escape") $("modal").classList.remove("on"); return; }
   const k = +e.key;
   if (k >= 1 && k <= PAGES.length && !e.ctrlKey && !e.altKey) { go(PAGES[k - 1][0]); return; }
+  if ((e.key === "m" || e.key === "M") && !e.ctrlKey && !e.altKey) { radio.toggle(); return; }
   if ((e.key === "Enter" || e.key === " ") && document.activeElement?.matches?.(".pick,.d,.key")) { e.preventDefault(); document.activeElement.click(); return; }
   if (e.key === "Enter" && (document.activeElement === document.body || !document.activeElement)) dropIn();
 });
@@ -736,7 +785,7 @@ const radio = (() => {
     rock: ["Port Carverton Drop","Bombeando el Hubba","Wallride en Constitución","Rampa Prohibida","Seguridad a los Gritos","Tabla Rota"],
     electro: ["Neón en la Costanera","Manual Infinito","Late Flip Tango","Distrito Industrial","Bajada de Caminito","Cámara Lenta"],
     cumbia: ["Cumbia del Half Pipe","La Rampa de Lanús","Ollie Sabrosón","Pibes del Skatepark","Cumbia del Grind","El Baile del Manual"]};
-  let a, out, comp, an, playing = false, timer = null, step = 0, nextT = 0, tr = null, n = 0, vol = .45, nb, genre = "mix";
+  let a, out, comp, an, playing = false, timer = null, step = 0, nextT = 0, tr = null, n = 0, vol = .45, nb, genre = "mix", shuf = true, hist = [];
   function rng(seed) { return () => { seed = (seed * 1664525 + 1013904223) >>> 0; return seed / 4294967296; }; }
   const pick = (r, arr) => arr[Math.floor(r() * arr.length)];
   const steps = f => Array.from({length: 16}, (_, k) => f(k));
@@ -751,7 +800,7 @@ const radio = (() => {
     const t = {g, root, prog, sc, swing: 0, hatDecay: .045, bassWave: "sine", bassCut: 500, bassDist: false, bassVol: .45,
       chordIv: [0,3,7,10], chordWave: "triangle", chordCut: 1400, chordDist: false, chordVol: .06, chordLen: 15,
       chord: steps(k => k === 0), lead: steps(() => null), leadWave: "square", conga: steps(() => null), guira: null, clap: false,
-      name: pick(r, NAMES[g])};
+      name: pick(r, NAMES[g]), bars: 32};
     if (g === "boombap") Object.assign(t, {bpm: 84 + Math.floor(r() * 12), swing: .12 + r() * .08,
       kick: [1,0,0,0,0,0,0,1,0,0,1,0,0,0,0,0].map((v, k) => v || (r() < .12 && k % 2 === 0) ? 1 : 0),
       snare: [0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,r() < .4 ? 1 : 0], hat: steps(k => k % 2 === 0 ? 1 : (r() < .35 ? .6 : 0)), hatDecay: .05});
@@ -770,6 +819,7 @@ const radio = (() => {
       conga: steps(k => k === 6 || k === 14 ? 0 : (k === 3 || k === 11) && r() < .7 ? 7 : null),
       chord: steps(k => k % 4 === 2), chordLen: .9, chordIv: [12,16,19], chordWave: "triangle", chordCut: 2600, chordVol: .07,
       bassWave: "sine", bassCut: 400, bassVol: .55, lead: steps(k => k % 2 === 0 && r() < .75 ? Math.floor(r() * sc.length) : null), leadWave: "square"});
+    t.bars = Math.max(16, Math.round(105 / (240 / t.bpm) / 4) * 4); // about 1:45 per track
     if (g === "cumbia") t.bassLine = steps(k => k === 0 ? 0 : k === 8 ? 4 : (k === 6 || k === 14) && r() < .5 ? 2 : null);
     t.bass = t.bassLine || steps(k => (t.kick[k] || r() < (g === "punk" ? .9 : g === "rock" ? .5 : g === "electro" ? (k % 4 === 2 ? 1 : 0) : .2)) ? (g === "electro" ? 0 : Math.floor(r() * 3)) : null);
     return t;
@@ -809,6 +859,7 @@ const radio = (() => {
       if (tr.lead[s] !== null) tone(t0, hz(base + 36 + deg(tr.lead[s])), tr.leadWave, tr.g === "cumbia" ? .07 : .045, spb * (tr.g === "cumbia" ? 1.7 : .8), tr.g === "cumbia" ? 3200 : 1800 + 1400 * Math.sin(step / 24));
       if (s % 4 === 0) crackle(t0, spb * 4);
       nextT += spb; step++;
+      if (step >= tr.bars * 16) { advance(); return; }
     }
   }
   function setup() {
@@ -820,27 +871,27 @@ const radio = (() => {
   function load(i, dir = 1) {
     if (genre === "fav" && favs.length) { fi = (fi + dir + favs.length) % favs.length; n = favs[fi].n; tr = make(n, favs[fi].g); }
     else { n = (i + 1000) % 1000; tr = make(n); }
-    step = 0; showTrack(); save(); if (playing) dj();
+    step = 0; showTrack(); save();
+  }
+  // next track: in shuffle a random one (any genre in Mix), else the following one
+  function advance() {
+    hist.push(genre === "fav" ? fi : n); if (hist.length > 50) hist.shift();
+    if (!shuf) { load(n + 1); return; }
+    if (genre === "fav" && favs.length) { fi = Math.floor(Math.random() * favs.length) - 1; load(0); return; }
+    let r; do { r = Math.floor(Math.random() * 1000); } while (r === n); load(r);
+  }
+  function back() {
+    if (shuf && hist.length) { const h = hist.pop(); if (genre === "fav" && favs.length) { fi = h - 1; load(0); } else load(h); return; }
+    load(n - 1, -1);
   }
   const isFav = () => favs.some(f => f.n === n && f.g === tr.g);
   function showTrack() { $("track").textContent = label(); $("rfav").textContent = isFav() ? "★" : "☆"; }
-  // DJ: a voice says the track name between songs (Windows' own voices)
-  function dj() {
-    if (S.prefs?.dj !== "1" || !window.speechSynthesis) return;
-    speechSynthesis.cancel();
-    const u = new SpeechSynthesisUtterance((S.en ? "Radio Carverton. Now playing: " : "Radio Carverton. Suena: ") + tr.name);
-    const want = S.en ? "en" : "es", v = speechSynthesis.getVoices().filter(v => v.lang.startsWith(want));
-    if (v.length) u.voice = v.find(x => /AR|419|MX/.test(x.lang)) || v[0];
-    u.lang = S.en ? "en-US" : "es-AR"; u.rate = 1.05;
-    if (out) { out.gain.setTargetAtTime(vol * .35, a.currentTime, .1); u.onend = () => out.gain.setTargetAtTime(vol, a.currentTime, .3); }
-    speechSynthesis.speak(u);
-  }
   function start() { if (!a) setup(); if (!tr) load(n); playing = true; nextT = a.currentTime + .05;
     timer = setInterval(schedule, 25); $("rplay").textContent = "❚❚"; $("radio").classList.add("play"); save(); }
   function stop() { playing = false; clearInterval(timer); $("rplay").textContent = "▶"; $("radio").classList.remove("play"); save(); }
   // the page has no fixed origin, so the radio settings live in skate3-mods.ini
   let saveT = null;
-  function save() { clearTimeout(saveT); saveT = setTimeout(() => { if (S.root) call("radio", JSON.stringify({on: playing, n, vol, genre, favs})); }, 800); }
+  function save() { clearTimeout(saveT); saveT = setTimeout(() => { if (S.root) call("radio", JSON.stringify({on: playing, n, vol, genre, favs, shuffle: shuf})); }, 800); }
   function draw() {
     const c = $("viz"), x = c.getContext("2d"), d = new Uint8Array(an.frequencyBinCount);
     (function f() { requestAnimationFrame(f); an.getByteFrequencyData(d); x.clearRect(0, 0, c.width, c.height);
@@ -848,30 +899,32 @@ const radio = (() => {
         x.fillStyle = i % 6 === 0 ? "#c6ff3d" : `rgba(255,${90 + i * 2},31,${.35 + v * .65})`; x.fillRect(i * w + 1, (c.height - h) / 2, w - 3, h); } })();
   }
   const saved = {on: true, n: Math.floor(Math.random() * 1000), vol: .45};
-  function showGenre() { $("rgen").textContent = genre === "mix" ? "Mix" : genre === "fav" ? "★" : GENRES.find(x => x[0] === genre)[1]; }
+  function showGenre() { $("rshuf").classList.toggle("on", shuf); $("rshuf").title = t("shuffle"); $("rgen").textContent = genre === "mix" ? "Mix" : genre === "fav" ? "★" : GENRES.find(x => x[0] === genre)[1]; }
   function show() { $("vol").value = Math.round(vol * 100); tr = make(n); showTrack(); showGenre(); }
   n = saved.n; vol = saved.vol; show();
   return {
-    get wantsAutoplay() { return saved.on; },
     restore(json) { try { const o = JSON.parse(json); if (typeof o.n === "number") n = o.n; if (typeof o.vol === "number") vol = o.vol;
       if (Array.isArray(o.favs)) favs = o.favs.filter(f => typeof f.n === "number" && GENRES.some(x => x[0] === f.g));
       if (o.genre === "mix" || (o.genre === "fav" && favs.length) || GENRES.some(x => x[0] === o.genre)) genre = o.genre;
-      if (o.on === false) saved.on = false; if (out) out.gain.value = vol; if (!playing) show(); } catch (e) {} },
+      if (typeof o.shuffle === "boolean") shuf = o.shuffle; else { shuf = true; genre = "mix"; } // v3.4: Mix + shuffle by default
+      if (out) out.gain.value = vol; if (!playing) show(); } catch (e) {} },
     toggle() { playing ? stop() : start(); },
-    next() { load(n + 1); if (!playing) start(); },
-    prev() { load(n - 1, -1); if (!playing) start(); },
+    next() { advance(); if (!playing) start(); },
+    prev() { back(); if (!playing) start(); },
+    shuffle() { shuf = !shuf; hist = []; sfx.tick(); showGenre(); save(); },
     fav() { if (!tr) return; if (isFav()) favs = favs.filter(f => !(f.n === n && f.g === tr.g)); else favs.push({n, g: tr.g});
       sfx.tick(); showTrack(); save(); },
     volume(v) { vol = v; if (out) out.gain.value = v; save(); },
-    setGenre(g) { if (g === "fav" && !favs.length) { toast("★", t("noFavs"), true); return; } genre = g; fi = -1; showGenre(); $("gmenu").classList.remove("on"); sfx.tick(); load(n + 1); if (!playing) start(); },
+    setGenre(g) { if (g === "fav" && !favs.length) { toast("★", t("noFavs"), true); return; } genre = g; fi = -1; showGenre(); $("gmenu").classList.remove("on"); sfx.tick(); advance(); if (!playing) start(); },
     menu() { $("gmenu").innerHTML = [["mix","Mix"]].concat(GENRES, favs.length ? [["fav","★ " + t("favs")]] : []).map(([k, l]) => `<button class="${k === genre ? "on" : ""}" onclick="radio.setGenre('${k}')">${l}</button>`).join("");
       const b = $("rgen").getBoundingClientRect(); $("gmenu").style.left = b.left + "px"; $("gmenu").classList.toggle("on"); },
     pause() { if (playing) stop(); },
     get playing() { return playing; }
   };
 })();
-// browsers start audio only after a click: the radio starts on the first one
-document.addEventListener("pointerdown", () => { if (radio.wantsAutoplay && !radio.playing && !window._radioTried) { window._radioTried = true; radio.toggle(); } }, {once: true, capture: true});
+// the radio starts with the modder (WebView2 runs with autoplay allowed); if
+// Windows still holds the sound back, the first click lets it out
+document.addEventListener("pointerdown", () => { if (AC && AC.state === "suspended") AC.resume(); }, {capture: true});
 
 // ------------------------------------------------------------------ boot
 (async function boot() {
@@ -893,7 +946,7 @@ document.addEventListener("pointerdown", () => { if (radio.wantsAutoplay && !rad
   }
   render();
   $("tip").innerHTML = t("tips")[0];
-  setTimeout(() => toast("Skate 3 Recomp Mods", radio.wantsAutoplay ? t("radioHint") : ""), 600);
+  if (!radio.playing) radio.toggle();
   showNews();
   await checkUpdate(false);
   if (S.root && !newVer) checkRecomp(false);

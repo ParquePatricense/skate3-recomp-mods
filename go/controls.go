@@ -130,10 +130,16 @@ func controlsState(root string) map[string]any {
 		"monitor": mon, "monitors": monitors(),
 		"mnk": tomlBool(m, "mnk_mode", false), "capture": tomlBool(m, "mnk_capture_mouse", false),
 		"sens": sens, "binds": binds,
-		"direct":    tomlBool(m, "skate3_demo_path", false) && tomlBool(m, "skate3_demo_path_signed_in", false),
+		"direct":    directOn(root),
 		"letterbox": tomlBool(m, "present_letterbox", true), "ssr": tomlBool(m, "skate3_native_render_scene_ssr", false),
 		"bootLang": loadConfig(root)["boot_lang"], "bootLangs": bootLangList(),
 	}
+}
+
+// directOn: the recomp's boot automation is on with the real profile kept.
+func directOn(root string) bool {
+	m := readToml(root)
+	return tomlBool(m, "skate3_demo_path", false) && tomlBool(m, "skate3_demo_path_signed_in", false)
 }
 
 func setBool(root, key string, on bool) error {
@@ -200,8 +206,15 @@ type screen struct {
 // accepted by themselves and the boot dialogs too, straight into the career.
 // Input injection stops for good once gameplay starts. The automation always
 // accepts English, so the chosen language (setBootLang) goes in that slot.
+// The helper covers all that with a loading screen until the log (flushed
+// every second) says gameplay was reached.
 func setDirect(root string, on bool) (string, error) {
-	vals := [][2]string{{"skate3_demo_path", strconv.FormatBool(on)}, {"skate3_demo_path_signed_in", strconv.FormatBool(on)}}
+	flush := "0"
+	if on {
+		flush = "1"
+	}
+	vals := [][2]string{{"skate3_demo_path", strconv.FormatBool(on)}, {"skate3_demo_path_signed_in", strconv.FormatBool(on)},
+		{"log_flush_interval", flush}}
 	c := loadConfig(root)
 	if on {
 		vals = append(vals, [2]string{"skate3_demo_path_gameplay_inputs", `""`})

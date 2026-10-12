@@ -4,7 +4,7 @@
 //   - PlayStation button icons (PS3/PS4/PS5)       -> game files
 //   - Graphics presets, FOV, ultrawide              -> skate3.toml
 //   - Alt+F4 to quit                                 -> helper ("play" mode)
-//   - Desktop shortcut                               -> Skate 3.lnk
+//   - Desktop shortcuts                              -> Skate 3 Mods / (directo) / (normal).lnk
 //   - "Español ARG" language (replaces Dutch)      -> game files
 //   - In-game helper: quick restart, priority, keep awake, hidden cursor,
 //     Windows key, window memory, do not disturb (play mode)
@@ -23,7 +23,7 @@ import (
 	"time"
 )
 
-const version = "3.3.0"
+const version = "3.4.0"
 
 var stdin = newStdin()
 
@@ -356,6 +356,12 @@ func run(args []string) int {
 				fmt.Println(onOff(textsOn(root)))
 			}
 		case "play":
+			// the "directo" and "normal" desktop shortcuts pick the startup
+			if want := arg == "direct"; (arg == "direct" || arg == "normal") && want != directOn(root) {
+				if _, err = setDirect(root, want); err != nil {
+					break
+				}
+			}
 			err = play(root)
 		default:
 			fmt.Println(T("Uso", "Usage") + ": Skate3-Mods [install ps3|ps4|ps5 | uninstall | status | preset max|balanced|perf|ultra|restore | texts on|off | play] [--game DIR]")

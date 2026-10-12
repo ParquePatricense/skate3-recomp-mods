@@ -11,13 +11,17 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"math"
 	"os"
 	"path/filepath"
+	"reflect"
 	"strings"
+	"syscall"
 	"time"
 	"unsafe"
 
 	webview2 "github.com/jchv/go-webview2"
+	"github.com/jchv/go-webview2/pkg/edge"
 )
 
 //go:embed ui/index.html
@@ -30,6 +34,8 @@ func runGUI() error {
 	guiMode = true
 	setLang(config{})
 	data := filepath.Join(os.Getenv("LOCALAPPDATA"), "Skate3-Mods", "webview")
+	// the radio starts by itself when the modder opens
+	os.Setenv("WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS", "--autoplay-policy=no-user-gesture-required")
 	width, height := windowSize(1200, 780)
 	w := webview2.NewWithOptions(webview2.WebViewOptions{
 		DataPath:  data,
@@ -76,6 +82,27 @@ func runGUI() error {
 		}
 		return map[bool]string{true: "full", false: "window"}[uiFull]
 	})
+	ctrl := controller(w)
+	// s3zoom fits the page to the window: the same share of the screen at any
+	// resolution and DPI, times the user's own size (1 = automatic).
+	w.Bind("s3zoom", func(mult float64) float64 {
+		if mult < .5 || mult > 2 {
+			mult = 1
+		}
+		var cr rect
+		pGetClientRect.Call(hwnd, uintptr(unsafe.Pointer(&cr)))
+		dpi, _, _ := pGetDpiForWindow.Call(hwnd)
+		if dpi == 0 {
+			dpi = 96
+		}
+		cssW, cssH := float64(cr.R-cr.L)*96/float64(dpi), float64(cr.B-cr.T)*96/float64(dpi)
+		z := math.Min(cssW/2260, cssH/1270)
+		z = math.Max(.75, math.Min(z, 2.5)) * mult
+		if ctrl != nil && cssW > 0 {
+			w.Dispatch(func() { putZoom(ctrl, z) })
+		}
+		return z
+	})
 	gameExitHook = func() {
 		w.Dispatch(func() {
 			pShowWindow.Call(hwnd, swRestore)
@@ -87,6 +114,34 @@ func runGUI() error {
 	w.SetHtml(indexHTML)
 	w.Run()
 	return nil
+}
+
+// controller digs the WebView2 controller out of the webview (the package
+// keeps it private) to set the zoom and turn off the browser's own zoom keys,
+// so Ctrl+wheel goes through s3zoom and is remembered.
+func controller(w webview2.WebView) *edge.ICoreWebView2Controller {
+	v := reflect.ValueOf(w)
+	if v.Kind() != reflect.Ptr || v.Elem().Kind() != reflect.Struct {
+		return nil
+	}
+	f := v.Elem().FieldByName("browser")
+	if !f.IsValid() {
+		return nil
+	}
+	ch, ok := reflect.NewAt(f.Type(), unsafe.Pointer(f.UnsafeAddr())).Elem().Interface().(*edge.Chromium)
+	if !ok || ch == nil {
+		return nil
+	}
+	if s, err := ch.GetSettings(); err == nil && s != nil {
+		s.PutIsZoomControlEnabled(false)
+	}
+	return ch.GetController()
+}
+
+// putZoom calls ICoreWebView2Controller::put_ZoomFactor (vtable slot 8).
+func putZoom(c *edge.ICoreWebView2Controller, z float64) {
+	vtbl := **(**[9]uintptr)(unsafe.Pointer(c))
+	syscall.SyscallN(vtbl[8], uintptr(unsafe.Pointer(c)), uintptr(math.Float64bits(z)))
 }
 
 // The modder opens fullscreen (borderless, on its monitor) unless the user

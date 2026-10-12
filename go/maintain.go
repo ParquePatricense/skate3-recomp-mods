@@ -201,6 +201,11 @@ func uninstallAll(root string) []string {
 	}
 	add(T("iconos", "icons"), uninstallIcons(root))
 	c := loadConfig(root)
+	if c.on("steam") {
+		_, err := setSteam(root, false)
+		add("Steam", err)
+		c = loadConfig(root)
+	}
 	delete(c, "texts")
 	delete(c, "boot_lang")
 	c.save(root)
@@ -316,6 +321,38 @@ func diagnose(root string) (string, error) {
 
 // problemReport is the diagnostics plus what the user says happened, saved on the
 // desktop and copied so it can be pasted straight into a message.
+// newestLog is the latest *.log in dir written after since.
+func newestLog(dir string, since time.Time) string {
+	ents, _ := os.ReadDir(dir)
+	best, bt := "", since
+	for _, e := range ents {
+		if e.IsDir() || !strings.HasSuffix(strings.ToLower(e.Name()), ".log") {
+			continue
+		}
+		if i, err := e.Info(); err == nil && i.ModTime().After(bt) {
+			best, bt = filepath.Join(dir, e.Name()), i.ModTime()
+		}
+	}
+	return best
+}
+
+// logTail is the end of the newest game log, for the problem report.
+func logTail(root string, lines int) string {
+	p := newestLog(filepath.Join(root, "logs"), time.Time{})
+	if p == "" {
+		return ""
+	}
+	b, err := os.ReadFile(p)
+	if err != nil {
+		return ""
+	}
+	l := strings.Split(strings.TrimRight(string(b), "\r\n"), "\n")
+	if len(l) > lines {
+		l = l[len(l)-lines:]
+	}
+	return "\n== " + T("Registro del juego", "Game log") + " (" + filepath.Base(p) + ")\n" + strings.Join(l, "\n") + "\n"
+}
+
 func problemReport(root, what string) (string, error) {
 	p, err := diagnose(root)
 	if err != nil {
@@ -325,7 +362,7 @@ func problemReport(root, what string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	text := "== " + T("Qué pasó", "What happened") + "\n" + strings.TrimSpace(what) + "\n\n" + string(b)
+	text := "== " + T("Qué pasó", "What happened") + "\n" + strings.TrimSpace(what) + "\n\n" + string(b) + logTail(root, 80)
 	if err := os.WriteFile(p, []byte(text), 0o644); err != nil {
 		return "", err
 	}

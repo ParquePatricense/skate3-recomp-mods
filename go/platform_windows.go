@@ -7,6 +7,7 @@ package main
 // do not disturb).
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"os/exec"
@@ -367,19 +368,30 @@ func play(root string) error {
 	hc = loadConfig(root)
 	setLang(hc)
 	checkMods(root) // put the mods back if a recomp update replaced the files
+	runtime.LockOSThread()
 	pid, running := findGamePID()
+	direct := !running && directOn(root)
+	var watch *gameplayWatch
+	if direct {
+		pFreeConsole.Call()
+		if readToml(root)["log_flush_interval"] != "1" { // set up before v3.4
+			setTomlValues(root, [][2]string{{"log_flush_interval", "1"}})
+		}
+		showCover(root)
+		watch = newGameplayWatch(root)
+	}
 	if !running {
 		var err error
 		if pid, err = launchGame(root); err != nil {
+			hideCover()
 			return err
 		}
 	}
-	if !hc.anyHelper() {
+	if !hc.anyHelper() && !direct {
 		return nil
 	}
 	pFreeConsole.Call()
 
-	runtime.LockOSThread()
 	gamePID = pid
 	proc, err := watchGame(pid)
 	if err != nil {
@@ -419,6 +431,13 @@ func play(root string) error {
 		}
 		if m.Message == wmTimer && m.Hwnd == 0 {
 			tick++
+			if watch != nil {
+				coverTick()
+				if watch.reached() {
+					watch = nil
+					hideCover()
+				}
+			}
 			if hc.feature("window") && tick%4 == 0 {
 				if st := readWindowState(gameWindow()); st.ok {
 					lastWin = st
@@ -443,6 +462,10 @@ func play(root string) error {
 				if proc, err = watchGame(gamePID); err != nil {
 					finish()
 					os.Exit(0)
+				}
+				if directOn(root) {
+					showCover(root)
+					watch = newGameplayWatch(root)
 				}
 				closeSent = time.Time{}
 				continue
@@ -511,7 +534,16 @@ func systemSpanish() bool {
 	return l&0x3FF == 0x0A // LANG_SPANISH
 }
 
-const shortcutName = "Skate 3.lnk"
+// Desktop shortcuts: the modder itself (its own icon), and the game straight
+// to your save or the normal way (the game's icon). "Skate 3.lnk" is the
+// single shortcut older versions made.
+var shortcuts = []struct{ name, args string }{
+	{"Skate 3 Mods.lnk", ""},
+	{"Skate 3 (directo).lnk", "play direct"},
+	{"Skate 3 (normal).lnk", "play normal"},
+}
+
+const oldShortcutName = "Skate 3.lnk"
 
 func psQuote(s string) string { return "'" + strings.ReplaceAll(s, "'", "''") + "'" }
 
@@ -530,12 +562,10 @@ func copyToClipboard(path string) error {
 	return powershell("Get-Content -Raw -Encoding UTF8 -LiteralPath " + psQuote(path) + " | Set-Clipboard")
 }
 
-func desktopShortcut() string {
-	return "(Join-Path ([Environment]::GetFolderPath('Desktop')) " + psQuote(shortcutName) + ")"
+func desktopShortcut(name string) string {
+	return "(Join-Path ([Environment]::GetFolderPath('Desktop')) " + psQuote(name) + ")"
 }
 
-// createShortcut puts a "Skate 3" shortcut on the desktop that starts the
-// game through the mods helper (minimized, so no console flashes).
 func createShortcut(root string) error {
 	exe := filepath.Join(root, modsExe)
 	if !exists(exe) {
@@ -544,15 +574,36 @@ func createShortcut(root string) error {
 			return err
 		}
 	}
-	return powershell("$s=(New-Object -ComObject WScript.Shell).CreateShortcut(" + desktopShortcut() + ");" +
-		"$s.TargetPath=" + psQuote(exe) + ";$s.Arguments='play';" +
-		"$s.WorkingDirectory=" + psQuote(root) + ";" +
-		"$s.IconLocation=" + psQuote(filepath.Join(root, gameExe)+",0") + ";" +
-		"$s.WindowStyle=7;$s.Description='Skate 3 Recomp (mods)';$s.Save()")
+	ps := "$p=" + desktopShortcut(oldShortcutName) + ";if(Test-Path -LiteralPath $p){Remove-Item -LiteralPath $p};"
+	for _, sc := range shortcuts {
+		icon, style, desc := filepath.Join(root, gameExe), "7", "Skate 3 Recomp (mods)"
+		if sc.args == "" {
+			icon, style, desc = exe, "1", "Skate 3 Recomp Mods"
+		}
+		ps += "$s=(New-Object -ComObject WScript.Shell).CreateShortcut(" + desktopShortcut(sc.name) + ");" +
+			"$s.TargetPath=" + psQuote(exe) + ";$s.Arguments=" + psQuote(sc.args) + ";" +
+			"$s.WorkingDirectory=" + psQuote(root) + ";" +
+			"$s.IconLocation=" + psQuote(icon+",0") + ";" +
+			"$s.WindowStyle=" + style + ";$s.Description=" + psQuote(desc) + ";$s.Save();"
+	}
+	return powershell(ps)
 }
 
 func removeShortcut() error {
-	return powershell("$p=" + desktopShortcut() + ";if(Test-Path -LiteralPath $p){Remove-Item -LiteralPath $p}")
+	ps := ""
+	for _, n := range []string{oldShortcutName, shortcuts[0].name, shortcuts[1].name, shortcuts[2].name} {
+		ps += "$p=" + desktopShortcut(n) + ";if(Test-Path -LiteralPath $p){Remove-Item -LiteralPath $p};"
+	}
+	return powershell(ps)
+}
+
+// openLog opens the newest game log in Notepad.
+func openLog(root string) error {
+	p := newestLog(filepath.Join(root, "logs"), time.Time{})
+	if p == "" {
+		return errors.New(T("todavía no hay registro: abrí el juego una vez", "no log yet: start the game once"))
+	}
+	return exec.Command("notepad.exe", p).Start()
 }
 
 func documentsDir() string {
@@ -642,4 +693,34 @@ func pickFolder(title string) (string, error) {
 	cmd.SysProcAttr = &syscall.SysProcAttr{HideWindow: true}
 	out, err := cmd.Output()
 	return strings.TrimSpace(string(out)), err
+}
+
+// steamDir is where Steam is installed ("" without Steam).
+func steamDir() string {
+	k, err := registry.OpenKey(registry.CURRENT_USER, `Software\Valve\Steam`, registry.QUERY_VALUE)
+	if err != nil {
+		return ""
+	}
+	defer k.Close()
+	p, _, err := k.GetStringValue("SteamPath")
+	if err != nil || !exists(p) {
+		return ""
+	}
+	return filepath.Clean(p)
+}
+
+func steamRunning() bool {
+	snap, err := syscall.CreateToolhelp32Snapshot(syscall.TH32CS_SNAPPROCESS, 0)
+	if err != nil {
+		return false
+	}
+	defer syscall.CloseHandle(snap)
+	var pe syscall.ProcessEntry32
+	pe.Size = uint32(unsafe.Sizeof(pe))
+	for err = syscall.Process32First(snap, &pe); err == nil; err = syscall.Process32Next(snap, &pe) {
+		if strings.EqualFold(syscall.UTF16ToString(pe.ExeFile[:]), "steam.exe") {
+			return true
+		}
+	}
+	return false
 }
