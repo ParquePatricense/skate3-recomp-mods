@@ -52,3 +52,5 @@ func startPlay(root string) error {
 func pickFolder(string) (string, error) {
 	return "", errors.New("folder picker only on Windows")
 }
+
+func monitors() []screen { return nil }

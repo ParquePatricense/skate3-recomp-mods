@@ -225,6 +225,19 @@ func monitorIndex(m uintptr) int {
 	return 0
 }
 
+// monitors lists the screens in the recomp's order.
+func monitors() []screen {
+	monitorList = monitorList[:0]
+	pEnumDisplayMonitors.Call(0, 0, enumMonitorsCB, 0)
+	out := []screen{}
+	for i, h := range monitorList {
+		mi := monitorInfo{Size: uint32(unsafe.Sizeof(monitorInfo{}))}
+		pGetMonitorInfoW.Call(h, uintptr(unsafe.Pointer(&mi)))
+		out = append(out, screen{N: i + 1, W: int(mi.Monitor.R - mi.Monitor.L), H: int(mi.Monitor.B - mi.Monitor.T), Primary: mi.Flags&1 != 0})
+	}
+	return out
+}
+
 // windowState is what "remember the window" saves when the game closes.
 type windowState struct {
 	ok         bool

@@ -175,12 +175,26 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:30px;heigh
 /* modal */
 #modal{display:none;position:fixed;inset:0;z-index:10;background:rgba(0,0,0,.7);place-items:center}
 #modal.on{display:grid}
-#modal .box{width:470px;background:#1b1b1b;border:2px solid #333;border-radius:16px;padding:24px;box-shadow:8px 8px 0 #000}
+#modal .box{width:540px;background:#1b1b1b;border:2px solid #333;border-radius:16px;padding:24px;box-shadow:8px 8px 0 #000}
 #modal h3{margin:0 0 8px;font-size:28px}
 #modal p{color:var(--dim);white-space:pre-line}
 #modal .act{display:flex;justify-content:flex-end;gap:10px;margin-top:18px}
+#modal .act .btn{white-space:nowrap}
 /* busy */
 body.busy #pages{pointer-events:none;opacity:.6;transition:opacity .2s}
+.keys{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+.key{display:flex;align-items:center;gap:10px;padding:10px 12px;background:#191919;border:1px solid #262626;border-radius:12px;cursor:pointer;transition:border-color .15s,transform .1s}
+.key:hover{border-color:#444;transform:translateY(-1px)}
+.key .pad{min-width:46px;height:34px;padding:0 8px;border-radius:17px;display:grid;place-items:center;background:#262626;font:900 14px "Segoe UI";color:var(--lime)}
+.key .kv{flex:1;min-width:0;font-weight:700;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.key .kv small{display:block;font-weight:400;font-size:11px;color:var(--mute)}
+.key.listen{border-color:var(--orange);animation:blink .8s infinite}
+.key.dup{border-color:#7a3a10}
+@keyframes blink{50%{box-shadow:0 0 0 3px rgba(255,90,31,.35)}}
+.scr{display:flex;gap:12px;flex-wrap:wrap}
+.scr .card{min-width:150px;text-align:center;padding:14px 18px}
+.scr .mon{width:90px;height:56px;margin:0 auto 8px;border:3px solid #444;border-radius:6px;display:grid;place-items:center;font:900 22px Impact,sans-serif;font-style:italic}
+.scr .sel .mon{border-color:var(--orange);color:var(--orange)}
 #tip{padding:0 30px;color:var(--mute);font-size:12.5px;height:18px}
 #tip b{color:var(--orange2)}
 </style>
@@ -231,7 +245,7 @@ const L = {
  es:{foot:"Mod pack modular · todo se puede deshacer",drop:"Drop in",dropsub:"JUGAR CON MODS",folder:"JUEGO",original:"beats propios",
   t_buttons:"Botones",t_gfx:"Gráficos",t_session:"En sesión",t_lang:"Idioma",t_shop:"El taller",
   s_buttons:"Elegí cómo se ven los botones en el juego. Se cambian al toque y vuelven a Xbox cuando quieras.",
-  s_gfx:"Presets de un toque, campo de visión y ultrawide. Después podés seguir ajustando en Settings del juego.",
+  s_gfx:"Presets de un toque, pantalla, campo de visión y ultrawide. Después podés seguir ajustando en Settings del juego.",
   s_session:"Cosas que hace el ayudante mientras jugás. Funcionan si abrís el juego con DROP IN o con el acceso directo.",
   s_lang:"Español ARG en la pantalla de idiomas del juego, y el idioma de esta ventana.",
   s_shop:"Mantenimiento: reparar, carpetas, diagnóstico, actualizar y desinstalar.",
@@ -242,6 +256,17 @@ const L = {
   argT:"Español ARG",argd:"Reemplaza \"Nederlands\" en la pantalla de idiomas por \"Español ARG\": voseo y vocabulario de acá. El español de siempre queda igual.",
   argBefore:"¿Quieres jugar? Haz un kickflip, colega.",argAfter:"¿Querés jugar? Hacé un kickflip, loco.",
   uiLang:"Idioma de esta ventana",
+  t_ctl:"Controles",s_ctl:"Jugá con teclado y mouse: activalo y elegí qué tecla aprieta cada botón del joystick.",
+  screen:"Pantalla",vsync:"VSync",vsyncd:"Saca el tearing (la imagen cortada al girar). Apagado = menos input lag.",
+  fs:"Pantalla completa",fsd:"Apagado, el juego abre en ventana.",whereT:"¿En qué pantalla abre el juego?",
+  whered:"Con dos monitores: el juego en uno y el resto (Discord, música, este modeador) en el otro.",
+  auto:"Automática",main:"Principal",scr:"Pantalla",
+  mnk:"Jugar con teclado y mouse",mnkd:"El mouse mueve la cámara (stick derecho). Las teclas de abajo hacen de botones.",
+  capture:"Atrapar el mouse en el juego",captured:"El puntero no se escapa de la ventana mientras jugás.",
+  sens:"Sensibilidad del mouse",sensd:"1 es la de fábrica.",keysT:"Teclas",keysd:"Tocá un botón y apretá la tecla o el click que quieras. Esc cancela.",
+  press:"Apretá una tecla…",reset:"Volver a las teclas de fábrica",swapped:"Intercambiadas con {b}",mnkOff:"Activá \"Jugar con teclado y mouse\" para que las teclas funcionen.",
+  recompT:"Salió skate3recomp {v}",recompd:"Tenés la {h}. Bajala desde GitHub y reemplazá los archivos: tus mods se vuelven a poner solos al jugar.",
+  recompGo:"Ver descarga",recompSkip:"No avisar por esta",later:"Después",recompVer:"skate3recomp instalado",
   repair:"Reparar",repaird:"Revisa los archivos del juego y arregla lo roto con las copias de seguridad.",
   diag:"Diagnóstico",diagd:"Arma un reporte en el escritorio para pedir ayuda.",
   folders:"Carpetas",fGame:"Juego",fSaves:"Partidas",fData:"Datos",chg:"Cambiar carpeta del juego",
@@ -257,11 +282,11 @@ const L = {
   tips:["<b>Tip:</b> Ctrl+Alt+R reinicia el juego si se traba (con el ayudante).","<b>Tip:</b> en la intro, Enter o A la saltean.",
    "<b>Tip:</b> todo lo que actives se puede deshacer desde acá.","<b>Tip:</b> si actualizás el recomp, tus mods se vuelven a poner solos al jugar.",
    "<b>Tip:</b> el acceso directo del escritorio abre el juego con el ayudante.","<b>Tip:</b> Español ARG aparece en la pantalla de idiomas del juego, en lugar de Nederlands.",
-   "<b>Tip:</b> Alt+F4 cierra el juego como la X de la ventana."]},
+   "<b>Tip:</b> Alt+F4 cierra el juego como la X de la ventana.","<b>Tip:</b> en Controles podés jugar con teclado y mouse y cambiar cada tecla.","<b>Tip:</b> con dos monitores, elegí en Gráficos en cuál abre el juego."]},
  en:{foot:"Modular mod pack · everything can be undone",drop:"Drop in",dropsub:"PLAY WITH MODS",folder:"GAME",original:"own beats",
   t_buttons:"Buttons",t_gfx:"Graphics",t_session:"Session",t_lang:"Language",t_shop:"The shop",
   s_buttons:"Pick how the buttons look in the game. Swaps instantly and goes back to Xbox whenever you want.",
-  s_gfx:"One-tap presets, field of view and ultrawide. You can keep tweaking in the game's Settings.",
+  s_gfx:"One-tap presets, screen, field of view and ultrawide. You can keep tweaking in the game's Settings.",
   s_session:"Things the helper does while you play. They work when you start the game with DROP IN or the shortcut.",
   s_lang:"Español ARG on the game's language screen, and this window's language.",
   s_shop:"Maintenance: repair, folders, diagnostics, updates and uninstall.",
@@ -272,6 +297,17 @@ const L = {
   argT:"Español ARG",argd:"Turns \"Nederlands\" on the game's language screen into \"Español ARG\" (Rioplatense Spanish). Regular Spanish stays as is.",
   argBefore:"¿Quieres jugar? Haz un kickflip, colega.",argAfter:"¿Querés jugar? Hacé un kickflip, loco.",
   uiLang:"This window's language",
+  t_ctl:"Controls",s_ctl:"Play with keyboard and mouse: turn it on and pick which key presses each pad button.",
+  screen:"Screen",vsync:"VSync",vsyncd:"Removes tearing (the split image when turning). Off = less input lag.",
+  fs:"Fullscreen",fsd:"Off, the game opens in a window.",whereT:"Which screen does the game open on?",
+  whered:"With two monitors: the game on one, everything else (Discord, music, this modder) on the other.",
+  auto:"Automatic",main:"Main",scr:"Screen",
+  mnk:"Play with keyboard and mouse",mnkd:"The mouse moves the camera (right stick). The keys below act as buttons.",
+  capture:"Keep the mouse in the game",captured:"The pointer can't leave the window while you play.",
+  sens:"Mouse sensitivity",sensd:"1 is the default.",keysT:"Keys",keysd:"Tap a button, then press the key or click you want. Esc cancels.",
+  press:"Press a key…",reset:"Back to default keys",swapped:"Swapped with {b}",mnkOff:"Turn on \"Play with keyboard and mouse\" for the keys to work.",
+  recompT:"skate3recomp {v} is out",recompd:"You have {h}. Get it from GitHub and replace the files: your mods come back by themselves when you play.",
+  recompGo:"See download",recompSkip:"Skip this one",later:"Later",recompVer:"Installed skate3recomp",
   repair:"Repair",repaird:"Checks the game files and fixes broken ones from the backups.",
   diag:"Diagnostics",diagd:"Writes a report to your desktop to ask for help.",
   folders:"Folders",fGame:"Game",fSaves:"Saves",fData:"Data",chg:"Change game folder",
@@ -287,7 +323,7 @@ const L = {
   tips:["<b>Tip:</b> Ctrl+Alt+R restarts the game if it hangs (with the helper).","<b>Tip:</b> Enter or A skips the intro.",
    "<b>Tip:</b> everything you turn on can be undone from here.","<b>Tip:</b> if you update the recomp, your mods come back by themselves when you play.",
    "<b>Tip:</b> the desktop shortcut starts the game with the helper.","<b>Tip:</b> Español ARG shows up on the game's language screen instead of Nederlands.",
-   "<b>Tip:</b> Alt+F4 closes the game like the window's X."]}
+   "<b>Tip:</b> Alt+F4 closes the game like the window's X.","<b>Tip:</b> in Controls you can play with keyboard and mouse and change every key.","<b>Tip:</b> with two monitors, pick in Graphics which one the game opens on."]}
 };
 let S = {en:false}, page = "buttons";
 const t = k => (S.en ? L.en : L.es)[k] ?? k;
@@ -336,7 +372,7 @@ function modal(title, text, buttons) {
 const sw = (on, onclick) => `<button class="sw ${on ? "on" : ""}" onclick="${onclick}"><span class="board"></span></button>`;
 const row = (ic, name, desc, ctl) => `<div class="row"><div class="ic">${ic}</div><div class="tx"><b>${esc(name)}</b><span>${esc(desc)}</span></div>${ctl}</div>`;
 
-const PAGES = [["buttons","🎮"],["gfx","🖼️"],["session","🛹"],["lang","🧉"],["shop","🔧"]];
+const PAGES = [["buttons","🎮"],["gfx","🖼️"],["ctl","⌨️"],["session","🛹"],["lang","🧉"],["shop","🔧"]];
 function render() {
   document.documentElement.lang = S.en ? "en" : "es";
   document.querySelectorAll("[data-t]").forEach(e => e.textContent = t(e.dataset.t));
@@ -351,12 +387,14 @@ function render() {
     if (+S.fov && +S.fov !== 60) sum.push("FOV " + Math.round(S.fov));
     if (S.ultrawide) sum.push("21:9");
     if (S.arg) sum.push("ARG 🧉");
+    if (S.ctl && S.ctl.mnk) sum.push(S.en ? "Keyboard" : "Teclado");
+    if (S.ctl && S.ctl.vsync) sum.push("VSync");
     const on = (S.features || []).filter(f => f.on).length; if (on) sum.push(on + (S.en ? " helpers" : " ayudas"));
   }
   $("sum").innerHTML = sum.map(x => `<span>${esc(x)}</span>`).join("");
   $("psub").textContent = t("s_" + page);
   if (!S.root) return;
-  $("pages").innerHTML = `<div class="page on">${({buttons, gfx, session, lang, shop})[page]()}</div>`;
+  $("pages").innerHTML = `<div class="page on">${({buttons, gfx, ctl, session, lang, shop})[page]()}</div>`;
 }
 function go(p) { page = p; sfx.tick(); render(); $("pages").scrollTop = 0; }
 
@@ -372,11 +410,12 @@ function buttons() {
     ${card("xbox", "xb", xb, "Xbox", t("xbd"))}</div>`;
 }
 function gfx() {
-  const bars = {max: 5, balanced: 3, perf: 1};
+  const c = S.ctl, mons = c.monitors || [];
+  const bars = {max: 5, balanced: 3, perf: 2, ultra: 1};
   const pc = S.presets.map(p => `<div class="card pick ${S.preset === p.key ? "sel" : ""}" data-tag="${t("installed")}" onclick="act('preset','${p.key}')">
      <h3 class="h" style="margin-top:0">${esc(p.name.split(" (")[0])}</h3><div class="sub">${esc((p.name.match(/\((.*)\)/) || ["", ""])[1])}</div>
      <div class="meter">${[1,2,3,4,5].map(i => `<i class="${i <= bars[p.key] ? "f" : ""}"></i>`).join("")}</div></div>`).join("");
-  return `<div class="sec"><h2 class="h">${t("presets")}</h2><div class="grid g3">${pc}</div>
+  return `<div class="sec"><h2 class="h">${t("presets")}</h2><div class="grid g4">${pc}</div>
       ${S.tomlBackup ? `<p style="margin-top:12px"><button class="btn" onclick="act('preset','restore')">↩ ${t("restore")}</button></p>` : ""}</div>
     <div class="sec grid g2">
       <div class="ramp"><div class="h" style="font-size:20px">${t("fov")}</div>
@@ -384,8 +423,66 @@ function gfx() {
         <input type="range" min="40" max="120" step="1" value="${S.fov}" oninput="$('fovv').textContent=this.value" onchange="act('fov',this.value)">
         <div class="sub" style="color:var(--dim);font-size:12.5px">${t("fovd")}</div></div>
       <div>${row("🖥️", t("uw"), t("uwd"), sw(S.ultrawide, `act('ultrawide','${S.ultrawide ? "off" : "on"}')`))}</div>
-    </div>`;
+    </div>
+    <div class="sec"><h2 class="h">${t("screen")}</h2>
+      ${row("🌀", t("vsync"), t("vsyncd"), sw(c.vsync, `act('vsync','${c.vsync ? "off" : "on"}')`))}
+      ${row("⛶", t("fs"), t("fsd"), sw(c.fullscreen, `act('fullscreen','${c.fullscreen ? "off" : "on"}')`))}</div>
+    ${mons.length ? `<div class="sec"><h2 class="h">${t("whereT")}</h2><p>${t("whered")}</p><div class="scr">
+      ${[{n: 0}].concat(mons).map(m => `<div class="card pick ${c.monitor === m.n || (m.n === 0 && !mons.some(x => x.n === c.monitor)) ? "sel" : ""}" data-tag="✓" onclick="act('monitor','${m.n}')">
+        <div class="mon">${m.n || "A"}</div><b>${m.n ? (m.primary ? t("main") : t("scr") + " " + m.n) : t("auto")}</b>
+        <div class="sub">${m.n ? m.w + "×" + m.h : t("main")}</div></div>`).join("")}</div></div>` : ""}`;
 }
+// ------------------------------------------------------------------ controls
+const KNAME = {LMB:["Click izq.","Left click"],RMB:["Click der.","Right click"],MMB:["Rueda","Wheel"],Return:["Enter","Enter"],
+  Space:["Espacio","Space"],Up:["↑","↑"],Down:["↓","↓"],Left:["←","←"],Right:["→","→"],Control:["Ctrl","Ctrl"],"":["—","—"]};
+const kname = k => (KNAME[k] || [k, k])[S.en ? 1 : 0];
+const CODE = {Enter:"Return",ArrowUp:"Up",ArrowDown:"Down",ArrowLeft:"Left",ArrowRight:"Right",ShiftLeft:"Shift",ShiftRight:"Shift",
+  ControlLeft:"Control",ControlRight:"Control",AltLeft:"Alt",AltRight:"Alt",NumpadAdd:"NumpadPlus",NumpadSubtract:"NumpadMinus",
+  NumpadMultiply:"NumpadStar",NumpadDivide:"NumpadSlash",Backquote:"Backtick",Equal:"Plus",BracketLeft:"LBracket",BracketRight:"RBracket"};
+const SAME = new Set("Space Tab Backspace Delete Insert Home End PageUp PageDown Minus Comma Period Semicolon Slash Backslash Quote PrintScreen Pause CapsLock NumLock ScrollLock NumpadEnter".split(" "));
+function keyFromCode(c) {
+  if (CODE[c]) return CODE[c];
+  if (SAME.has(c)) return c;
+  let m = c.match(/^Key([A-Z])$/) || c.match(/^Digit([0-9])$/); if (m) return m[1];
+  if (/^(F([1-9]|1[0-9]|2[0-4])|Numpad[0-9])$/.test(c)) return c;
+  return "";
+}
+const padName = b => S.icons && S.icons !== "xbox" ? b.ps : b.xb;
+function ctl() {
+  const c = S.ctl, counts = {};
+  c.binds.forEach(b => counts[b.val] = (counts[b.val] || 0) + 1);
+  return `<div class="sec">
+      ${row("⌨️", t("mnk"), t("mnkd"), sw(c.mnk, `act('mnk','${c.mnk ? "off" : "on"}')`))}
+      ${row("🎯", t("capture"), t("captured"), sw(c.capture, `act('capture','${c.capture ? "off" : "on"}')`))}</div>
+    <div class="sec"><div class="ramp"><div class="h" style="font-size:20px">${t("sens")}</div>
+      <div class="val h"><span id="sensv">${(+c.sens).toFixed(2)}</span></div>
+      <input type="range" min="0.1" max="4" step="0.05" value="${c.sens}" oninput="$('sensv').textContent=(+this.value).toFixed(2)" onchange="act('sens',this.value)">
+      <div class="sub" style="color:var(--dim);font-size:12.5px">${t("sensd")}</div></div></div>
+    <div class="sec"><h2 class="h">${t("keysT")}</h2><p>${c.mnk ? t("keysd") : t("mnkOff")}</p><div class="keys">
+      ${c.binds.map(b => `<div class="key ${counts[b.val] > 1 && b.val ? "dup" : ""}" id="k_${b.key}" onclick="listenKey('${b.key}')">
+        <span class="pad">${esc(padName(b))}</span><span class="kv">${esc(kname(b.val))}${b.val !== b.def ? `<small>${esc(kname(b.def))}</small>` : ""}</span></div>`).join("")}</div>
+      <p style="margin-top:12px"><button class="btn" onclick="act('bindsreset')">↩ ${t("reset")}</button></p></div>`;
+}
+let listening = null;
+function listenKey(key) {
+  stopListen();
+  const el = $("k_" + key); if (!el) return;
+  sfx.tick(); el.classList.add("listen"); el.querySelector(".kv").textContent = t("press");
+  const done = async name => {
+    stopListen();
+    if (name === null) { render(); return; }
+    const b = S.ctl.binds.find(x => x.key === key), other = S.ctl.binds.find(x => x.key !== key && x.val === name);
+    await act("bind", key + "=" + name);
+    if (other && b.val) { await call("bind", other.key + "=" + b.val); await refresh(); toast(padName(other), t("swapped").replace("{b}", padName(b))); }
+  };
+  const kd = e => { e.preventDefault(); e.stopPropagation(); if (e.code === "Escape") return done(null); const n = keyFromCode(e.code); if (n) done(n); };
+  const md = e => { e.preventDefault(); e.stopPropagation(); done(["LMB", "MMB", "RMB"][e.button] || null); };
+  const cm = e => e.preventDefault();
+  setTimeout(() => { addEventListener("keydown", kd, true); addEventListener("mousedown", md, true); addEventListener("contextmenu", cm, true); }, 0);
+  listening = () => { removeEventListener("keydown", kd, true); removeEventListener("mousedown", md, true);
+    setTimeout(() => removeEventListener("contextmenu", cm, true), 300); el.classList.remove("listen"); };
+}
+function stopListen() { if (listening) { const f = listening; listening = null; f(); } }
 const FICON = {altf4:"⌨️",restart:"🔁",priority:"⚡",awake:"☀️",cursor:"🖱️",winkey:"🪟",window:"🗔",dnd:"🔕"};
 function session() {
   return `<div class="sec"><h2 class="h">${t("helper")}</h2>
@@ -406,6 +503,7 @@ function shop() {
       ${row("🩹", t("repair"), t("repaird"), `<button class="btn hot" onclick="act('repair','', '${t("repair")}')">${t("repair")}</button>`)}
       ${row("🩺", t("diag"), t("diagd"), `<button class="btn" onclick="act('diagnose','', '${t("diag")}')">${t("diag")}</button>`)}
       ${row("⬇️", t("update") + " · v" + S.version, t("updated"), `<button class="btn" onclick="checkUpdate(true)">${t("check")}</button>`)}
+      ${S.recomp ? row("🛹", t("recompVer") + " · v" + S.recomp, "", `<button class="btn" onclick="checkRecomp(true)">${t("check")}</button>`) : ""}
       ${row("📁", t("folders"), S.root, `<div style="display:flex;gap:8px">
          <button class="btn" onclick="act('folder','game','${t("fGame")}')">${t("fGame")}</button>
          <button class="btn" onclick="act('folder','saves','${t("fSaves")}')">${t("fSaves")}</button>
@@ -436,6 +534,15 @@ async function checkUpdate(manual) {
 function doUpdate() {
   modal(t("newver"), t("newverd").replace("{v}", newVer), [[t("cancel"), "", null], [t("updNow"), "hot", () => act("update")]]);
 }
+
+async function checkRecomp(manual) {
+  const r = await call("recompcheck"), [have, tag] = (r.msg || "").split("|");
+  if (!tag) { if (manual) toast("skate3recomp", t("noupd")); return; }
+  modal(t("recompT").replace("{v}", "v" + tag), t("recompd").replace("{h}", "v" + have),
+    [[t("recompSkip"), "", () => call("recompskip", tag)], [t("later"), "", null], [t("recompGo"), "hot", () => call("recompopen")]]);
+}
+// F5 / Ctrl+R would reload this window and lose the radio
+addEventListener("keydown", e => { if (e.key === "F5" || (e.ctrlKey && (e.key === "r" || e.key === "R"))) e.preventDefault(); });
 
 // rotating loading-screen tips
 let tipN = 0;
@@ -567,7 +674,8 @@ document.addEventListener("pointerdown", () => { if (radio.wantsAutoplay && !rad
   render();
   $("tip").innerHTML = t("tips")[0];
   setTimeout(() => toast("Skate 3 Recomp Mods", radio.wantsAutoplay ? t("radioHint") : ""), 600);
-  checkUpdate(false);
+  await checkUpdate(false);
+  if (S.root && !newVer) checkRecomp(false);
 })();
 </script>
 </body>

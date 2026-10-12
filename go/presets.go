@@ -36,6 +36,8 @@ var presets = []preset{
 		{"skate3_draw_distance_scale", "4.0"},
 		{"skate3_lod_distance_scale", "4.0"},
 		{"anisotropic_override", "16"},
+		{"skate3_native_render_scene_shadow_static_size", "4096"},
+		{"skate3_native_render_scene_shafts_res", "2"},
 	}},
 	{"balanced", "Equilibrado (valores por defecto del recomp)|Balanced (recomp defaults)", [][2]string{
 		{"skate3_native_render_scene", "true"},
@@ -50,6 +52,8 @@ var presets = []preset{
 		{"skate3_draw_distance_scale", "2.0"},
 		{"skate3_lod_distance_scale", "2.0"},
 		{"anisotropic_override", "-1"},
+		{"skate3_native_render_scene_shadow_static_size", "4096"},
+		{"skate3_native_render_scene_shafts_res", "4"},
 	}},
 	{"perf", "Rendimiento (PC de pocos recursos)|Performance (low-end PCs)", [][2]string{
 		{"skate3_native_render_scene", "true"},
@@ -64,6 +68,24 @@ var presets = []preset{
 		{"skate3_draw_distance_scale", "1.0"},
 		{"skate3_lod_distance_scale", "1.0"},
 		{"anisotropic_override", "-1"},
+		{"skate3_native_render_scene_shadow_static_size", "2048"},
+		{"skate3_native_render_scene_shafts_res", "8"},
+	}},
+	{"ultra", "Ultra liviano (PC muy justa)|Ultra light (very weak PCs)", [][2]string{
+		{"skate3_native_render_scene", "true"},
+		{"skate3_native_render_scene_msaa", "1"},
+		{"skate3_native_render_scene_shadows", "false"},
+		{"skate3_native_render_scene_shadow_static_casters", "false"},
+		{"skate3_native_render_scene_shadow_pcss", "false"},
+		{"skate3_native_render_scene_ssao", "false"},
+		{"skate3_native_render_scene_bloom", "false"},
+		{"skate3_native_render_scene_shafts", "false"},
+		{"skate3_native_render_scene_haze", "false"},
+		{"skate3_draw_distance_scale", "0.75"},
+		{"skate3_lod_distance_scale", "0.75"},
+		{"anisotropic_override", "-1"},
+		{"skate3_native_render_scene_shadow_static_size", "1024"},
+		{"skate3_native_render_scene_shafts_res", "8"},
 	}},
 }
 
@@ -118,7 +140,7 @@ func setTomlValues(root string, values [][2]string) error {
 func applyPreset(root, key string) error {
 	p := findPreset(key)
 	if p == nil {
-		return fmt.Errorf(T("preset desconocido %q (usá max, balanced o perf)", "unknown preset %q (use max, balanced or perf)"), key)
+		return fmt.Errorf(T("preset desconocido %q (usá max, balanced, perf o ultra)", "unknown preset %q (use max, balanced, perf or ultra)"), key)
 	}
 	if err := setTomlValues(root, p.values); err != nil {
 		return err

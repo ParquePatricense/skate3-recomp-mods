@@ -53,6 +53,8 @@ func apiState(root string) map[string]any {
 	st["saves"] = savesDir(root)
 	st["tomlBackup"] = exists(filepath.Join(root, tomlBackup))
 	st["radio"] = c["radio"]
+	st["ctl"] = controlsState(root)
+	st["recomp"] = c["recomp_version"]
 	return st
 }
 
@@ -177,6 +179,30 @@ func apiDo(root *string, cmd, arg string) (string, error) {
 		c := loadConfig(r)
 		c["radio"] = arg
 		return "", c.save(r)
+	case "vsync":
+		return "VSync " + onOff(onArg(arg)), setBool(r, "vsync", onArg(arg))
+	case "fullscreen":
+		return T("Pantalla completa ", "Fullscreen ") + onOff(onArg(arg)), setBool(r, "fullscreen", onArg(arg))
+	case "monitor":
+		return setMonitor(r, arg)
+	case "mnk":
+		return T("Teclado y mouse ", "Keyboard and mouse ") + onOff(onArg(arg)), setBool(r, "mnk_mode", onArg(arg))
+	case "capture":
+		return T("Mouse atrapado en el juego ", "Mouse captured by the game ") + onOff(onArg(arg)), setBool(r, "mnk_capture_mouse", onArg(arg))
+	case "sens":
+		return setSensitivity(r, arg)
+	case "bind":
+		return setBind(r, arg)
+	case "bindsreset":
+		return T("Teclas de fábrica", "Default keys"), resetBinds(r)
+	case "recompcheck":
+		return recompNews(r), nil
+	case "recompskip":
+		c := loadConfig(r)
+		c["recomp_skip"] = arg
+		return "", c.save(r)
+	case "recompopen":
+		return "", openPath(recompReleasesURL())
 	case "checkupdate":
 		return newerVersion(), nil
 	case "play":
