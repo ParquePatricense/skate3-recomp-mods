@@ -73,3 +73,13 @@ func freeSpace(path string) (uint64, bool) {
 }
 
 func warmGameFiles(string) {}
+
+func setDefender(string, bool) (string, error) { return "", errors.New("only on Windows") }
+func preloadOn() bool                          { return false }
+func setPreload(string, bool) (string, error)  { return "", errors.New("only on Windows") }
+func preload(string)                           {}
+func diskState(string) map[string]any          { return map[string]any{"known": false} }
+func startMove(string, string) (string, error) { return "", errors.New("only on Windows") }
+func deleteOldGame(string) (string, error)     { return "", errors.New("only on Windows") }
+func stickDrift() []map[string]any             { return nil }
+func padsConnected() int                       { return 0 }

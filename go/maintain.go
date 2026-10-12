@@ -200,6 +200,7 @@ func uninstallAll(root string) []string {
 		}
 	}
 	add(T("iconos", "icons"), uninstallIcons(root))
+	add("logo", applyNoLogo(root, false))
 	c := loadConfig(root)
 	if c.on("steam") {
 		_, err := setSteam(root, false)

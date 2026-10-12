@@ -374,6 +374,7 @@ func play(root string) error {
 	hc = loadConfig(root)
 	setLang(hc)
 	checkMods(root) // put the mods back if a recomp update replaced the files
+	keepNoLogo(root)
 	if _, err := preflight(root); err != nil {
 		msgBox(err.Error())
 		return nil
@@ -398,9 +399,12 @@ func play(root string) error {
 			return err
 		}
 	}
-	if !hc.anyHelper() && !direct {
-		return nil
+	launched := time.Now()
+	var logoWatch *gameplayWatch // without the logo: did the game get past the boot?
+	if hc.on("nologo") && !running {
+		logoWatch = &gameplayWatch{dir: filepath.Join(root, "logs"), since: launched.Add(-3 * time.Second), marks: logoMarks}
 	}
+	// the helper always stays: it keeps the play time even with no helpers on
 	pFreeConsole.Call()
 
 	gamePID = pid
@@ -435,6 +439,7 @@ func play(root string) error {
 		pSetThreadExecutionState.Call(esContinuous)
 	}
 	var lastWin windowState
+	var bootTook time.Duration
 	tick := 0
 	pSetTimer.Call(0, 0, 100, 0) // fast, so the loading screen goes the moment you can play
 	var m msg
@@ -456,9 +461,22 @@ func play(root string) error {
 					if loadBoost && !hc.feature("priority") {
 						pSetPriorityClass.Call(uintptr(proc), normalPriorityClass)
 					}
+					bootTook = took
+					showArrival(root)
 					recordBoot(root, took)
 					addBootHistory(root, time.Now(), readBootPhases(watch.path, coverStart, took))
 					watch = nil
+				}
+			}
+			if logoWatch != nil && tick%10 == 0 {
+				if logoWatch.reached() {
+					logoWatch = nil
+				} else if direct && time.Since(launched) > 60*time.Second {
+					logoWatch = nil
+					noLogoFailed(root)
+					hideCover()
+					msgBox(T("El juego no pasó del arranque sin el logo de EA, así que lo volví a poner. Cerralo y abrilo de nuevo.",
+						"The game didn't get past the boot without the EA logo, so I put it back. Close it and open it again."))
 				}
 			}
 			if hc.feature("window") && tick%10 == 0 {
@@ -477,6 +495,8 @@ func play(root string) error {
 				if hc.feature("window") {
 					saveWindowState(root, lastWin)
 				}
+				addPlayTime(root, launched, time.Now(), bootTook)
+				launched, bootTook = time.Now(), 0
 				if gamePID, err = launchGame(root); err != nil {
 					finish()
 					msgBox(err.Error())
@@ -494,7 +514,11 @@ func play(root string) error {
 				continue
 			}
 			if w, _, _ := pWaitForSingleObject.Call(uintptr(proc), 0); w == 0 {
+				if logoWatch != nil && !logoWatch.reached() && time.Since(launched) < 90*time.Second && (direct || exitCrashed(proc)) {
+					noLogoFailed(root) // closed or crashed during the boot
+				}
 				noteCrash(root, proc)
+				addPlayTime(root, launched, time.Now(), bootTook)
 				if hc.feature("window") {
 					saveWindowState(root, lastWin)
 				}
@@ -515,6 +539,11 @@ func play(root string) error {
 
 // noteCrash remembers an unexpected exit (an NTSTATUS error code such as
 // 0xC0000005) so the modder can offer the problem report.
+func exitCrashed(proc syscall.Handle) bool {
+	var code uint32
+	return windows.GetExitCodeProcess(windows.Handle(proc), &code) == nil && code >= 0xC0000000
+}
+
 func noteCrash(root string, proc syscall.Handle) {
 	var code uint32
 	if windows.GetExitCodeProcess(windows.Handle(proc), &code) != nil || code < 0xC0000000 {
@@ -581,6 +610,8 @@ func systemLang() string {
 		return "zh"
 	case 0x11:
 		return "ja"
+	case 0x16:
+		return "pt"
 	}
 	return "en"
 }

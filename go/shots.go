@@ -111,7 +111,7 @@ func readBigEntry(b *bigArchive, i int) ([]byte, error) {
 }
 
 // decodeRx2 decodes a one-texture RenderWare 4 (Xbox 360) file holding a
-// linear DXT5 image.
+// DXT5 image, linear or in the Xbox 360 tiled layout.
 func decodeRx2(d []byte) (*shot, error) {
 	if len(d) < 0x60 || !bytes.Equal(d[:8], []byte("\x89RW4xb2\x00")) {
 		return nil, errors.New("not rx2")
@@ -121,20 +121,30 @@ func decodeRx2(d []byte) (*shot, error) {
 	if k < 0 || k+20 > len(d) {
 		return nil, errors.New("no texture header")
 	}
-	d1, d2 := binary.BigEndian.Uint32(d[k+12:]), binary.BigEndian.Uint32(d[k+16:])
+	d0, d1, d2 := binary.BigEndian.Uint32(d[k+8:]), binary.BigEndian.Uint32(d[k+12:]), binary.BigEndian.Uint32(d[k+16:])
+	tiled := d0>>31 == 1
 	if d1&0x3f != 0x14 { // DXT4/5
 		return nil, errors.New("not DXT5")
 	}
 	w, h := int(d2&0x1fff)+1, int(d2>>13&0x1fff)+1
 	bw, bh := w/4, h/4
-	if base+bw*bh*16 > len(d) {
+	pitch := (bw + 31) &^ 31 // tiled rows are padded to 32 blocks
+	need := bw * bh * 16
+	if tiled {
+		need = pitch * ((bh + 31) &^ 31) * 16
+	}
+	if base+need > len(d) {
 		return nil, errors.New("short texture")
 	}
 	px := make([]byte, w*h*4)
 	var blk [16]byte
 	for by := 0; by < bh; by++ {
 		for bx := 0; bx < bw; bx++ {
-			src := d[base+(by*bw+bx)*16:]
+			idx := by*bw + bx
+			if tiled {
+				idx = tiledIndex(bx, by, pitch)
+			}
+			src := d[base+idx*16:]
 			for j := 0; j < 16; j += 2 { // 8-in-16 byte swap
 				blk[j], blk[j+1] = src[j+1], src[j]
 			}
@@ -184,4 +194,17 @@ func dxt5Block(b []byte, px []byte, x0, y0, w int) {
 		o := ((y0+p/4)*w + x0 + p%4) * 4
 		px[o], px[o+1], px[o+2], px[o+3] = byte(c[2]), byte(c[1]), byte(c[0]), byte(alpha[abits>>(3*p)&7])
 	}
+}
+
+// tiledIndex is where block (x, y) sits in an Xbox 360 tiled texture of
+// 16-byte blocks, w blocks per row.
+func tiledIndex(x, y, w int) int {
+	const l = 4
+	macro := ((y >> 5) * (w >> 5)) << (l + 7)
+	micro := ((y & 6) << 2) << l
+	base := macro + ((micro &^ 0xF) << 1) + (micro & 0xF) + ((y & 8) << (3 + l)) + ((y & 1) << 4)
+	macro = (x >> 5) << (l + 7)
+	micro = (x & 7) << l
+	off := base + macro + ((micro &^ 0xF) << 1) + (micro & 0xF)
+	return (((off &^ 0x1FF) << 3) + ((off & 0x1C0) << 2) + (off & 0x3F) + ((y & 16) << 7) + ((((y&8)>>2)+(x>>3))&3)<<6) >> l
 }

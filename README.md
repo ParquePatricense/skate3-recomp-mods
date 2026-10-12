@@ -12,12 +12,15 @@ Pack de mods **modular** para [skate3recomp](https://github.com/mchughalex/skate
 | ⌨️ **Teclado y mouse** | Activa el modo teclado+mouse del recomp, sensibilidad y remapeo de cada botón tocando la tecla |
 | 🔭 **FOV y ultrawide** | Campo de visión (40–120) y modo 21:9 |
 | 🛹 **Ayudante en sesión** | Alt+F4, reinicio rápido (Ctrl+Alt+R), prioridad alta, pantalla siempre encendida, cursor oculto, tecla Windows bloqueada, ventana recordada y no molestar |
-| 🔗 **Accesos** | Con un botón: "Skate 3 Mods" (el modeador), "Skate 3 (directo)" y "Skate 3 (normal)" en el escritorio y el menú Inicio, uno por idioma, Skate 3 en Steam (Big Picture, Steam Input) e historial de cargas con cuánto tardó cada parte |
+| ⚡ **Carga** | Saca de verdad el logo de EA Black Box (unos 4,7 s menos por carga), Defender sin revisar el juego, precarga al prender la PC, mover el juego a un SSD con un botón y aviso de carga lenta |
+| 🔗 **Accesos** | Con un botón: "Skate 3 Mods" (el modeador), "Skate 3 (directo)" y "Skate 3 (normal)" en el escritorio y el menú Inicio, uno por idioma, Skate 3 en Steam (Big Picture, Steam Input), tiempo de juego por día y semana, historial de cargas y varias versiones del recomp |
+| 🗺️ **Guía** | Los 41 lugares de Port Carverton con foto, zona y descripción del juego, y la lista de trucos con los botones de tu estilo |
 | 🧉 **Español ARG** | Agrega el idioma "Español ARG" (voseo y vocabulario rioplatense) en lugar del neerlandés; el español original queda igual |
+| 🇧🇷 **Português (Brasil)** | Los textos del juego en portugués para la carga directa (unos 13 600 textos) |
 
 🔧 **El taller:** aviso cuando sale una versión nueva de skate3recomp, reparar archivos, reaplicar los mods solo si actualizás el recomp, diagnóstico, carpetas a mano, actualización en un toque y desinstalar todo.
 
-🌍 En English, Español, Français, Italiano, Deutsch, 中文 y 日本語: elige solo el idioma de Windows y se cambia en **Idioma**.
+🌍 En English, Español, Português (Brasil), Français, Italiano, Deutsch, 中文 y 日本語: elige solo el idioma de Windows y se cambia en **Idioma**.
 
 ![modeador](preview/modeador.png)
 
@@ -65,6 +68,16 @@ Activa `mnk_mode` del recomp: el mouse mueve la cámara (stick derecho) y cada b
 Usa la automatización de arranque del propio recomp (`skate3_demo_path` con `skate3_demo_path_signed_in`, así conserva tu perfil y tu partida): saltea la intro, acepta la pantalla de idioma, el Press Start y los avisos de arranque, y deja de tocar los controles en cuanto empezás a patinar. Mientras tanto, el ayudante tapa el monitor del juego con una pantalla de carga y la saca cuando el registro del juego (`logs/`, que con esta opción se escribe cada segundo) dice que ya estás patinando; si algo sale raro, se va sola a los 2 minutos. Mientras está puesta, el juego queda muteado en el mezclador de volumen de Windows, de fondo hay una foto distinta cada vez (las fotos de los lugares de Port Carverton que trae el propio juego, leídas de `fedynamic.big` en tu PC), un consejo con los botones de tu estilo y una barra que aprende cuánto tarda tu carga. Al terminar suena un ollie (se apaga en En sesión).
 
 Para que tarde lo menos posible: el juego carga con prioridad alta, el modeador deja los archivos del juego en la memoria de Windows mientras está abierto (lectura de fondo con prioridad baja, hasta 1,5 GB y nunca más de un cuarto de la memoria libre), la pantalla de carga se va apenas el registro dice que ya podés jugar, y el viaje a un spot espera 1 s en vez de 2,5 s. En **Accesos → Historial de cargas** ves cuánto tardó cada parte: abrir el juego, logos y menús, tu partida y el mapa, e ir al spot. En "Arrancás en" podés elegir aparecer en la Biblioteca de la PCU (experimental: el recomp maneja el menú del mapa por vos). Esa automatización siempre acepta inglés, así que el idioma que elegís en el modeador (Español, Español ARG, Français, Deutsch, Italiano) se pone en el lugar del inglés dentro de `miscboot.big` mientras la opción está activa; al apagarla vuelve el original.
+
+## ⚡ Carga
+
+- 🎬 **Sin logo de EA Black Box:** la película `EA_Blackbox` se saca de verdad (se renombra el archivo suelto o se anula su entrada en el `.big`, guardando el original), así que el juego no la reproduce. Si el juego no llega a la pantalla de inicio sin ella, el ayudante la vuelve a poner solo y te avisa. Después de actualizar el recomp se vuelve a sacar.
+- 🛡️ **Windows Defender:** agrega la carpeta del juego y el proceso a las exclusiones (pide permiso de administrador una vez), para que no revise cada archivo al cargar.
+- 🌅 **Precarga al prender la PC:** 45 s después de iniciar Windows lee los archivos del juego en segundo plano, sin ventanas.
+- 💽 **SSD:** si el juego está en un disco rígido y tenés un SSD, lo copia a `X:\Skate3Recomp`, verifica el tamaño y reacomoda accesos, Steam y precarga; la carpeta vieja se borra solo si lo pedís.
+- 🐢 **Carga lenta:** si una carga tarda bastante más que tu promedio, te dice qué parte se hizo lenta.
+
+La carga directa ronda los 12 s sin el logo: unos 7 s son el propio juego armando el mundo y ~2,4 s la pantalla de Press Start, que se manejan dentro del recomp.
 
 ## 🧉 Español ARG
 
@@ -140,4 +153,4 @@ Fuente: Inter (SIL Open Font License, ver `tools/fonts/Inter-LICENSE.txt`).
 
 ### 🇬🇧 English
 
-Modular mod pack for skate3recomp with a Skate 3 styled modder window (and its own generated-beats radio): PlayStation button icons (PS3/PS4/PS5), graphics presets (including an ultra light one), FOV/ultrawide, VSync/fullscreen/which monitor the game opens on, keyboard and mouse play with click-to-remap keys, an in-game helper (Alt+F4, Ctrl+Alt+R quick restart, high priority, keep awake, hidden cursor, Windows key block, window memory, do not disturb), desktop shortcuts, a Steam (non-Steam game) entry, a "straight to your save" direct load behind a loading screen, an "Español ARG" (Rioplatense Spanish) language in Dutch's slot, and a shop with a skate3recomp new-version notice, repair, auto re-apply after recomp updates, diagnostics, one-click update and uninstall-all. Unzip anywhere and run `Skate3-Mods.exe` (it finds the skate3recomp folder by itself and copies itself there) to toggle modules, then hit DROP IN (or use the "Skate 3 (directo)" / "Skate 3 (normal)" shortcuts) so the helper runs. Every module is reversible. Not affiliated with EA, Sony or the skate3recomp project.
+Modular mod pack for skate3recomp with a Skate 3 styled modder window (and its own generated-beats radio): PlayStation button icons (PS3/PS4/PS5), graphics presets (including an ultra light one), FOV/ultrawide, VSync/fullscreen/which monitor the game opens on, keyboard and mouse play with click-to-remap keys, an in-game helper (Alt+F4, Ctrl+Alt+R quick restart, high priority, keep awake, hidden cursor, Windows key block, window memory, do not disturb), desktop shortcuts, a Steam (non-Steam game) entry, a "straight to your save" direct load behind a loading screen, an "Español ARG" (Rioplatense Spanish) language in Dutch's slot, Brazilian Portuguese game texts, a Loading tab (EA Black Box logo removed for real, Defender exclusion, preload at sign-in, move to SSD, slow-load notice), a Port Carverton guide with every spot and a trick list, play time stats, and a shop with a skate3recomp new-version notice, repair, auto re-apply after recomp updates, diagnostics, one-click update and uninstall-all. Unzip anywhere and run `Skate3-Mods.exe` (it finds the skate3recomp folder by itself and copies itself there) to toggle modules, then hit DROP IN (or use the "Skate 3 (directo)" / "Skate 3 (normal)" shortcuts) so the helper runs. Every module is reversible. Not affiliated with EA, Sony or the skate3recomp project.

@@ -15,7 +15,7 @@ func TestTranslations(t *testing.T) {
 	if !langEN || lang != "ja" {
 		t.Fatal(lang)
 	}
-	if langFromCode("zh_CN.UTF-8") != "zh" || langFromCode("pt_BR") != "en" {
+	if langFromCode("zh_CN.UTF-8") != "zh" || langFromCode("pt_BR") != "pt" || langFromCode("ko_KR") != "en" {
 		t.Fatal("langFromCode")
 	}
 }

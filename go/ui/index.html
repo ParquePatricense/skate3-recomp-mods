@@ -226,19 +226,54 @@ body.full #top{padding-top:34px}
 .langs{display:flex;flex-wrap:wrap;gap:8px}
 :focus-visible{outline:3px solid var(--lime);outline-offset:3px}
 textarea{width:100%;min-height:110px;background:#111;color:var(--ink);border:1px solid #333;border-radius:10px;padding:10px;font:14px "Segoe UI";resize:vertical;user-select:text}
+#me{position:relative;display:none;margin:0 auto;width:92px;height:92px;flex:none;border-radius:50%;overflow:hidden;border:3px solid #050505;box-shadow:0 0 0 2px var(--orange)}
+#me.on{display:block}#me img{width:100%;height:100%;object-fit:cover;object-position:50% 20%}
+.lookbar{display:flex;gap:10px;align-items:center;margin-bottom:12px}
+.lookbar select{background:#191919;color:#eee;border:1px solid #333;border-radius:10px;padding:8px 12px;font:inherit;font-size:14px}
+.decks.game{max-height:300px;overflow:auto;padding:4px}
+.decks .d.img{background-size:cover!important;background-position:center!important}
+.avs{display:flex;gap:8px;flex-wrap:wrap;max-height:370px;overflow:auto;padding:4px}
+.avs .a{width:64px;height:64px;border-radius:50%;overflow:hidden;border:2px solid #262626;cursor:pointer;background:#111}
+.avs .a img{width:100%;height:100%;object-fit:cover;object-position:50% 20%}
+.avs .a.sel{outline:3px solid var(--orange);outline-offset:2px}
 .decks{display:flex;gap:10px;flex-wrap:wrap}.decks .d{width:46px;height:110px;border-radius:23px;border:3px solid #050505;cursor:pointer}
 .decks .d.sel{outline:3px solid var(--orange);outline-offset:3px}
 #tip{padding:0 30px;color:var(--mute);font-size:12.5px;height:18px}
 #tip b{color:var(--orange2)}
+#bgshot{position:fixed;inset:0;z-index:0;background:center/cover no-repeat;opacity:0;filter:grayscale(.35) blur(1.5px) brightness(.55);transition:opacity 1.2s;pointer-events:none}
+#bgshot.on{opacity:.22}
+.row .tx .sub{color:var(--dim);font-size:12.5px;line-height:1.35}
+.card.warn{border-color:#7a5a10;background:#211b0e;margin-bottom:16px}.card.warn b{color:var(--orange2)}
+.pweek{display:grid;grid-template-columns:repeat(7,1fr);gap:8px;height:110px;align-items:end;margin-top:6px}
+.pweek div{display:flex;flex-direction:column;align-items:center;height:100%;justify-content:flex-end;gap:4px;font-size:11px;color:var(--mute)}
+.pweek i{display:block;width:70%;min-height:3px;border-radius:4px 4px 0 0;background:linear-gradient(var(--lime),#7fa82a)}
+.rootl{display:grid;gap:6px}
+.rr{display:flex;align-items:center;gap:8px;padding:7px 10px;background:#151515;border:1px solid #262626;border-radius:10px;font-size:13px}
+.rr span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--dim)}.rr small{color:var(--mute)}
+.rr.on{border-color:var(--orange)}.rr.on span{color:var(--ink)}.rr b{color:var(--lime);font-size:12px}
+.rr .btn{padding:4px 10px;font-size:12px}
+.spots{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}
+.spot{background:#1b1b1b;border:2px solid #2a2a2a;border-radius:14px;overflow:hidden}
+.spot .ph{position:relative;aspect-ratio:2/1;background:#111 center/cover}
+.spot .ph span{position:absolute;left:8px;bottom:8px;padding:2px 8px;background:var(--orange);color:#111;font:800 10px "Segoe UI";letter-spacing:1px;text-transform:uppercase;transform:rotate(-2deg)}
+.spot b{display:block;padding:9px 12px 0;font-family:Impact,"Arial Black",sans-serif;font-style:italic;text-transform:uppercase;font-size:18px;font-weight:400}
+.spot p{margin:3px 12px 12px;color:var(--dim);font-size:12px;line-height:1.35}
+.tricks{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;align-items:start}
+.hint{padding:7px 0;border-top:1px solid #262626;font-size:13px;color:#ddd;line-height:1.7}
+.pg{display:inline-grid;place-items:center;min-width:24px;height:22px;padding:0 6px;margin:0 2px;border-radius:11px;background:#2a2a2a;font:800 12px "Segoe UI";color:#eee;vertical-align:1px}
+.pg.xb.kA{background:#5cb85c;color:#111}.pg.xb.kB{background:#d9534f;color:#111}.pg.xb.kX{background:#3f8fd8;color:#111}.pg.xb.kY{background:#e8c22d;color:#111}
+.pg.ps{background:#e9e9e9;color:#222}.pg.st{background:#333;color:var(--lime)}
 </style>
 </head>
 <body>
+<div id="bgshot"></div>
 <div id="app">
   <aside id="side">
     <div id="deck"></div>
     <div id="logo"><div class="s3 h">Skate 3</div><div class="rc h">recomp</div><div class="mods h">mods</div></div>
     <nav id="nav"></nav>
     <div id="sum"></div>
+    <div id="me"></div>
     <div id="sideFoot"><b id="ver"></b><br><span data-t="foot"></span></div>
   </aside>
   <main id="main">
@@ -280,10 +315,37 @@ textarea{width:100%;min-height:110px;background:#111;color:var(--ink);border:1px
 "use strict";
 // ------------------------------------------------------------------ texts
 const L = {
- es:{chg:["Carga directa más rápida: el juego carga con prioridad alta, el modeador deja los archivos del juego listos en memoria mientras está abierto, la pantalla de carga se va apenas podés jugar y el viaje al spot espera menos.",
-   "La pantalla de carga muestra una foto distinta del juego cada vez (más de 50 lugares de Port Carverton) y termina con un ollie.",
-   "Pestaña nueva, Accesos: accesos directos con un botón, Skate 3 en Steam e historial de cargas con cuánto tardó cada parte.",
-   "El modeador ahora está en English, Español, Français, Italiano, Deutsch, 中文 y 日本語. Elige solo el idioma de Windows y lo podés cambiar en Idioma."],
+ es:{chg:["Logo de EA Black Box afuera de verdad: el juego arranca sin esa película (unos 4,7 s menos en cada carga), en Carga.",
+   "Pestaña nueva, Carga: Defender sin revisar el juego, precarga al prender la PC, aviso si el juego está en un disco rígido (y lo movés a un SSD con un botón) y aviso de carga lenta.",
+   "Pestaña nueva, Guía: los 41 lugares de Port Carverton con foto, zona y descripción del juego, y los trucos con los botones de tu estilo.",
+   "Skate 3 en Português (Brasil): el juego entero traducido, y el modeador también.",
+   "Tiempo de juego por día y semana, resumen al volver, cartel con el lugar al llegar y aviso de drift del joystick.",
+   "Fondo del modeador con fotos del juego, varias versiones del recomp a mano y corrección de traducciones desde el modeador."],
+  t_speed:"Carga",s_speed:"Todo lo que saca segundos de la carga, y cuánto tarda cada una.",
+  t_guide:"Guía",s_guide:"Port Carverton lugar por lugar y los trucos con tus botones, del propio juego.",
+  noLogoT:"Sin logo de EA Black Box",noLogoD:"Saca la película del logo que pasa después de la pantalla de idiomas (4,7 s fijos en cada carga). Si el juego no arranca sin ella, vuelve sola.",
+  noLogoMiss:"No encontré la película del logo (EA_Blackbox) en la carpeta del juego.",noLogoFail:"El juego no arrancó sin el logo, así que volvió. Podés probar de nuevo.",
+  defT:"Que Windows Defender no revise el juego",defD:"Defender revisa cada archivo que el juego abre al cargar. Esto le pide a Windows (con su permiso de administrador) que deje afuera la carpeta del juego.",
+  preT:"Precarga al prender la PC",preD:"Al iniciar Windows, sin abrir ninguna ventana, el modeador deja los archivos del juego en memoria para que la primera carga del día sea rápida.",
+  diskT:"Disco del juego",diskSSD:"El juego está en un SSD ({d}). Perfecto.",diskHDD:"El juego está en un disco rígido ({d}): es lo que más estira la carga. Movelo a un SSD:",diskNone:"No hay otro SSD con lugar en esta PC.",
+  diskUnknown:"Windows no dice qué tipo de disco es {d}.",moveTo:"Mover a {d} ({f} libres)",moving:"Moviendo el juego a {d}: {p}%",moved:"Listo: el juego quedó en {d}. Los accesos y Steam ya apuntan ahí.",
+  delOld:"Borrar la carpeta vieja",delOldQ:"Se borra {d} con todo lo que tiene. El juego nuevo no se toca.",moveQ:"Se copia el juego entero a {d}. La carpeta vieja queda hasta que la borres.",
+  slowT:"Esta carga tardó más de lo normal",slowD:"{t} contra {a} de promedio. Lo que más creció: {p} (+{x}). Si actualizaste el recomp o Windows, suele pasar una vez.",
+  playT:"Tiempo de juego",playToday:"Hoy",playWeek:"Esta semana",playTotal:"En total",playNone:"Todavía no hay sesiones: aparecen cuando jugás desde el modeador o sus accesos.",
+  days:["Dom","Lun","Mar","Mié","Jue","Vie","Sáb"],
+  sumT:"¡De vuelta!",sumD:"Jugaste {p}.",sumL:"La carga tardó {s}.",
+  rootsT:"Versiones del recomp",rootsD:"Cada carpeta del juego tiene sus propios mods y ajustes. Elegí con cuál jugar (por ejemplo la estable y una de prueba).",rootsAdd:"Agregar otra carpeta",rootsUse:"Usar",rootsOn:"En uso",rootsForget:"Olvidar",
+  arrT:"Cartel de llegada",arrD:"Cuando termina la carga, el nombre del lugar aparece unos segundos en una esquina.",
+  bgT:"Fondo con fotos del juego",bgD:"Una foto distinta de Port Carverton detrás del modeador cada vez que lo abrís.",
+  driftT:"Drift del joystick",driftD:"Soltá el joystick y tocá Revisar: si un stick se mueve solo, te avisa antes de que te arruine los trucos.",driftGo:"Revisar",
+  driftOk:"Los sticks están quietos. Todo bien.",driftNoPad:"No hay joystick conectado.",driftBad:"Joystick {n}: el stick {s} se mueve solo ({p}%). Probá calibrarlo o limpiarlo.",driftL:"izquierdo",driftR:"derecho",
+  gMap:"Mapa",gTricks:"Trucos",zAll:"Todo",z_dt:"Centro",z_ind:"Industrial",z_uni:"Universidad",z_park:"Parques",
+  tg_basic:"Lo básico",tg_flip:"Ollie, flips y giros",tg_grab:"Grabs",tg_grind:"Grinds",tg_walk:"A pie",tg_bail:"Sala del dolor",tg_more:"Más",
+  tricksD:"Los consejos del propio juego, con los botones del estilo que tenés puesto.",
+  ptT:"Skate 3 en Português (Brasil)",ptD:"El juego entero en portugués de Brasil. Entra en el lugar de English en la pantalla de idiomas y en la carga directa.",ptOn:"Está puesto",ptGo:"Poner en portugués",
+  cjkT:"Chino y japonés en el juego",cjkD:"No se puede: la letra del juego no tiene caracteres chinos ni japoneses y sus textos solo admiten letras latinas. El modeador sí está en 中文 y 日本語.",
+  fixT:"Corregir una traducción",fixD:"Clic derecho sobre cualquier texto del modeador, o escribilo acá: me llega tu corrección.",fixWhat:"Texto que suena raro",fixBetter:"Cómo debería decir",fixSend:"Enviar corrección",
+  ghT:"Avisar en GitHub",ghD:"Abre GitHub con el reporte ya escrito.",
   kLMB:"Click izq.",kRMB:"Click der.",kMMB:"Rueda",kSpace:"Espacio",foot:"Mod pack modular · todo se puede deshacer",drop:"Drop in",dropsub:"JUGAR CON MODS",folder:"JUEGO",original:"música original",
   t_buttons:"Botones",t_gfx:"Gráficos",t_session:"En sesión",t_lang:"Idioma",t_shop:"El taller",
   s_buttons:"Elegí cómo se ven los botones en el juego. Se cambian al toque y vuelven a Xbox cuando quieras.",
@@ -299,6 +361,15 @@ const L = {
   zoomT:"Tamaño del modeador",zoomD:"Se adapta solo a tu pantalla. Movelo si lo querés más grande o más chico (también con Ctrl + rueda del mouse).",
   sofaT:"Modo sofá",sofaD:"Todo más grande y el foco bien marcado, para usarlo desde la tele con el joystick.",
   shuffle:"Aleatorio",
+  t_look:"Apariencia",s_look:"La tabla del costado, tu skater, el tamaño y los sonidos del modeador.",
+  deckD:"Elegí un grupo y tocá una tabla. \"Del juego\" son las 160 tablas de la tienda de Skate 3, leídas de tu juego.",
+  dg_classic:"Clásicas",dg_countries:"Países",dg_letters:"Siglas",dg_styles:"Estilos",dg_materials:"Materiales",dg_game:"Del juego",
+  meT:"Tu skater",meD:"Aparece en el costado del modeador. Los cinco skaters iniciales del creador y los pros del juego.",meNone:"Ninguno",
+  dk_clasica:"Clásica",dk_fuego:"Fuego",dk_damero:"Damero",dk_camuflado:"Camuflado",dk_madera:"Madera",dk_celeste:"Argentina",
+  dk_brasil:"Brasil",dk_uruguay:"Uruguay",dk_mexico:"México",dk_espana:"España",dk_italia:"Italia",dk_francia:"Francia",dk_alemania:"Alemania",dk_japon:"Japón",dk_eeuu:"Estados Unidos",
+  dk_arg:"ARG",dk_s3:"Skate 3",dk_sk8:"SK8",dk_pcv:"Carverton",dk_bail:"Bail!",dk_hom:"Hall of Meat",
+  dk_neon:"Neón",dk_vapor:"Vaporwave",dk_sunset80:"Atardecer 80s",dk_graffiti:"Graffiti",dk_cebra:"Cebra",dk_pixel:"Pixel",dk_puntos:"Lunares",
+  dk_maple:"Maple",dk_carbono:"Fibra de carbono",dk_aluminio:"Aluminio",dk_marmol:"Mármol",dk_corcho:"Corcho",
   t_access:"Accesos",s_access:"Accesos directos, Steam y cuánto tarda cada carga directa.",
   lnkT:"Accesos directos",lnkD:"Skate 3 Mods abre este modeador; Skate 3 (directo) y Skate 3 (normal) abren el juego con los mods. Van al escritorio y al menú Inicio.",
   lnkMake:"Crear accesos directos",lnkDel:"Sacar accesos directos",lnkOn:"Están puestos",
@@ -343,7 +414,7 @@ const L = {
   recompGo:"Ver descarga",recompSkip:"No avisar por esta",later:"Después",recompVer:"skate3recomp instalado",
   repair:"Reparar",repaird:"Revisa los archivos del juego y arregla lo roto con las copias de seguridad.",
   diag:"Diagnóstico",diagd:"Arma un reporte en el escritorio para pedir ayuda.",
-  folders:"Carpetas",fGame:"Juego",fSaves:"Partidas",fData:"Datos",chg:"Cambiar carpeta del juego",
+  folders:"Carpetas",fGame:"Juego",fSaves:"Partidas",fData:"Datos",chgDir:"Cambiar carpeta del juego",
   update:"Actualización",updated:"Buscar versión nueva y actualizar sola.",check:"Buscar",
   hom:"Zona Hall of Meat",uninst:"Desinstalar todo",uninstd:"Deja el juego exactamente como estaba antes de los mods.",
   sure:"¿Seguro?",uninstQ:"Se sacan todos los mods, se restauran los archivos y la configuración, y se borran los accesos directos y la entrada de Steam.",
@@ -357,10 +428,37 @@ const L = {
    "<b>Tip:</b> todo lo que actives se puede deshacer desde acá.","<b>Tip:</b> si actualizás el recomp, tus mods se vuelven a poner solos al jugar.",
    "<b>Tip:</b> Skate 3 (directo) en el escritorio te deja en tu partida sin tocar nada.","<b>Tip:</b> Español ARG aparece en la pantalla de idiomas del juego, en lugar de Nederlands.",
    "<b>Tip:</b> Alt+F4 cierra el juego como la X de la ventana.","<b>Tip:</b> en Controles podés jugar con teclado y mouse y cambiar cada tecla.","<b>Tip:</b> con dos monitores, elegí en Gráficos en cuál abre el juego.","<b>Tip:</b> F11 cambia el modeador entre pantalla completa y ventana.","<b>Tip:</b> tocá el género en la radio: boom bap, punk, rock, electro o cumbia.","<b>Tip:</b> el modeador se maneja con el joystick: LB/RB cambian de pestaña.","<b>Tip:</b> marcá con ☆ los temas de la radio que te gusten."]},
- en:{chg:["Faster direct load: the game loads at high priority, the modder gets the game files ready in memory while it's open, the loading screen goes the moment you can play and the trip to the spot waits less.",
-   "The loading screen shows a different photo from the game every time (over 50 places in Port Carverton) and ends with an ollie.",
-   "New tab, Shortcuts: shortcuts with one button, Skate 3 in Steam and a load history with how long each part took.",
-   "The modder now speaks English, Español, Français, Italiano, Deutsch, 中文 and 日本語. It picks Windows' language by itself and you can change it in Language."],
+ en:{chg:["The EA Black Box logo is gone for real: the game starts without that movie (about 4.7 s less every load), in Loading.",
+   "New tab, Loading: Defender leaves the game alone, preload when the PC starts, a warning if the game is on a hard disk (move it to an SSD with one button) and a slow load notice.",
+   "New tab, Guide: Port Carverton's 41 spots with photo, district and the game's description, and the tricks with your button style.",
+   "Skate 3 in Português (Brasil): the whole game translated, and the modder too.",
+   "Play time per day and week, a summary when you come back, an arrival sign with the spot and a stick drift warning.",
+   "The modder's background shows the game's photos, several recomp versions at hand and translation fixes from the modder."],
+  t_speed:"Loading",s_speed:"Everything that takes seconds off the load, and how long each one takes.",
+  t_guide:"Guide",s_guide:"Port Carverton spot by spot and the tricks with your buttons, from the game itself.",
+  noLogoT:"No EA Black Box logo",noLogoD:"Removes the logo movie that plays after the language screen (a fixed 4.7 s every load). If the game won't start without it, it comes back by itself.",
+  noLogoMiss:"Couldn't find the logo movie (EA_Blackbox) in the game folder.",noLogoFail:"The game didn't start without the logo, so it came back. You can try again.",
+  defT:"Keep Windows Defender off the game",defD:"Defender scans every file the game opens while loading. This asks Windows (with its admin prompt) to leave the game folder out.",
+  preT:"Preload when the PC starts",preD:"When Windows starts, without opening any window, the modder gets the game files into memory so the day's first load is fast.",
+  diskT:"Game disk",diskSSD:"The game is on an SSD ({d}). Perfect.",diskHDD:"The game is on a hard disk ({d}): that's what stretches the load the most. Move it to an SSD:",diskNone:"There's no other SSD with room on this PC.",
+  diskUnknown:"Windows doesn't say what kind of disk {d} is.",moveTo:"Move to {d} ({f} free)",moving:"Moving the game to {d}: {p}%",moved:"Done: the game is now on {d}. Shortcuts and Steam point there.",
+  delOld:"Delete the old folder",delOldQ:"{d} gets deleted with everything in it. The new game isn't touched.",moveQ:"The whole game gets copied to {d}. The old folder stays until you delete it.",
+  slowT:"This load took longer than usual",slowD:"{t} against {a} on average. What grew the most: {p} (+{x}). After a recomp or Windows update it usually happens once.",
+  playT:"Play time",playToday:"Today",playWeek:"This week",playTotal:"In total",playNone:"No sessions yet: they show up when you play from the modder or its shortcuts.",
+  days:["Sun","Mon","Tue","Wed","Thu","Fri","Sat"],
+  sumT:"Back!",sumD:"You played {p}.",sumL:"The load took {s}.",
+  rootsT:"Recomp versions",rootsD:"Each game folder has its own mods and settings. Pick which one to play (say the stable one and a test build).",rootsAdd:"Add another folder",rootsUse:"Use",rootsOn:"In use",rootsForget:"Forget",
+  arrT:"Arrival sign",arrD:"When the load ends, the spot's name shows for a few seconds in a corner.",
+  bgT:"Background with the game's photos",bgD:"A different Port Carverton photo behind the modder every time you open it.",
+  driftT:"Stick drift",driftD:"Let go of the controller and hit Check: if a stick moves on its own, it tells you before it ruins your tricks.",driftGo:"Check",
+  driftOk:"The sticks are still. All good.",driftNoPad:"No controller connected.",driftBad:"Controller {n}: the {s} stick moves on its own ({p}%). Try calibrating or cleaning it.",driftL:"left",driftR:"right",
+  gMap:"Map",gTricks:"Tricks",zAll:"All",z_dt:"Downtown",z_ind:"Industrial",z_uni:"University",z_park:"Parks",
+  tg_basic:"The basics",tg_flip:"Ollie, flips and spins",tg_grab:"Grabs",tg_grind:"Grinds",tg_walk:"On foot",tg_bail:"Hall of Meat",tg_more:"More",
+  tricksD:"The game's own tips, with the buttons of the style you have installed.",
+  ptT:"Skate 3 in Português (Brasil)",ptD:"The whole game in Brazilian Portuguese. It takes English's place on the language screen and in the direct load.",ptOn:"It's on",ptGo:"Switch to Portuguese",
+  cjkT:"Chinese and Japanese in the game",cjkD:"Not possible: the game's font has no Chinese or Japanese characters and its texts only take Latin letters. The modder does speak 中文 and 日本語.",
+  fixT:"Fix a translation",fixD:"Right-click any text in the modder, or type it here: your fix reaches me.",fixWhat:"Text that sounds off",fixBetter:"What it should say",fixSend:"Send fix",
+  ghT:"Report on GitHub",ghD:"Opens GitHub with the report already written.",
   kLMB:"Left click",kRMB:"Right click",kMMB:"Wheel",kSpace:"Space",foot:"Modular mod pack · everything can be undone",drop:"Drop in",dropsub:"PLAY WITH MODS",folder:"GAME",original:"original music",
   t_buttons:"Buttons",t_gfx:"Graphics",t_session:"Session",t_lang:"Language",t_shop:"The shop",
   s_buttons:"Pick how the buttons look in the game. Swaps instantly and goes back to Xbox whenever you want.",
@@ -376,6 +474,15 @@ const L = {
   zoomT:"Modder size",zoomD:"Fits your screen by itself. Move it if you want it bigger or smaller (Ctrl + mouse wheel works too).",
   sofaT:"Couch mode",sofaD:"Everything bigger and a clear focus ring, to use it from the TV with a gamepad.",
   shuffle:"Shuffle",
+  t_look:"Look",s_look:"The side deck, your skater, the modder's size and sounds.",
+  deckD:"Pick a group and tap a deck. \"From the game\" are the 160 decks of Skate 3's board shop, read from your game.",
+  dg_classic:"Classics",dg_countries:"Countries",dg_letters:"Letters",dg_styles:"Styles",dg_materials:"Materials",dg_game:"From the game",
+  meT:"Your skater",meD:"Shows on the modder's side. The skater creator's five starter skaters and the game's pros.",meNone:"None",
+  dk_clasica:"Classic",dk_fuego:"Fire",dk_damero:"Checkerboard",dk_camuflado:"Camo",dk_madera:"Wood",dk_celeste:"Argentina",
+  dk_brasil:"Brazil",dk_uruguay:"Uruguay",dk_mexico:"Mexico",dk_espana:"Spain",dk_italia:"Italy",dk_francia:"France",dk_alemania:"Germany",dk_japon:"Japan",dk_eeuu:"United States",
+  dk_arg:"ARG",dk_s3:"Skate 3",dk_sk8:"SK8",dk_pcv:"Carverton",dk_bail:"Bail!",dk_hom:"Hall of Meat",
+  dk_neon:"Neon",dk_vapor:"Vaporwave",dk_sunset80:"80s sunset",dk_graffiti:"Graffiti",dk_cebra:"Zebra",dk_pixel:"Pixel",dk_puntos:"Polka dots",
+  dk_maple:"Maple",dk_carbono:"Carbon fiber",dk_aluminio:"Aluminum",dk_marmol:"Marble",dk_corcho:"Cork",
   t_access:"Shortcuts",s_access:"Shortcuts, Steam and how long each direct load takes.",
   lnkT:"Shortcuts",lnkD:"Skate 3 Mods opens this modder; Skate 3 (directo) and Skate 3 (normal) start the game with the mods. They go on the desktop and in the Start menu.",
   lnkMake:"Create shortcuts",lnkDel:"Remove shortcuts",lnkOn:"They're in place",
@@ -420,7 +527,7 @@ const L = {
   recompGo:"See download",recompSkip:"Skip this one",later:"Later",recompVer:"Installed skate3recomp",
   repair:"Repair",repaird:"Checks the game files and fixes broken ones from the backups.",
   diag:"Diagnostics",diagd:"Writes a report to your desktop to ask for help.",
-  folders:"Folders",fGame:"Game",fSaves:"Saves",fData:"Data",chg:"Change game folder",
+  folders:"Folders",fGame:"Game",fSaves:"Saves",fData:"Data",chgDir:"Change game folder",
   update:"Update",updated:"Look for a new version and update by itself.",check:"Check",
   hom:"Hall of Meat zone",uninst:"Uninstall everything",uninstd:"Leaves the game exactly as it was before the mods.",
   sure:"Sure?",uninstQ:"Every mod comes off, files and settings are restored, and the shortcuts and the Steam entry are deleted.",
@@ -483,7 +590,7 @@ function modal(title, text, buttons, html) {
 const sw = (on, onclick) => `<button class="sw ${on ? "on" : ""}" onclick="${onclick}"><span class="board"></span></button>`;
 const row = (ic, name, desc, ctl) => `<div class="row"><div class="ic">${ic}</div><div class="tx"><b>${esc(name)}</b><span>${esc(desc)}</span></div>${ctl}</div>`;
 
-const PAGES = [["buttons","🎮"],["gfx","🖼️"],["ctl","⌨️"],["session","🛹"],["access","🔗"],["lang","🧉"],["shop","🔧"]];
+const PAGES = [["buttons","🎮"],["gfx","🖼️"],["ctl","⌨️"],["session","🛹"],["speed","⚡"],["access","🔗"],["guide","🗺️"],["look","🎨"],["lang","🧉"],["shop","🔧"]];
 function render() {
   document.documentElement.lang = S.lang || "en";
   document.querySelectorAll("[data-t]").forEach(e => e.textContent = t(e.dataset.t));
@@ -506,7 +613,7 @@ function render() {
   $("sum").innerHTML = sum.map(x => `<span>${esc(x)}</span>`).join("");
   $("psub").textContent = t("s_" + page);
   if (!S.root) return;
-  $("pages").innerHTML = `<div class="page on">${({buttons, gfx, ctl, session, access, lang, shop})[page]()}</div>`;
+  $("pages").innerHTML = `<div class="page on">${({buttons, gfx, ctl, session, speed, access, guide, look, lang, shop})[page]()}</div>`;
   document.querySelectorAll("#pages .pick,#pages .key").forEach(e => e.tabIndex = 0);
   applyPrefs();
 }
@@ -568,7 +675,8 @@ function ctl() {
   c.binds.forEach(b => counts[b.val] = (counts[b.val] || 0) + 1);
   return `<div class="sec">
       ${row("⌨️", t("mnk"), t("mnkd"), sw(c.mnk, `act('mnk','${c.mnk ? "off" : "on"}')`))}
-      ${row("🎯", t("capture"), t("captured"), sw(c.capture, `act('capture','${c.capture ? "off" : "on"}')`))}</div>
+      ${row("🎯", t("capture"), t("captured"), sw(c.capture, `act('capture','${c.capture ? "off" : "on"}')`))}
+      ${row("🕹️", t("driftT"), driftMsg || t("driftD"), `<button class="btn" onclick="checkDrift()">${t("driftGo")}</button>`)}</div>
     <div class="sec"><div class="ramp"><div class="h" style="font-size:20px">${t("sens")}</div>
       <div class="val h"><span id="sensv">${(+c.sens).toFixed(2)}</span></div>
       <input type="range" min="0.1" max="4" step="0.05" value="${c.sens}" oninput="$('sensv').textContent=(+this.value).toFixed(2)" onchange="act('sens',this.value)">
@@ -577,6 +685,17 @@ function ctl() {
       ${c.binds.map(b => `<div class="key ${counts[b.val] > 1 && b.val ? "dup" : ""}" id="k_${b.key}" onclick="listenKey('${b.key}')">
         <span class="pad">${esc(padName(b))}</span><span class="kv">${esc(kname(b.val))}${b.val !== b.def ? `<small>${esc(kname(b.def))}</small>` : ""}</span></div>`).join("")}</div>
       <p style="margin-top:12px"><button class="btn" onclick="act('bindsreset')">↩ ${t("reset")}</button></p></div>`;
+}
+let driftMsg = "";
+async function checkDrift(quiet) {
+  const r = await call("drift");
+  let d; try { d = JSON.parse(r.msg || "{}"); } catch { return; }
+  if (!d.pads) { driftMsg = quiet ? "" : t("driftNoPad"); }
+  else if (d.drift && d.drift.length) {
+    driftMsg = d.drift.map(x => t("driftBad").replace("{n}", x.pad).replace("{s}", t(x.stick === "left" ? "driftL" : "driftR")).replace("{p}", x.pct)).join(" ");
+    if (quiet) toast("🕹️ " + t("driftT"), driftMsg, true);
+  } else driftMsg = quiet ? "" : t("driftOk");
+  if (page === "ctl") render();
 }
 let listening = null;
 function listenKey(key) {
@@ -608,20 +727,20 @@ function session() {
 </div></div>
        <div><b>${t("spotT")}</b><div class="sub" style="color:var(--dim);font-size:12.5px;margin:2px 0 10px">${t("spotD")}</div>
        <div class="langs">${(S.ctl.spots || []).map(p => `<button class="btn ${(S.ctl.spot || "here") === p.key ? "hot" : ""}" onclick="act('spot','${p.key}')">${esc(p.name)}</button>`).join("")}</div></div></div>` : ""}</div>
-    ${S.ctl.direct ? `<div class="rows" style="margin-top:8px">${row("🛹", t("ollieT"), t("ollieD"), sw(S.prefs?.ollie !== "0", `setPref('ollie','${S.prefs?.ollie === "0" ? "1" : "0"}')`))}</div>` : ""}
+    ${S.ctl.direct ? `<div class="rows" style="margin-top:8px">${row("🛹", t("ollieT"), t("ollieD"), sw(S.prefs?.ollie !== "0", `setPref('ollie','${S.prefs?.ollie === "0" ? "1" : "0"}')`))}
+      ${row("📍", t("arrT"), t("arrD"), sw(S.prefs?.arrival !== "0", `setPref('arrival','${S.prefs?.arrival === "0" ? "1" : "0"}')`))}</div>` : ""}
     <div class="sec"><h2 class="h">${t("afterT")}</h2><div class="opts">${opt("min", t("aMin"), t("aMinD"))}${opt("close", t("aClose"), t("aCloseD"))}${opt("stay", t("aStay"), t("aStayD"))}</div></div>
     <div class="sec"><h2 class="h">${t("helper")}</h2><div class="rows">
      ${S.features.map(f => row(FICON[f.key] || "•", f.name, f.desc, sw(f.on, `act('feature','${f.key}=${f.on ? "off" : "on"}')`))).join("")}</div></div>`;
 }
-// shortcuts, Steam and the load history
+// shortcuts, Steam, play time and the recomp versions
 const HPH = [["open","#7fb2ff"],["menus","#ffd23f"],["save","#c6ff3d"],["spot","#ff7ad9"],["rest","#555"]];
+const dur = s => { const h = Math.floor(s / 3600), m = Math.round(s % 3600 / 60); return h ? `${h} h ${m} min` : `${m} min`; };
+const sec = ms => (ms / 1000).toFixed(1) + " s";
 function access() {
-  const h = (S.bootHist || []).map(x => ({...x, rest: Math.max(0, x.total - x.open - x.menus - x.save - x.spot)}));
-  const sec = ms => (ms / 1000).toFixed(1) + " s";
-  const max = Math.max(1, ...h.map(x => x.total));
-  const bar = x => `<div class="hbar">${HPH.map(([k, c]) => x[k] > 0 ? `<i style="width:${x[k] / max * 100}%;background:${c}" title="${esc(t("h" + k[0].toUpperCase() + k.slice(1)))} · ${sec(x[k])}"></i>` : "").join("")}</div>`;
-  const avg = h.length ? h.reduce((a, x) => a + x.total, 0) / h.length : 0, best = h.length ? Math.min(...h.map(x => x.total)) : 0;
   const bl = S.ctl.bootLangs.find(l => l.key === S.ctl.bootLang);
+  const pl = S.play || {}, days = pl.days || [], dmax = Math.max(1, ...days.map(d => d.secs));
+  const roots = S.roots || [];
   return `<div class="sec grid g2" style="gap:12px">
       <div class="card"><div style="display:flex;align-items:center;gap:14px"><div style="font-size:34px">🖱️</div><div style="flex:1"><h3 class="h" style="margin:0">${t("lnkT")}</h3>
         <div class="sub">${t("lnkD")}</div></div></div>
@@ -631,21 +750,137 @@ function access() {
           ${S.ctl.direct && bl ? `<button class="btn" onclick="act('langshortcut','${bl.key}')">${t("langLnk")} · ${esc(bl.name)}</button>` : ""}</p></div>
       ${S.hasSteam || S.steam ? `<div class="card"><div style="display:flex;align-items:center;gap:14px"><div style="font-size:34px">🚂</div><div style="flex:1"><h3 class="h" style="margin:0">${t("steamT")}</h3>
         <div class="sub">${t("steamD")}</div></div>${sw(S.steam, `act('steam','${S.steam ? "off" : "on"}')`)}</div></div>` : ""}</div>
+    <div class="sec grid g2" style="gap:12px;align-items:start">
+      <div class="card"><h3 class="h" style="margin:0 0 8px">⏱️ ${t("playT")}</h3>
+        ${pl.total ? `<div class="hsum"><span>${t("playToday")} <b>${dur(pl.today)}</b></span><span>${t("playWeek")} <b>${dur(pl.week)}</b></span><span>${t("playTotal")} <b>${dur(pl.total)}</b></span></div>
+        <div class="pweek">${days.map(d => `<div><i style="height:${Math.round(d.secs / dmax * 100)}%" title="${dur(d.secs)}"></i><span>${t("days")[d.wd]}</span></div>`).join("")}</div>`
+        : `<div class="sub">${t("playNone")}</div>`}</div>
+      <div class="card"><h3 class="h" style="margin:0">🧪 ${t("rootsT")}</h3><div class="sub" style="margin:2px 0 10px">${t("rootsD")}</div>
+        <div class="rootl">${roots.map(r => `<div class="rr ${r.on ? "on" : ""}"><span title="${esc(r.path)}">${esc(r.path)}</span><small>${r.version ? "v" + esc(r.version) : ""}</small>
+          ${r.on ? `<b>${t("rootsOn")}</b>` : `<button class="btn" onclick='act("useroot",${esc(JSON.stringify(r.path))})'>${t("rootsUse")}</button><button class="btn" onclick='act("forgetroot",${esc(JSON.stringify(r.path))})'>✕</button>`}</div>`).join("")}</div>
+        <p style="margin:10px 0 0"><button class="btn" onclick="pickFolder()">＋ ${t("rootsAdd")}</button></p></div></div>`;
+}
+// Carga: what takes seconds off the load, and the load history
+function speed() {
+  const h = (S.bootHist || []).map(x => ({...x, rest: Math.max(0, x.total - x.open - x.menus - x.save - x.spot)}));
+  const max = Math.max(1, ...h.map(x => x.total));
+  const bar = x => `<div class="hbar">${HPH.map(([k, c]) => x[k] > 0 ? `<i style="width:${x[k] / max * 100}%;background:${c}" title="${esc(t("h" + k[0].toUpperCase() + k.slice(1)))} · ${sec(x[k])}"></i>` : "").join("")}</div>`;
+  const avg = h.length ? h.reduce((a, x) => a + x.total, 0) / h.length : 0, best = h.length ? Math.min(...h.map(x => x.total)) : 0;
+  let slow = "";
+  if (h.length >= 4) { // the last load against the ones before it
+    const prev = h.slice(1), pa = k => prev.reduce((a, x) => a + x[k], 0) / prev.length;
+    if (h[0].total > pa("total") * 1.25 && h[0].total - pa("total") > 2000) {
+      const grew = HPH.map(([k]) => [k, h[0][k] - pa(k)]).sort((a, b) => b[1] - a[1])[0];
+      slow = `<div class="card warn"><b>🐢 ${t("slowT")}</b><div class="sub">${t("slowD").replace("{t}", sec(h[0].total)).replace("{a}", sec(pa("total")))
+        .replace("{p}", t("h" + grew[0][0].toUpperCase() + grew[0].slice(1))).replace("{x}", sec(grew[1]))}</div></div>`;
+    }
+  }
+  const nl = S.nologo, d = S.disk || {}, mv = d.move;
+  let disk;
+  if (mv && !mv.finished) disk = `<div class="sub">${t("moving").replace("{d}", esc(mv.to)).replace("{p}", Math.floor(mv.done / Math.max(1, mv.total) * 100))}</div><div class="meter"><i class="f" style="flex:${mv.done}"></i><i style="flex:${Math.max(0, mv.total - mv.done)}"></i></div>`;
+  else if (mv && mv.finished && !mv.err) disk = `<div class="sub">${t("moved").replace("{d}", esc(mv.to))}</div>`;
+  else if (!d.known) disk = `<div class="sub">${t("diskUnknown").replace("{d}", esc(d.drive || "?"))}</div>`;
+  else if (d.ssd) disk = `<div class="sub">${t("diskSSD").replace("{d}", esc(d.drive))}</div>`;
+  else disk = `<div class="sub">${t("diskHDD").replace("{d}", esc(d.drive))}</div><p style="display:flex;gap:8px;flex-wrap:wrap;margin:10px 0 0">${(d.targets || []).length
+      ? d.targets.map(x => `<button class="btn hot" onclick="askMove('${x.letter}')">${t("moveTo").replace("{d}", x.letter).replace("{f}", (x.free / 2 ** 30).toFixed(0) + " GB")}</button>`).join("") : `<span class="sub">${t("diskNone")}</span>`}</p>`;
+  if (mv && mv.err) disk += `<div class="sub" style="color:#ff8a8a">${esc(mv.err)}</div>`;
+  if (d.movedFrom) disk += `<p style="margin:10px 0 0"><button class="btn danger" onclick="askDelOld('${esc(d.movedFrom.replace(/\\/g, "\\\\"))}')">🗑 ${t("delOld")}</button></p>`;
+  if (mv && !mv.finished) setTimeout(() => page === "speed" && refresh(), 1000);
+  return `${slow}<div class="sec"><div class="rows">
+      ${row("🎬", t("noLogoT"), nl === "missing" ? t("noLogoMiss") : nl === "failed" ? t("noLogoFail") : t("noLogoD"), nl === "missing" ? "" : sw(nl === "on", `act('nologo','${nl === "on" ? "off" : "on"}')`))}
+      ${row("🛡️", t("defT"), t("defD"), sw(S.defender, `act('defender','${S.defender ? "off" : "on"}')`))}
+      ${row("🌅", t("preT"), t("preD"), sw(S.preload, `act('preload','${S.preload ? "off" : "on"}')`))}
+      <div class="row"><div class="ic">💽</div><div class="tx"><b>${t("diskT")}</b>${disk}</div></div></div></div>
     <div class="sec"><h2 class="h">${t("histT")}</h2><p class="sub" style="color:var(--dim);margin:-4px 0 10px">${t("histD")}</p>
       ${h.length ? `<div class="hsum"><span>${t("hLast")} <b>${sec(h[0].total)}</b></span><span>${t("hAvg")} <b>${sec(avg)}</b></span><span>${t("hBest")} <b>${sec(best)}</b></span>
         <span class="hkey">${HPH.map(([k, c]) => `<i style="background:${c}"></i>${t("h" + k[0].toUpperCase() + k.slice(1))}`).join("")}</span></div>
         <div class="hist">${h.slice(0, 8).map(x => `<div class="hrow"><span class="hw">${esc(x.when.slice(5))}</span>${bar(x)}<b>${sec(x.total)}</b></div>`).join("")}</div>`
       : `<div class="card sub">${t("histNone")}</div>`}</div>`;
 }
+function askMove(l) { modal(t("diskT"), t("moveQ").replace("{d}", l), [[t("cancel"), "", null], [t("moveTo").replace("{d}", l).replace(" ({f} libres)", "").replace(" ({f} free)", ""), "hot", () => act("move", l)]]); }
+function askDelOld(p) { modal(t("delOld"), t("delOldQ").replace("{d}", p), [[t("cancel"), "", null], [t("delOld"), "danger", () => act("deleteold")]]); }
+// Guía: the map's spots and the game's trick tips
+let guideTab = "map", guideZone = "all", guideList = null, trickList = null;
+async function loadGuide() {
+  if (!guideList) { const r = await call("guide"); try { guideList = JSON.parse(r.msg || "[]"); } catch { guideList = []; } }
+  if (!trickList) { const r = await call("tricks"); try { trickList = JSON.parse(r.msg || "[]"); } catch { trickList = []; } }
+  if (page === "guide") render();
+}
+// <B:Stick_Right_Down_hud> -> a pad glyph in the installed style
+function padTok(tok) {
+  const ps = (S.icons || "").startsWith("ps"), n = tok.replace(/^~/, "").replace(/_hud$/, "");
+  const face = {A: ps ? "✕" : "A", B: ps ? "○" : "B", X: ps ? "□" : "X", Y: ps ? "△" : "Y", Start: ps ? "Start" : "Start", Back: ps ? "Select" : "Back",
+    L_Bumper: ps ? "L1" : "LB", R_Bumper: ps ? "R1" : "RB", L_Trigger: ps ? "L2" : "LT", R_Trigger: ps ? "R2" : "RT", L3_Click: ps ? "L3" : "LS"}[n];
+  if (face) return `<span class="pg ${ps ? "ps" : "xb"} k${n[0]}">${face}</span>`;
+  const m = n.match(/^(Stick_Left|Stick_Right|DPad)_?(.*)$/);
+  if (m) {
+    const base = m[1] === "DPad" ? "✚" : m[1] === "Stick_Left" ? (ps ? "L" : "LS") : (ps ? "R" : "RS");
+    const dir = {Up: "↑", Down: "↓", L: "←", R: "→", Left: "←", Right: "→", L_R: "↔", UpDown: "↕", Up_down: "↕", Arrows: "↔"}[m[2]] || "";
+    return `<span class="pg st">${base}${dir}</span>`;
+  }
+  return `<span class="pg">${esc(n)}</span>`;
+}
+const hintHTML = s => esc(s).replace(/&lt;B:([^&]+)&gt;/g, (_, k) => padTok(k)).replace(/\^/g, "<br>");
+function guide() {
+  if (!guideList || !trickList) setTimeout(loadGuide, 0);
+  const tabs = `<div class="lookbar">${[["map", t("gMap")], ["tricks", t("gTricks")]].map(([k, n]) => `<button class="btn ${guideTab === k ? "hot" : ""}" onclick="guideTab='${k}';render()">${n}</button>`).join("")}
+    ${guideTab === "map" ? `<span style="width:20px"></span>` + ["all", "dt", "ind", "uni", "park"].map(z => `<button class="btn ${guideZone === z ? "hot" : ""}" onclick="guideZone='${z}';render()">${t(z === "all" ? "zAll" : "z_" + z)}</button>`).join("") : ""}</div>`;
+  if (guideTab === "tricks") return tabs + `<p class="sub" style="color:var(--dim);margin:-2px 0 12px">${t("tricksD")}</p>` + (trickList ? `<div class="tricks">${trickList.map(g => `<div class="card"><h3 class="h" style="margin:0 0 8px">${t("tg_" + g.key)}</h3>${(g.hints || []).map(x => `<div class="hint">${hintHTML(x)}</div>`).join("")}</div>`).join("")}</div>` : `<span class="sub">${t("working")}</span>`);
+  return tabs + (guideList ? `<div class="spots">${guideList.filter(x => guideZone === "all" || x.zone === guideZone).map(x => `<div class="spot"><div class="ph" style="background-image:url(${x.img})"><span>${esc(x.area || t("z_" + x.zone))}</span></div>
+      <b>${esc(x.name)}</b>${x.desc ? `<p>${esc(x.desc)}</p>` : ""}</div>`).join("")}</div>` : `<span class="sub">${t("working")}</span>`);
+}
 function lang() {
   return `<div class="sec"><div class="card"><div style="display:flex;align-items:center;gap:16px">
       <div style="font-size:42px">🧉</div><div style="flex:1"><h3 class="h" style="margin:0">${t("argT")}</h3><div class="sub">${t("argd")}</div></div>
       ${sw(S.arg, `act('arg','${S.arg ? "off" : "on"}')`)}</div>
       <div class="ba"><div>${esc(t("argBefore"))}</div><div style="font-size:22px">➜</div><div class="new">${esc(t("argAfter"))}</div></div></div></div>
+    <div class="sec grid g2" style="gap:12px">
+      <div class="card"><div style="display:flex;align-items:center;gap:16px"><div style="font-size:38px">🇧🇷</div><div style="flex:1"><h3 class="h" style="margin:0">${t("ptT")}</h3><div class="sub">${t("ptD")}</div></div>
+        ${S.ctl.bootLang === "pt" ? `<b style="color:var(--lime)">✓ ${t("ptOn")}</b>` : `<button class="btn hot" onclick="act('bootlang','pt')">${t("ptGo")}</button>`}</div></div>
+      <div class="card"><div style="display:flex;align-items:center;gap:16px"><div style="font-size:38px">🀄</div><div style="flex:1"><h3 class="h" style="margin:0">${t("cjkT")}</h3><div class="sub">${t("cjkD")}</div></div></div></div></div>
     <div class="sec"><h2 class="h">${t("uiLang")}</h2><div class="grid g4">
-      ${[["auto", t("langAuto")]].concat(UILANGS).map(([k, n]) => `<div class="card pick ${(S.langPref || "auto") === k || (k === "auto" && !UILANGS.some(l => l[0] === S.langPref)) ? "sel" : ""}" data-tag="✓" onclick="setUi('${k}')"><h3 class="h" style="margin:0;font-size:${k === "auto" ? 15 : 20}px">${esc(n)}</h3></div>`).join("")}</div></div>`;
+      ${[["auto", t("langAuto")]].concat(UILANGS).map(([k, n]) => `<div class="card pick ${(S.langPref || "auto") === k || (k === "auto" && !UILANGS.some(l => l[0] === S.langPref)) ? "sel" : ""}" data-tag="✓" onclick="setUi('${k}')"><h3 class="h" style="margin:0;font-size:${k === "auto" ? 15 : 20}px">${esc(n)}</h3></div>`).join("")}</div></div>
+    <div class="sec"><div class="card"><b>✍️ ${t("fixT")}</b><div class="sub" style="margin:2px 0 10px">${t("fixD")}</div>
+      <div class="grid g2" style="gap:10px"><textarea id="fixA" style="min-height:60px" placeholder="${esc(t("fixWhat"))}"></textarea><textarea id="fixB" style="min-height:60px" placeholder="${esc(t("fixBetter"))}"></textarea></div>
+      <p style="margin:10px 0 0"><button class="btn hot" onclick="sendFix()">${t("fixSend")}</button></p></div></div>`;
 }
-const UILANGS = [["en","English"],["es","Español"],["fr","Français"],["it","Italiano"],["de","Deutsch"],["zh","中文"],["ja","日本語"]];
+const UILANGS = [["en","English"],["es","Español"],["pt","Português (Brasil)"],["fr","Français"],["it","Italiano"],["de","Deutsch"],["zh","中文"],["ja","日本語"]];
+// Apariencia: the side deck, your skater and the rest of the modder's looks
+let deckGroup = null, gameDeckList = null, avatarList = null;
+async function loadGameLists() {
+  if (!gameDeckList) { const r = await call("gamedecks"); try { gameDeckList = JSON.parse(r.msg || "[]"); } catch { gameDeckList = []; } }
+  if (!avatarList) { const r = await call("avatars"); try { avatarList = JSON.parse(r.msg || "[]"); } catch { avatarList = []; } }
+  if (page === "look") render();
+}
+function look() {
+  const cur = deckKey();
+  if (!deckGroup) deckGroup = cur.startsWith("game:") ? "game" : Object.keys(DECKGROUPS).find(g => DECKGROUPS[g][cur]) || "classic";
+  if (!gameDeckList || !avatarList) setTimeout(loadGameLists, 0);
+  const groups = Object.keys(DECKGROUPS).concat("game");
+  const decks = deckGroup === "game"
+    ? (gameDeckList || []).map(d => `<div class="d img ${cur === "game:" + d.key ? "sel" : ""}" tabindex="0" title="${esc(d.name)}" style="background:url(${d.img})" onclick="setPref('deck','game:${d.key}')"></div>`).join("") || `<span class="sub">${t("working")}</span>`
+    : Object.entries(DECKGROUPS[deckGroup]).map(([k, v]) => `<div class="d ${cur === k ? "sel" : ""}" tabindex="0" title="${esc(t("dk_" + k))}" style="background:${esc(v)}" onclick="setPref('deck','${k}')"></div>`).join("");
+  const me = S.prefs?.avatar || "";
+  const avs = avatarList ? `<div class="a ${me ? "" : "sel"}" tabindex="0" title="${esc(t("meNone"))}" onclick="setPref('avatar','')" style="display:grid;place-items:center;color:var(--mute)">✕</div>` +
+    avatarList.map(a => `<div class="a ${me === a.key ? "sel" : ""}" tabindex="0" title="${esc(a.name)}" onclick="setPref('avatar','${a.key}')"><img src="${a.img}" alt=""></div>`).join("") : `<span class="sub">${t("working")}</span>`;
+  return `<div class="sec grid g2" style="gap:12px;align-items:start">
+      <div class="card"><b>${t("deckT")}</b><div class="sub" style="color:var(--dim);font-size:12.5px;margin:2px 0 10px">${t("deckD")}</div>
+        <div class="lookbar"><select onchange="deckGroup=this.value;render()">${groups.map(g => `<option value="${g}" ${g === deckGroup ? "selected" : ""}>${t("dg_" + g)}</option>`).join("")}</select></div>
+        <div class="decks ${deckGroup === "game" ? "game" : ""}">${decks}</div></div>
+      <div class="card"><b>${t("meT")}</b><div class="sub" style="color:var(--dim);font-size:12.5px;margin:2px 0 10px">${t("meD")}</div><div class="avs">${avs}</div></div></div>
+    <div class="sec"><div class="grid g2" style="gap:8px">
+      <div class="stack">${row("🔊", t("sfxT"), t("sfxD"), sw(sfx.on, `setPref('sfx','${sfx.on ? "0" : "1"}')`))}
+      ${row("🖼️", t("bgT"), t("bgD"), sw(S.prefs?.bg !== "0", `setPref('bg','${S.prefs?.bg === "0" ? "1" : "0"}')`))}</div>
+      <div class="stack">${row("🔍", t("zoomT") + " · " + Math.round(zoomPref() * 100) + "%", t("zoomD"), `<input type="range" min="70" max="150" step="5" value="${Math.round(zoomPref() * 100)}" style="width:220px;margin:0" onchange="setZoom(this.value/100)">`)}
+      ${row("🎚️", t("eqT"), t("eqD"), `<div style="display:flex;gap:14px;align-items:center;font-size:12.5px;color:var(--dim)">
+        ${t("eqB")}<input type="range" min="-12" max="12" step="1" value="${radio.bass}" style="width:120px;margin:0" oninput="radio.eq('bass',this.value)">
+        ${t("eqH")}<input type="range" min="-12" max="12" step="1" value="${radio.treble}" style="width:120px;margin:0" oninput="radio.eq('treble',this.value)"></div>`)}
+      ${row("🛋️", t("sofaT"), t("sofaD"), sw(S.prefs?.sofa === "1", `setPref('sofa','${S.prefs?.sofa === "1" ? "0" : "1"}')`))}
+      ${(S.ctl.monitors || []).length > 1 ? row("🖥️", t("uiMonT"), t("uiMonD"), `<div style="display:flex;gap:6px">${[{n: 0}].concat(S.ctl.monitors).map(m => `<button class="btn ${(S.uiMonitor || 0) === m.n ? "hot" : ""}" onclick="uiMonitor(${m.n})">${m.n || t("auto")}</button>`).join("")}</div>`) : ""}
+</div></div>
+      <p style="color:var(--mute);font-size:12.5px;margin-top:12px">${t("keysHelp")}</p></div>
+`;
+}
 function shop() {
   return `<div class="sec rows">
       ${row("🩹", t("repair"), t("repaird"), `<button class="btn hot" onclick="act('repair','', '${t("repair")}')">${t("repair")}</button>`)}
@@ -656,21 +891,11 @@ function shop() {
          <button class="btn" onclick="act('folder','game','${t("fGame")}')">${t("fGame")}</button>
          <button class="btn" onclick="act('folder','saves','${t("fSaves")}')">${t("fSaves")}</button>
          <button class="btn" onclick="act('folder','data','${t("fData")}')">${t("fData")}</button></div>`)}
-      ${row("🔀", t("chg"), "", `<button class="btn" onclick="pickFolder()">${t("pick")}</button>`)}
+      ${row("🔀", t("chgDir"), "", `<button class="btn" onclick="pickFolder()">${t("pick")}</button>`)}
       ${row("📣", t("report"), t("reportD"), `<button class="btn" onclick="askReport()">${t("report")}</button>`)}
+      ${S.repoPublic ? row("🐙", t("ghT"), t("ghD"), `<button class="btn" onclick="askReport(true)">GitHub</button>`) : ""}
       ${row("📜", t("logT"), t("logD"), `<button class="btn" onclick="act('gamelog')">${t("open")}</button>`)}
       ${row("🧭", t("wizT"), t("wizD"), `<button class="btn" onclick="wizard()">${t("wizGo")}</button>`)}</div>
-    <div class="sec"><h2 class="h">${t("modder")}</h2><div class="grid g2" style="gap:8px">
-      <div class="stack"><div class="card"><b>${t("deckT")}</b><div class="decks" style="margin-top:10px">${Object.keys(DECKS).map(k => `<div class="d ${deckKey() === k ? "sel" : ""}" tabindex="0" style="background:${DECKS[k]}" onclick="setPref('deck','${k}')"></div>`).join("")}</div></div>
-      ${row("🔊", t("sfxT"), t("sfxD"), sw(sfx.on, `setPref('sfx','${sfx.on ? "0" : "1"}')`))}</div>
-      <div class="stack">${row("🔍", t("zoomT") + " · " + Math.round(zoomPref() * 100) + "%", t("zoomD"), `<input type="range" min="70" max="150" step="5" value="${Math.round(zoomPref() * 100)}" style="width:220px;margin:0" onchange="setZoom(this.value/100)">`)}
-      ${row("🎚️", t("eqT"), t("eqD"), `<div style="display:flex;gap:14px;align-items:center;font-size:12.5px;color:var(--dim)">
-        ${t("eqB")}<input type="range" min="-12" max="12" step="1" value="${radio.bass}" style="width:120px;margin:0" oninput="radio.eq('bass',this.value)">
-        ${t("eqH")}<input type="range" min="-12" max="12" step="1" value="${radio.treble}" style="width:120px;margin:0" oninput="radio.eq('treble',this.value)"></div>`)}
-      ${row("🛋️", t("sofaT"), t("sofaD"), sw(S.prefs?.sofa === "1", `setPref('sofa','${S.prefs?.sofa === "1" ? "0" : "1"}')`))}
-      ${(S.ctl.monitors || []).length > 1 ? row("🖥️", t("uiMonT"), t("uiMonD"), `<div style="display:flex;gap:6px">${[{n: 0}].concat(S.ctl.monitors).map(m => `<button class="btn ${(S.uiMonitor || 0) === m.n ? "hot" : ""}" onclick="uiMonitor(${m.n})">${m.n || t("auto")}</button>`).join("")}</div>`) : ""}
-</div></div>
-      <p style="color:var(--mute);font-size:12.5px;margin-top:12px">${t("keysHelp")}</p></div>
     <div class="sec"><h2 class="h" style="color:#ff8a8a">💀 ${t("hom")}</h2>
       ${row("🧨", t("uninst"), t("uninstd"), `<button class="btn danger" onclick="askUninstall()">${t("uninst")}</button>`)}</div>`;
 }
@@ -690,6 +915,27 @@ function crashCheck() {
   call("crashseen");
   modal(t("crashT"), t("crashD").replace("{c}", c), [[t("cancel"), "", null], [t("crashGo"), "hot", () => act("report", t("crashTxt").replace("{c}", c), t("report"))]]);
   return true;
+}
+function sendFix() {
+  const a = $("fixA").value.trim(), b = $("fixB").value.trim();
+  if (!a) return;
+  act("issue", "translation|" + a + (b ? "\n=> " + b : ""), t("fixT"));
+}
+// right-click any text: fix its translation
+document.addEventListener("contextmenu", e => {
+  e.preventDefault();
+  const el = e.target.closest("b,span,p,h1,h2,h3,button,div.sub,.tx span");
+  const txt = (el && el.innerText || "").trim();
+  if (!txt || txt.length > 400 || !S.root) return;
+  modal(t("fixT"), "", [[t("cancel"), "", null], [t("fixSend"), "hot", () => { const b = $("fixM").value.trim(); act("issue", "translation|" + txt + (b ? "\n=> " + b : ""), t("fixT")); }]],
+    `<p style="color:var(--dim)">${esc(txt)}</p><textarea id="fixM" placeholder="${esc(t("fixBetter"))}"></textarea>`);
+  setTimeout(() => $("fixM") && $("fixM").focus(), 50);
+});
+// the game's photos behind the modder, a different one each time
+async function setBg() {
+  if (S.prefs?.bg === "0") { $("bgshot").style.backgroundImage = ""; return; }
+  const r = await call("bg");
+  if (r.msg) { $("bgshot").style.backgroundImage = `url(${r.msg})`; $("bgshot").classList.add("on"); }
 }
 async function setUi(l) { await call("uilang", l); sfx.tick(); await refresh(); }
 function askUninstall() {
@@ -721,16 +967,52 @@ async function checkRecomp(manual) {
   modal(t("recompT").replace("{v}", "v" + tag), t("recompd").replace("{h}", "v" + have),
     [[t("recompSkip"), "", () => call("recompskip", tag)], [t("later"), "", null], [t("recompGo"), "hot", () => call("recompopen")]]);
 }
-const DECKS = {
-  clasica: "repeating-linear-gradient(115deg,#0c0c0c 0 3px,#121212 3px 6px)",
-  fuego: "linear-gradient(0deg,#140800 0 30%,#ff5a1f 55%,#ffb020 70%,#140800 85%)",
-  damero: "repeating-conic-gradient(#111 0 25%,#eee 0 50%) 0 0/22px 22px",
-  camuflado: "radial-gradient(circle at 30% 20%,#3d4a2a 0 18%,transparent 19%),radial-gradient(circle at 70% 60%,#2a3320 0 22%,transparent 23%),radial-gradient(circle at 40% 85%,#55603a 0 16%,transparent 17%),#1d2416",
-  madera: "repeating-linear-gradient(90deg,#6b4423 0 6px,#7a5230 6px 9px,#5c3a1e 9px 14px)",
-  celeste: "linear-gradient(180deg,#74acdf 0 33%,#fff 33% 66%,#74acdf 66%)"};
-const deckKey = () => DECKS[S.prefs?.deck] ? S.prefs.deck : "clasica";
+// side deck graphics: name -> CSS background, in groups for the picker
+const svgDeck = (txt, bg, fg, size = 64) => `url("data:image/svg+xml,${encodeURIComponent(`<svg xmlns='http://www.w3.org/2000/svg' width='120' height='300'><rect width='120' height='300' fill='${bg}'/><text x='60' y='150' fill='${fg}' font-family='Impact,Arial Black,sans-serif' font-size='${size}' font-style='italic' text-anchor='middle' dominant-baseline='middle' transform='rotate(-90 60 150)' letter-spacing='4'>${txt}</text></svg>`)}") center/cover`;
+const flag3v = (a, b, c) => `linear-gradient(90deg,${a} 0 33.3%,${b} 33.3% 66.6%,${c} 66.6%)`;
+const flag3h = (a, b, c) => `linear-gradient(180deg,${a} 0 33.3%,${b} 33.3% 66.6%,${c} 66.6%)`;
+const DECKGROUPS = {
+  classic: {
+    clasica: "repeating-linear-gradient(115deg,#0c0c0c 0 3px,#121212 3px 6px)",
+    fuego: "linear-gradient(0deg,#140800 0 30%,#ff5a1f 55%,#ffb020 70%,#140800 85%)",
+    damero: "repeating-conic-gradient(#111 0 25%,#eee 0 50%) 0 0/22px 22px",
+    camuflado: "radial-gradient(circle at 30% 20%,#3d4a2a 0 18%,transparent 19%),radial-gradient(circle at 70% 60%,#2a3320 0 22%,transparent 23%),radial-gradient(circle at 40% 85%,#55603a 0 16%,transparent 17%),#1d2416",
+    madera: "repeating-linear-gradient(90deg,#6b4423 0 6px,#7a5230 6px 9px,#5c3a1e 9px 14px)",
+    celeste: "radial-gradient(circle at 50% 50%,#f6b40e 0 9%,transparent 10%)," + flag3h("#74acdf", "#fff", "#74acdf")},
+  countries: {
+    brasil: "radial-gradient(circle at 50% 50%,#002776 0 18%,transparent 19%),conic-gradient(from 45deg at 50% 50%,#ffdf00 0 25%,transparent 0 50%,#ffdf00 0 75%,transparent 0) center/100% 60% no-repeat,#009c3b",
+    uruguay: "radial-gradient(circle at 28% 12%,#fcd116 0 12%,transparent 13%),repeating-linear-gradient(180deg,#fff 0 22px,#0038a8 22px 44px)",
+    mexico: "radial-gradient(circle at 50% 50%,#8c5a2b 0 9%,transparent 10%)," + flag3h("#006847", "#fff", "#ce1126"),
+    espana: "linear-gradient(180deg,#aa151b 0 25%,#f1bf00 25% 75%,#aa151b 75%)",
+    italia: flag3h("#009246", "#fff", "#ce2b37"),
+    francia: flag3h("#0055a4", "#fff", "#ef4135"),
+    alemania: flag3h("#000", "#dd0000", "#ffce00"),
+    japon: "radial-gradient(circle at 50% 50%,#bc002d 0 22%,transparent 23%),#fff",
+    eeuu: "linear-gradient(90deg,#3c3b6e 0 100%) 0 0/100% 30% no-repeat,repeating-linear-gradient(180deg,#b22234 0 12px,#fff 12px 24px)"},
+  letters: {
+    arg: svgDeck("ARG", "#74acdf", "#fff"), s3: svgDeck("SKATE 3", "#111", "#ff5a1f", 40), sk8: svgDeck("SK8", "#c6ff3d", "#111"),
+    pcv: svgDeck("CARVERTON", "#1d2b4a", "#ffd23f", 30), bail: svgDeck("BAIL!", "#ff3b3b", "#fff"), hom: svgDeck("HALL OF MEAT", "#2a0a0a", "#ff8a8a", 26)},
+  styles: {
+    neon: "linear-gradient(180deg,transparent 0 47%,#ff2bd6 47% 49%,transparent 49% 51%,#00f0ff 51% 53%,transparent 53%),#0b0218",
+    vapor: "linear-gradient(180deg,#ff71ce 0%,#b967ff 40%,#01cdfe 75%,#05ffa1 100%)",
+    sunset80: "repeating-linear-gradient(180deg,transparent 0 10px,#1a0b2e 10px 13px),linear-gradient(180deg,#ffd319,#ff901f 35%,#ff2975 65%,#8c1eff)",
+    graffiti: "radial-gradient(circle at 20% 20%,#ff5a1f 0 14%,transparent 15%),radial-gradient(circle at 75% 40%,#3f8cff 0 16%,transparent 17%),radial-gradient(circle at 35% 70%,#c6ff3d 0 13%,transparent 14%),radial-gradient(circle at 70% 88%,#ff4dd8 0 12%,transparent 13%),#151515",
+    cebra: "repeating-linear-gradient(160deg,#eee 0 10px,#111 10px 22px,#eee 22px 28px,#111 28px 34px)",
+    pixel: "repeating-conic-gradient(#ff5a1f 0 25%,#ffd23f 0 50%) 0 0/16px 16px",
+    puntos: "radial-gradient(circle,#ff5a1f 0 30%,transparent 32%) 0 0/14px 14px,#111"},
+  materials: {
+    maple: "repeating-linear-gradient(90deg,#e8c99a 0 5px,#dcb986 5px 7px,#f0d6ab 7px 12px)",
+    carbono: "repeating-linear-gradient(45deg,#1b1b1b 0 4px,#2a2a2a 4px 8px),repeating-linear-gradient(-45deg,#1b1b1b 0 4px,#262626 4px 8px)",
+    aluminio: "repeating-linear-gradient(0deg,#9aa0a6 0 1px,#b9bec3 1px 3px,#a7acb1 3px 4px)",
+    marmol: "linear-gradient(125deg,transparent 40%,rgba(120,120,120,.35) 42%,transparent 44%),linear-gradient(70deg,transparent 60%,rgba(100,100,100,.3) 61%,transparent 63%),#e9e6e1",
+    corcho: "radial-gradient(circle at 30% 40%,#8a5a2b 0 2px,transparent 3px) 0 0/9px 9px,radial-gradient(circle at 70% 70%,#6e4520 0 2px,transparent 3px) 0 0/13px 13px,#b07a45"}};
+const DECKS = Object.assign({}, ...Object.values(DECKGROUPS));
+const deckKey = () => DECKS[S.prefs?.deck] || (S.prefs?.deck || "").startsWith("game:") ? S.prefs.deck : "clasica";
 function applyPrefs() {
-  const k = deckKey(); $("deck").style.background = k === "clasica" ? DECKS[k] : "linear-gradient(rgba(8,8,8,.62),rgba(8,8,8,.62))," + DECKS[k];
+  const k = deckKey(), dim = "linear-gradient(rgba(8,8,8,.62),rgba(8,8,8,.62)),";
+  $("deck").style.background = k === "clasica" ? DECKS[k] : k.startsWith("game:") ? (S.deckImg ? `linear-gradient(rgba(8,8,8,.5),rgba(8,8,8,.5)),url(${S.deckImg}) center/cover` : DECKS.clasica) : dim + DECKS[k];
+  $("me").innerHTML = S.avatarImg ? `<img src="${S.avatarImg}" alt="">` : "";
+  $("me").classList.toggle("on", !!S.avatarImg);
   sfx.on = S.prefs?.sfx !== "0";
   document.body.classList.toggle("sofa", S.prefs?.sofa === "1");
   fitZoom();
@@ -755,9 +1037,9 @@ addEventListener("keydown", e => { if (!e.ctrlKey) return;
   if (e.key === "+" || e.key === "=") { e.preventDefault(); setZoom(zoomPref() + .05); }
   else if (e.key === "-") { e.preventDefault(); setZoom(zoomPref() - .05); }
   else if (e.key === "0") { e.preventDefault(); setZoom(1); } });
-async function setPref(k, v) { await call("pref", k + "=" + v); await refresh(); sfx.tick(); }
-function askReport() {
-  modal(t("report"), "", [[t("cancel"), "", null], [t("send"), "hot", () => act("report", $("rtext").value, t("report"))]],
+async function setPref(k, v) { await call("pref", k + "=" + v); await refresh(); sfx.tick(); if (k === "bg") setBg(); }
+function askReport(gh) {
+  modal(gh ? t("ghT") : t("report"), "", [[t("cancel"), "", null], [t("send"), "hot", () => gh ? act("issue", "report|" + $("rtext").value, t("ghT")) : act("report", $("rtext").value, t("report"))]],
     `${esc(t("reportQ"))}<br><br><textarea id="rtext"></textarea>`);
   setTimeout(() => $("rtext").focus(), 50);
 }
@@ -819,7 +1101,14 @@ async function dropIn() {
   if (ap === "close") setTimeout(() => win("close"), 1200);
   else if (ap === "min") setTimeout(() => win("min"), 900);
 }
-window.s3back = async () => { if (radioWasOn && !radio.playing) radio.toggle(); await refresh(); if (!crashCheck()) toast(t("back"), t("backD")); };
+window.s3back = async () => {
+  if (radioWasOn && !radio.playing) radio.toggle();
+  await refresh();
+  if (crashCheck()) return;
+  const l = S.play && S.play.last, fresh = l && Date.now() - new Date(l.when.replace(" ", "T")).getTime() < 15 * 60000;
+  if (fresh && l.secs > 0) toast(t("sumT"), t("sumD").replace("{p}", dur(l.secs)) + (l.load ? " " + t("sumL").replace("{s}", sec(l.load)) : ""));
+  else toast(t("back"), t("backD"));
+};
 async function win(mode) {
   if (!window.s3win) return;
   const m = await window.s3win(mode);
@@ -1039,6 +1328,7 @@ document.addEventListener("pointerdown", () => { if (AC && AC.state === "suspend
   if (!radio.playing) radio.toggle();
   if (S.root && !S.prefs?.seen) setTimeout(wizard, 400); else crashCheck();
   showNews();
+  if (S.root) { setBg(); setTimeout(() => checkDrift(true), 2500); }
   await checkUpdate(false);
   if (S.root && !newVer) checkRecomp(false);
 })();

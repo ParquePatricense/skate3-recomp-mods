@@ -1,8 +1,9 @@
 package main
 
-// Seven-language UI: English, Spanish, French, Italian, German, Chinese and
-// Japanese. The system language picks it (Windows' display language, $LANG
-// elsewhere); "lang = <code>" in skate3-mods.ini overrides it.
+// Eight-language UI: English, Spanish, Brazilian Portuguese, French,
+// Italian, German, Chinese and Japanese. The system language picks it
+// (Windows' display language, $LANG elsewhere); "lang = <code>" in
+// skate3-mods.ini overrides it.
 //
 // Texts are written as T(spanish, english); the other languages come from
 // i18n/go.json, keyed by the English text.
@@ -15,7 +16,7 @@ import (
 )
 
 var langs = []struct{ code, name string }{
-	{"en", "English"}, {"es", "Español"}, {"fr", "Français"}, {"it", "Italiano"},
+	{"en", "English"}, {"es", "Español"}, {"pt", "Português (Brasil)"}, {"fr", "Français"}, {"it", "Italiano"},
 	{"de", "Deutsch"}, {"zh", "中文"}, {"ja", "日本語"},
 }
 
@@ -46,7 +47,7 @@ func setLang(c config) {
 }
 
 // langFromCode turns a locale such as "es_AR.UTF-8" or "zh-Hans" into one of
-// the seven languages (English when it is none of them).
+// the eight languages (English when it is none of them).
 func langFromCode(s string) string {
 	s = strings.ToLower(s)
 	if len(s) >= 2 && validLang(s[:2]) {

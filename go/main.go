@@ -23,7 +23,7 @@ import (
 	"time"
 )
 
-const version = "3.6.0"
+const version = "3.7.0"
 
 var stdin = newStdin()
 
@@ -357,6 +357,8 @@ func run(args []string) int {
 			default:
 				fmt.Println(onOff(textsOn(root)))
 			}
+		case "preload": // Windows sign-in: warm the game files, quietly
+			preload(root)
 		case "play":
 			// the "directo" and "normal" shortcuts pick the startup, and
 			// "directo, English" and the like the language too
@@ -399,7 +401,7 @@ func main() {
 	case args[0] == "menu":
 		consoleSetup(false)
 		args = nil
-	case args[0] != "play":
+	case args[0] != "play" && args[0] != "preload":
 		consoleSetup(true)
 	}
 	os.Exit(run(args))

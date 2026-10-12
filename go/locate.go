@@ -58,6 +58,7 @@ func rememberRoot(dir string) {
 		os.MkdirAll(filepath.Dir(f), 0o755)
 		os.WriteFile(f, []byte(dir+"\n"), 0o644)
 	}
+	addKnownRoot(dir)
 }
 
 // searchStarts are the places worth searching, most likely first.

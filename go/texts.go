@@ -273,6 +273,7 @@ func textsArchivePath(game string) (string, error) {
 var bootLangs = []struct{ key, name, src string }{
 	{"en", "English", "English"}, {"es", "Español", "Spanish"}, {"arg", "Español ARG", "Spanish"},
 	{"fr", "Français", "French"}, {"de", "Deutsch", "German"}, {"it", "Italiano", "Italian"},
+	{"pt", "Português (Brasil)", "Spanish"},
 }
 
 func bootLangSrc(key string) string {
@@ -342,12 +343,17 @@ func wantedTexts(root string, orig *bigArchive) (map[string][]byte, int, error) 
 		src := bootLangSrc(boot)
 		var g []byte
 		var err error
-		if boot == "arg" {
+		if boot == "arg" || boot == "pt" {
 			es, err := get(textsEntry)
 			if err != nil {
 				return nil, 0, err
 			}
-			if g, _, err = rioplatensize(es); err != nil {
+			if boot == "pt" {
+				g, err = portuguese(es)
+			} else {
+				g, _, err = rioplatensize(es)
+			}
+			if err != nil {
 				return nil, 0, err
 			}
 		} else if g, err = get("LANGUAGE_" + src + "_Global_skate3ng.BIN"); err != nil {
