@@ -54,6 +54,9 @@ func apiState(root string) map[string]any {
 	st["tomlBackup"] = exists(filepath.Join(root, tomlBackup))
 	st["radio"] = c["radio"]
 	st["ctl"] = controlsState(root)
+	st["music"] = musicState(root)
+	st["afterPlay"] = c["after_play"]
+	st["uiWindow"] = c["ui_window"]
 	st["recomp"] = c["recomp_version"]
 	return st
 }
@@ -178,6 +181,14 @@ func apiDo(root *string, cmd, arg string) (string, error) {
 	case "radio":
 		c := loadConfig(r)
 		c["radio"] = arg
+		return "", c.save(r)
+	case "direct":
+		return setDirect(r, onArg(arg))
+	case "music":
+		return musicDo(r, arg)
+	case "afterplay":
+		c := loadConfig(r)
+		c["after_play"] = arg
 		return "", c.save(r)
 	case "vsync":
 		return "VSync " + onOff(onArg(arg)), setBool(r, "vsync", onArg(arg))

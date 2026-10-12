@@ -195,6 +195,22 @@ body.busy #pages{pointer-events:none;opacity:.6;transition:opacity .2s}
 .scr .card{min-width:150px;text-align:center;padding:14px 18px}
 .scr .mon{width:90px;height:56px;margin:0 auto 8px;border:3px solid #444;border-radius:6px;display:grid;place-items:center;font:900 22px Impact,sans-serif;font-style:italic}
 .scr .sel .mon{border-color:var(--orange);color:var(--orange)}
+#rgen{width:auto;padding:0 12px;border-radius:19px;font:800 11px "Segoe UI";letter-spacing:1px;text-transform:uppercase;color:var(--lime)}
+#gmenu{display:none;position:fixed;bottom:84px;left:330px;flex-direction:column;gap:4px;padding:8px;background:#1b1b1b;border:1px solid #333;border-radius:12px;box-shadow:6px 6px 0 #000}
+#gmenu.on{display:flex}
+#gmenu button{border:0;background:transparent;text-align:left;padding:7px 14px;border-radius:8px;font:800 13px "Segoe UI";text-transform:uppercase;letter-spacing:1px;color:var(--dim)}
+#gmenu button:hover,#gmenu button.on{background:var(--orange);color:#111}
+#winctl{position:fixed;top:0;right:0;z-index:11;display:none;gap:2px;padding:4px}
+body.full #winctl{display:flex}
+#winctl button{width:40px;height:30px;border:0;border-radius:6px;background:transparent;color:var(--dim);font-size:15px}
+#winctl button:hover{background:#2a2a2a;color:var(--ink)}
+#winctl button.x:hover{background:#c42b1c;color:#fff}
+body.full #top{padding-top:34px}
+.opts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.opts .card{padding:14px 16px}.opts b{display:block;font-size:15px}.opts span{color:var(--dim);font-size:12.5px}
+.songs{columns:2;column-gap:24px;color:var(--dim);font-size:13px;margin:10px 0 0;padding-left:18px}
+.keys2{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}.keys2 span{padding:5px 10px;background:#191919;border:1px solid #2a2a2a;border-radius:8px;font-size:12.5px;color:var(--dim)}
+.keys2 b{color:var(--ink)}
 #tip{padding:0 30px;color:var(--mute);font-size:12.5px;height:18px}
 #tip b{color:var(--orange2)}
 </style>
@@ -211,7 +227,7 @@ body.busy #pages{pointer-events:none;opacity:.6;transition:opacity .2s}
   <main id="main">
     <div id="top">
       <div id="title"><h1 class="h" id="ptitle"></h1><p id="psub"></p></div>
-      <button id="drop" class="h" onclick="act('play')"><span data-t="drop"></span><small data-t="dropsub"></small></button>
+      <button id="drop" class="h" onclick="dropIn()"><span data-t="drop"></span><small data-t="dropsub"></small></button>
     </div>
     <div id="rootbar"><span class="chip" data-t="folder"></span><span id="rootp"></span><button id="upd" onclick="doUpdate()"></button></div>
     <div id="tip"></div>
@@ -229,12 +245,15 @@ body.busy #pages{pointer-events:none;opacity:.6;transition:opacity .2s}
 <div id="radio">
   <div class="tape"></div>
   <div class="meta"><b id="track">—</b><span>Radio Carverton · <span data-t="original"></span></span></div>
+  <button class="rb" id="rgen" onclick="radio.menu()">Mix</button>
   <button class="rb" onclick="radio.prev()" title="⏮">⏮</button>
   <button class="rb main" id="rplay" onclick="radio.toggle()">▶</button>
   <button class="rb" onclick="radio.next()" title="⏭">⏭</button>
   <canvas id="viz" width="600" height="76"></canvas>
   <input type="range" id="vol" min="0" max="100" value="45" oninput="radio.volume(this.value/100)">
 </div>
+<div id="gmenu"></div>
+<div id="winctl"><button onclick="win('min')" title="—">—</button><button onclick="win('toggle')" title="F11">❐</button><button class="x" onclick="win('close')" title="✕">✕</button></div>
 <div id="toasts"></div>
 <div id="modal"><div class="box"><h3 class="h" id="mt"></h3><p id="mp"></p><div class="act" id="ma"></div></div></div>
 
@@ -242,7 +261,7 @@ body.busy #pages{pointer-events:none;opacity:.6;transition:opacity .2s}
 "use strict";
 // ------------------------------------------------------------------ texts
 const L = {
- es:{foot:"Mod pack modular · todo se puede deshacer",drop:"Drop in",dropsub:"JUGAR CON MODS",folder:"JUEGO",original:"beats propios",
+ es:{foot:"Mod pack modular · todo se puede deshacer",drop:"Drop in",dropsub:"JUGAR CON MODS",folder:"JUEGO",original:"música propia",
   t_buttons:"Botones",t_gfx:"Gráficos",t_session:"En sesión",t_lang:"Idioma",t_shop:"El taller",
   s_buttons:"Elegí cómo se ven los botones en el juego. Se cambian al toque y vuelven a Xbox cuando quieras.",
   s_gfx:"Presets de un toque, pantalla, campo de visión y ultrawide. Después podés seguir ajustando en Settings del juego.",
@@ -256,6 +275,15 @@ const L = {
   argT:"Español ARG",argd:"Reemplaza \"Nederlands\" en la pantalla de idiomas por \"Español ARG\": voseo y vocabulario de acá. El español de siempre queda igual.",
   argBefore:"¿Quieres jugar? Haz un kickflip, colega.",argAfter:"¿Querés jugar? Hacé un kickflip, loco.",
   uiLang:"Idioma de esta ventana",
+  t_music:"Tu música",s_music:"Tus canciones suenan mientras patinás, como los soundtracks propios de la Xbox 360.",
+  musOn:"Tu música en el juego",musOnD:"El ayudante pasa tus canciones mientras jugás. Bajá Música a 0 en las opciones de audio del juego.",
+  musDir:"Carpeta de canciones",musPick:"Elegir carpeta",musOpen:"Abrir",musNone:"Todavía no elegiste carpeta.",musCount:"{n} canciones",
+  musShuf:"Orden aleatorio",musShufD:"Mezcla las canciones cada vez que jugás.",musFocus:"Pausar con Alt+Tab",musFocusD:"Si salís del juego, la música espera.",
+  musVol:"Volumen",musKeys:"Atajos mientras jugás",kNext:"siguiente",kPrev:"anterior",kPause:"pausa",kVol:"volumen",
+  musWhy:"¿Por qué no reemplaza la música del juego? Los temas del juego están en XMA dentro de archivos de RenderWare Audio, y no existe un conversor libre a XMA. Cuando lo haya, se suma.",
+  bootT:"Al arrancar",direct:"Directo a tu partida",directD:"Saltea la intro, la pantalla de idioma, el Press Start y los avisos de arranque, y entra a tu carrera. Toma el idioma que esté marcado.",
+  afterT:"Al tocar Drop in",aMin:"Minimizar",aMinD:"Se esconde y vuelve sola cuando cerrás el juego.",aClose:"Cerrar",aCloseD:"El modeador se cierra; el ayudante sigue.",aStay:"Dejarlo abierto",aStayD:"Queda abierto detrás del juego.",
+  back:"¡De vuelta!",backD:"Sesión terminada.",
   t_ctl:"Controles",s_ctl:"Jugá con teclado y mouse: activalo y elegí qué tecla aprieta cada botón del joystick.",
   screen:"Pantalla",vsync:"VSync",vsyncd:"Saca el tearing (la imagen cortada al girar). Apagado = menos input lag.",
   fs:"Pantalla completa",fsd:"Apagado, el juego abre en ventana.",whereT:"¿En qué pantalla abre el juego?",
@@ -282,8 +310,8 @@ const L = {
   tips:["<b>Tip:</b> Ctrl+Alt+R reinicia el juego si se traba (con el ayudante).","<b>Tip:</b> en la intro, Enter o A la saltean.",
    "<b>Tip:</b> todo lo que actives se puede deshacer desde acá.","<b>Tip:</b> si actualizás el recomp, tus mods se vuelven a poner solos al jugar.",
    "<b>Tip:</b> el acceso directo del escritorio abre el juego con el ayudante.","<b>Tip:</b> Español ARG aparece en la pantalla de idiomas del juego, en lugar de Nederlands.",
-   "<b>Tip:</b> Alt+F4 cierra el juego como la X de la ventana.","<b>Tip:</b> en Controles podés jugar con teclado y mouse y cambiar cada tecla.","<b>Tip:</b> con dos monitores, elegí en Gráficos en cuál abre el juego."]},
- en:{foot:"Modular mod pack · everything can be undone",drop:"Drop in",dropsub:"PLAY WITH MODS",folder:"GAME",original:"own beats",
+   "<b>Tip:</b> Alt+F4 cierra el juego como la X de la ventana.","<b>Tip:</b> en Controles podés jugar con teclado y mouse y cambiar cada tecla.","<b>Tip:</b> con dos monitores, elegí en Gráficos en cuál abre el juego.","<b>Tip:</b> F11 cambia el modeador entre pantalla completa y ventana.","<b>Tip:</b> tocá el género en la radio: boom bap, punk, rock, electro o cumbia."]},
+ en:{foot:"Modular mod pack · everything can be undone",drop:"Drop in",dropsub:"PLAY WITH MODS",folder:"GAME",original:"own music",
   t_buttons:"Buttons",t_gfx:"Graphics",t_session:"Session",t_lang:"Language",t_shop:"The shop",
   s_buttons:"Pick how the buttons look in the game. Swaps instantly and goes back to Xbox whenever you want.",
   s_gfx:"One-tap presets, screen, field of view and ultrawide. You can keep tweaking in the game's Settings.",
@@ -297,6 +325,15 @@ const L = {
   argT:"Español ARG",argd:"Turns \"Nederlands\" on the game's language screen into \"Español ARG\" (Rioplatense Spanish). Regular Spanish stays as is.",
   argBefore:"¿Quieres jugar? Haz un kickflip, colega.",argAfter:"¿Querés jugar? Hacé un kickflip, loco.",
   uiLang:"This window's language",
+  t_music:"Your music",s_music:"Your songs play while you skate, like the Xbox 360's custom soundtracks.",
+  musOn:"Your music in the game",musOnD:"The helper plays your songs while you play. Turn Music down to 0 in the game's audio options.",
+  musDir:"Songs folder",musPick:"Pick folder",musOpen:"Open",musNone:"No folder picked yet.",musCount:"{n} songs",
+  musShuf:"Shuffle",musShufD:"Mixes the songs every time you play.",musFocus:"Pause on Alt+Tab",musFocusD:"If you leave the game, the music waits.",
+  musVol:"Volume",musKeys:"Shortcuts while playing",kNext:"next",kPrev:"previous",kPause:"pause",kVol:"volume",
+  musWhy:"Why doesn't it replace the game's music? The game's songs are XMA inside RenderWare Audio archives, and there is no free XMA encoder. When there is one, it gets added.",
+  bootT:"At startup",direct:"Straight to your save",directD:"Skips the intro, the language screen, Press Start and the boot prompts, into your career. Uses whichever language is highlighted.",
+  afterT:"When you hit Drop in",aMin:"Minimize",aMinD:"Hides and comes back by itself when you close the game.",aClose:"Close",aCloseD:"The modder closes; the helper keeps going.",aStay:"Keep it open",aStayD:"Stays open behind the game.",
+  back:"Back!",backD:"Session over.",
   t_ctl:"Controls",s_ctl:"Play with keyboard and mouse: turn it on and pick which key presses each pad button.",
   screen:"Screen",vsync:"VSync",vsyncd:"Removes tearing (the split image when turning). Off = less input lag.",
   fs:"Fullscreen",fsd:"Off, the game opens in a window.",whereT:"Which screen does the game open on?",
@@ -323,7 +360,7 @@ const L = {
   tips:["<b>Tip:</b> Ctrl+Alt+R restarts the game if it hangs (with the helper).","<b>Tip:</b> Enter or A skips the intro.",
    "<b>Tip:</b> everything you turn on can be undone from here.","<b>Tip:</b> if you update the recomp, your mods come back by themselves when you play.",
    "<b>Tip:</b> the desktop shortcut starts the game with the helper.","<b>Tip:</b> Español ARG shows up on the game's language screen instead of Nederlands.",
-   "<b>Tip:</b> Alt+F4 closes the game like the window's X.","<b>Tip:</b> in Controls you can play with keyboard and mouse and change every key.","<b>Tip:</b> with two monitors, pick in Graphics which one the game opens on."]}
+   "<b>Tip:</b> Alt+F4 closes the game like the window's X.","<b>Tip:</b> in Controls you can play with keyboard and mouse and change every key.","<b>Tip:</b> with two monitors, pick in Graphics which one the game opens on.","<b>Tip:</b> F11 switches the modder between fullscreen and window.","<b>Tip:</b> tap the genre on the radio: boom bap, punk, rock, electro or cumbia."]}
 };
 let S = {en:false}, page = "buttons";
 const t = k => (S.en ? L.en : L.es)[k] ?? k;
@@ -372,7 +409,7 @@ function modal(title, text, buttons) {
 const sw = (on, onclick) => `<button class="sw ${on ? "on" : ""}" onclick="${onclick}"><span class="board"></span></button>`;
 const row = (ic, name, desc, ctl) => `<div class="row"><div class="ic">${ic}</div><div class="tx"><b>${esc(name)}</b><span>${esc(desc)}</span></div>${ctl}</div>`;
 
-const PAGES = [["buttons","🎮"],["gfx","🖼️"],["ctl","⌨️"],["session","🛹"],["lang","🧉"],["shop","🔧"]];
+const PAGES = [["buttons","🎮"],["gfx","🖼️"],["ctl","⌨️"],["session","🛹"],["music","🎧"],["lang","🧉"],["shop","🔧"]];
 function render() {
   document.documentElement.lang = S.en ? "en" : "es";
   document.querySelectorAll("[data-t]").forEach(e => e.textContent = t(e.dataset.t));
@@ -389,12 +426,14 @@ function render() {
     if (S.arg) sum.push("ARG 🧉");
     if (S.ctl && S.ctl.mnk) sum.push(S.en ? "Keyboard" : "Teclado");
     if (S.ctl && S.ctl.vsync) sum.push("VSync");
+    if (S.ctl && S.ctl.direct) sum.push(S.en ? "Direct" : "Directo");
+    if (S.music && S.music.on) sum.push("🎧 " + S.music.count);
     const on = (S.features || []).filter(f => f.on).length; if (on) sum.push(on + (S.en ? " helpers" : " ayudas"));
   }
   $("sum").innerHTML = sum.map(x => `<span>${esc(x)}</span>`).join("");
   $("psub").textContent = t("s_" + page);
   if (!S.root) return;
-  $("pages").innerHTML = `<div class="page on">${({buttons, gfx, ctl, session, lang, shop})[page]()}</div>`;
+  $("pages").innerHTML = `<div class="page on">${({buttons, gfx, ctl, session, music, lang, shop})[page]()}</div>`;
 }
 function go(p) { page = p; sfx.tick(); render(); $("pages").scrollTop = 0; }
 
@@ -485,9 +524,30 @@ function listenKey(key) {
 function stopListen() { if (listening) { const f = listening; listening = null; f(); } }
 const FICON = {altf4:"⌨️",restart:"🔁",priority:"⚡",awake:"☀️",cursor:"🖱️",winkey:"🪟",window:"🗔",dnd:"🔕"};
 function session() {
-  return `<div class="sec"><h2 class="h">${t("helper")}</h2>
+  const ap = S.afterPlay || "min", opt = (k, n, d) => `<div class="card pick ${ap === k ? "sel" : ""}" data-tag="✓" onclick="act('afterplay','${k}')"><b>${n}</b><span>${d}</span></div>`;
+  return `<div class="sec"><h2 class="h">${t("bootT")}</h2>
+     ${row("⏩", t("direct"), t("directD"), sw(S.ctl.direct, `act('direct','${S.ctl.direct ? "off" : "on"}')`))}</div>
+    <div class="sec"><h2 class="h">${t("afterT")}</h2><div class="opts">${opt("min", t("aMin"), t("aMinD"))}${opt("close", t("aClose"), t("aCloseD"))}${opt("stay", t("aStay"), t("aStayD"))}</div></div>
+    <div class="sec"><h2 class="h">${t("helper")}</h2>
      ${S.features.map(f => row(FICON[f.key] || "•", f.name, f.desc, sw(f.on, `act('feature','${f.key}=${f.on ? "off" : "on"}')`))).join("")}</div>
     <div class="sec">${row("🖱️", t("shortcut"), t("shortcutd"), sw(S.shortcut, `act('shortcut','${S.shortcut ? "off" : "on"}')`))}</div>`;
+}
+function music() {
+  const m = S.music;
+  return `<div class="sec">
+      ${row("🎧", t("musOn"), t("musOnD"), sw(m.on, `act('music','${m.on ? "off" : "on"}')`))}
+      ${row("📂", t("musDir"), m.dir ? m.dir + " · " + t("musCount").replace("{n}", m.count) : t("musNone"), `<div style="display:flex;gap:8px">
+         <button class="btn hot" onclick="act('music','dir')">${t("musPick")}</button>${m.dir ? `<button class="btn" onclick="call('music','open')">${t("musOpen")}</button>` : ""}</div>`)}
+      ${row("🔀", t("musShuf"), t("musShufD"), sw(m.shuffle, `act('music','shuffle=${m.shuffle ? "off" : "on"}')`))}
+      ${row("⏸️", t("musFocus"), t("musFocusD"), sw(m.focus, `act('music','focus=${m.focus ? "off" : "on"}')`))}</div>
+    <div class="sec grid g2"><div class="ramp"><div class="h" style="font-size:20px">${t("musVol")}</div>
+        <div class="val h"><span id="mvol">${m.vol}</span><small>%</small></div>
+        <input type="range" min="0" max="100" step="5" value="${m.vol}" oninput="$('mvol').textContent=this.value" onchange="call('music','vol='+this.value)"></div>
+      <div class="card"><div class="h" style="font-size:20px">${t("musKeys")}</div><div class="keys2">
+        <span><b>Ctrl+Alt+→</b> ${t("kNext")}</span><span><b>Ctrl+Alt+←</b> ${t("kPrev")}</span>
+        <span><b>Ctrl+Alt+${S.en ? "Space" : "Espacio"}</b> ${t("kPause")}</span><span><b>Ctrl+Alt+↑↓</b> ${t("kVol")}</span></div></div></div>
+    ${m.names.length ? `<div class="sec"><ol class="songs">${m.names.map(n => `<li>${esc(n)}</li>`).join("")}</ol></div>` : ""}
+    <div class="sec"><p>${t("musWhy")}</p></div>`;
 }
 function lang() {
   return `<div class="sec"><div class="card"><div style="display:flex;align-items:center;gap:16px">
@@ -541,6 +601,23 @@ async function checkRecomp(manual) {
   modal(t("recompT").replace("{v}", "v" + tag), t("recompd").replace("{h}", "v" + have),
     [[t("recompSkip"), "", () => call("recompskip", tag)], [t("later"), "", null], [t("recompGo"), "hot", () => call("recompopen")]]);
 }
+let radioWasOn = false;
+async function dropIn() {
+  radioWasOn = radio.playing; radio.pause();
+  const r = await act("play");
+  if (r.err) return;
+  const ap = S.afterPlay || "min";
+  if (ap === "close") setTimeout(() => win("close"), 1200);
+  else if (ap === "min") setTimeout(() => win("min"), 900);
+}
+window.s3back = () => { toast(t("back"), t("backD")); if (radioWasOn && !radio.playing) radio.toggle(); refresh(); };
+async function win(mode) {
+  if (!window.s3win) return;
+  const m = await window.s3win(mode);
+  document.body.classList.toggle("full", m === "full");
+}
+addEventListener("keydown", e => { if (e.key === "F11") { e.preventDefault(); win("toggle"); } });
+document.addEventListener("click", e => { if (!e.target.closest("#gmenu,#rgen")) $("gmenu").classList.remove("on"); });
 // F5 / Ctrl+R would reload this window and lose the radio
 addEventListener("keydown", e => { if (e.key === "F5" || (e.ctrlKey && (e.key === "r" || e.key === "R"))) e.preventDefault(); });
 
@@ -569,27 +646,56 @@ const sfx = {
 };
 
 // ------------------------------------------------------------------ Radio Carverton
-// Original beats made on the fly with Web Audio: boom bap and skate punk,
-// a new pattern per track. No music files, nothing copyrighted.
+// Original music made on the fly with Web Audio: boom bap, skate punk, rock,
+// electro and cumbia, a new pattern per track. No music files, nothing
+// copyrighted.
+const GENRES = [["boombap","Boom bap"],["punk","Punk"],["rock","Rock"],["electro","Electro"],["cumbia","Cumbia"]];
 const radio = (() => {
-  const NAMES = ["Parque Patricios Session","Kickflip en la 9 de Julio","Port Carverton Drop","Bombeando el Hubba",
-    "Grind en Plaza Moreno","Ledge de Puerto Madero","Sesión de Madrugada","Bowl del Conurbano","Tiburón de Asfalto",
-    "Wallride en Constitución","Late Flip Tango","Coach Frank No Duerme","Hall of Meat Blues","Ruedas Blandas","Bajada de Caminito"];
-  let a, out, comp, an, playing = false, timer = null, step = 0, nextT = 0, tr = null, n = 0, vol = .45, nb;
+  const NAMES = {
+    boombap: ["Parque Patricios Session","Sesión de Madrugada","Ledge de Puerto Madero","Hall of Meat Blues","Ruedas Blandas","Coach Frank No Duerme"],
+    punk: ["Kickflip en la 9 de Julio","Bowl del Conurbano","Tiburón de Asfalto","Grind en Plaza Moreno","Patea y Empuja","Lija Gastada"],
+    rock: ["Port Carverton Drop","Bombeando el Hubba","Wallride en Constitución","Rampa Prohibida","Seguridad a los Gritos","Tabla Rota"],
+    electro: ["Neón en la Costanera","Manual Infinito","Late Flip Tango","Distrito Industrial","Bajada de Caminito","Cámara Lenta"],
+    cumbia: ["Cumbia del Half Pipe","La Rampa de Lanús","Ollie Sabrosón","Pibes del Skatepark","Cumbia del Grind","El Baile del Manual"]};
+  let a, out, comp, an, playing = false, timer = null, step = 0, nextT = 0, tr = null, n = 0, vol = .45, nb, genre = "mix";
   function rng(seed) { return () => { seed = (seed * 1664525 + 1013904223) >>> 0; return seed / 4294967296; }; }
+  const pick = (r, arr) => arr[Math.floor(r() * arr.length)];
+  const steps = f => Array.from({length: 16}, (_, k) => f(k));
   function make(i) {
-    const r = rng(i * 7919 + 13), punk = i % 3 === 2;
-    const scales = [[0,3,5,7,10],[0,2,3,7,8],[0,3,5,6,7,10]];
-    const sc = scales[Math.floor(r() * scales.length)], root = 36 + Math.floor(r() * 7);
-    const prog = [0, 3, 4, 2].map(() => sc[Math.floor(r() * sc.length)]);
-    const kick = punk ? [1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0] : [1,0,0,0,0,0,0,1,0,0,1,0,0,0,0,0].map((v, k) => v || (r() < .12 && k % 2 === 0) ? 1 : 0);
-    const snare = punk ? [0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0] : [0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,r() < .4 ? 1 : 0];
-    const hat = Array.from({length: 16}, (_, k) => punk ? 1 : (k % 2 === 0 ? 1 : (r() < .35 ? .6 : 0)));
-    const bass = Array.from({length: 16}, (_, k) => (kick[k] || r() < (punk ? .9 : .2)) ? sc[Math.floor(r() * 3)] : null);
-    return {punk, bpm: punk ? 168 + Math.floor(r() * 18) : 84 + Math.floor(r() * 12), root, prog, kick, snare, hat, bass,
-      name: NAMES[i % NAMES.length], swing: punk ? 0 : .12 + r() * .08};
+    const g = genre === "mix" ? GENRES[i % GENRES.length][0] : genre;
+    const r = rng(i * 7919 + 13 + g.length * 104729);
+    const minor = [[0,3,5,7,10],[0,2,3,7,8],[0,3,5,6,7,10]], major = [[0,2,4,7,9],[0,2,4,5,7,9,11]];
+    const sc = g === "cumbia" ? pick(r, [[0,2,3,5,7,8,10], minor[0]]) : g === "rock" && r() < .4 ? pick(r, major) : pick(r, minor);
+    const root = 36 + Math.floor(r() * 7);
+    const prog = g === "cumbia" ? [0, sc[3] ?? 5, sc[4] ?? 7, 0] : [0, 3, 4, 2].map(() => pick(r, sc));
+    const t = {g, root, prog, sc, swing: 0, hatDecay: .045, bassWave: "sine", bassCut: 500, bassDist: false, bassVol: .45,
+      chordIv: [0,3,7,10], chordWave: "triangle", chordCut: 1400, chordDist: false, chordVol: .06, chordLen: 15,
+      chord: steps(k => k === 0), lead: steps(() => null), leadWave: "square", conga: steps(() => null), guira: null, clap: false,
+      name: pick(r, NAMES[g])};
+    if (g === "boombap") Object.assign(t, {bpm: 84 + Math.floor(r() * 12), swing: .12 + r() * .08,
+      kick: [1,0,0,0,0,0,0,1,0,0,1,0,0,0,0,0].map((v, k) => v || (r() < .12 && k % 2 === 0) ? 1 : 0),
+      snare: [0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,r() < .4 ? 1 : 0], hat: steps(k => k % 2 === 0 ? 1 : (r() < .35 ? .6 : 0)), hatDecay: .05});
+    if (g === "punk") Object.assign(t, {bpm: 168 + Math.floor(r() * 18), kick: steps(k => k % 4 === 0 ? 1 : 0),
+      snare: steps(k => k % 8 === 4 ? 1 : 0), hat: steps(() => 1), chord: steps(k => k % 8 === 0), chordLen: 7.5,
+      chordIv: [0,7,12], chordWave: "sawtooth", chordCut: 2600, chordDist: true, chordVol: .07, bassWave: "sawtooth", bassCut: 900, bassDist: true, bassVol: .32, hatDecay: .04});
+    if (g === "rock") Object.assign(t, {bpm: 118 + Math.floor(r() * 22), kick: [1,0,0,0,0,0,1,0,1,0,r() < .5 ? 1 : 0,0,0,0,0,0],
+      snare: steps(k => k === 4 || k === 12 ? 1 : 0), hat: steps(k => k % 2 === 0 ? .8 : 0), chord: steps(k => k % 2 === 0), chordLen: 1.6,
+      chordIv: [0,7,12], chordWave: "sawtooth", chordCut: 1900, chordDist: true, chordVol: .06, bassWave: "sawtooth", bassCut: 700, bassVol: .36});
+    if (g === "electro") Object.assign(t, {bpm: 122 + Math.floor(r() * 7), kick: steps(k => k % 4 === 0 ? 1 : 0),
+      snare: steps(k => k === 4 || k === 12 ? 1 : 0), clap: true, hat: steps(k => k % 4 === 2 ? 1 : (k % 2 ? .35 : 0)), hatDecay: .11,
+      chord: steps(k => k === 0), chordLen: 15, chordIv: [0,7,10,15], chordWave: "sawtooth", chordCut: 900, chordVol: .035,
+      bassWave: "square", bassCut: 600, bassVol: .3, lead: steps(k => r() < .7 ? Math.floor(r() * sc.length) : null), leadWave: "square"});
+    if (g === "cumbia") Object.assign(t, {bpm: 92 + Math.floor(r() * 9), kick: steps(k => k === 0 || k === 8 ? 1 : 0),
+      snare: steps(k => k === 12 && r() < .3 ? 1 : 0), hat: steps(() => 0), guira: [1,.35,.75,.4],
+      conga: steps(k => k === 6 || k === 14 ? 0 : (k === 3 || k === 11) && r() < .7 ? 7 : null),
+      chord: steps(k => k % 4 === 2), chordLen: .9, chordIv: [12,16,19], chordWave: "triangle", chordCut: 2600, chordVol: .07,
+      bassWave: "sine", bassCut: 400, bassVol: .55, lead: steps(k => k % 2 === 0 && r() < .75 ? Math.floor(r() * sc.length) : null), leadWave: "square"});
+    if (g === "cumbia") t.bassLine = steps(k => k === 0 ? 0 : k === 8 ? 4 : (k === 6 || k === 14) && r() < .5 ? 2 : null);
+    t.bass = t.bassLine || steps(k => (t.kick[k] || r() < (g === "punk" ? .9 : g === "rock" ? .5 : g === "electro" ? (k % 4 === 2 ? 1 : 0) : .2)) ? (g === "electro" ? 0 : Math.floor(r() * 3)) : null);
+    return t;
   }
   const hz = m => 440 * Math.pow(2, (m - 69) / 12);
+  const deg = (i) => tr.sc[i % tr.sc.length] + 12 * Math.floor(i / tr.sc.length);
   function env(g, t0, v, d) { g.gain.setValueAtTime(v, t0); g.gain.exponentialRampToValueAtTime(.0001, t0 + d); }
   function kick(t0) { const o = a.createOscillator(), g = a.createGain(); o.frequency.setValueAtTime(140, t0);
     o.frequency.exponentialRampToValueAtTime(42, t0 + .12); env(g, t0, 1, .32); o.connect(g).connect(out); o.start(t0); o.stop(t0 + .35); }
@@ -597,24 +703,30 @@ const radio = (() => {
     s.buffer = nb; fl.type = type; fl.frequency.value = f; env(g, t0, v, d); s.connect(fl).connect(g).connect(out); s.start(t0, Math.random()); s.stop(t0 + d + .02); }
   function snare(t0) { noise(t0, 1800, "bandpass", .7, .2); const o = a.createOscillator(), g = a.createGain();
     o.frequency.value = 190; env(g, t0, .35, .1); o.connect(g).connect(out); o.start(t0); o.stop(t0 + .12); }
+  function clap(t0) { [0, .012, .024].forEach(d => noise(t0 + d, 1200, "bandpass", .5, .09)); }
+  function conga(t0, f) { const o = a.createOscillator(), g = a.createGain(); o.frequency.setValueAtTime(f * 1.4, t0);
+    o.frequency.exponentialRampToValueAtTime(f, t0 + .04); env(g, t0, .35, .18); o.connect(g).connect(out); o.start(t0); o.stop(t0 + .2); }
   function tone(t0, f, type, v, d, cut, dist) { const o = a.createOscillator(), fl = a.createBiquadFilter(), g = a.createGain();
     o.type = type; o.frequency.value = f; fl.type = "lowpass"; fl.frequency.value = cut; env(g, t0, v, d);
     let node = o.connect(fl); if (dist) { const ws = a.createWaveShaper(), c = new Float32Array(256);
       for (let k = 0; k < 256; k++) { const x = k / 128 - 1; c[k] = Math.tanh(x * 6); } ws.curve = c; node = node.connect(ws); }
     node.connect(g).connect(out); o.start(t0); o.stop(t0 + d + .05); }
-  function chord(t0, base, d) { (tr.punk ? [0, 7, 12] : [0, 3, 7, 10]).forEach((iv, k) => {
-      tone(t0 + (tr.punk ? 0 : k * .012), hz(base + 24 + iv), tr.punk ? "sawtooth" : "triangle", tr.punk ? .07 : .06, d, tr.punk ? 2600 : 1400, tr.punk); }); }
-  function crackle(t0, d) { if (tr.punk) return; for (let k = 0; k < 3; k++) if (Math.random() < .5) noise(t0 + Math.random() * d, 6000, "highpass", .05, .01); }
+  function chord(t0, base, d) { tr.chordIv.forEach((iv, k) => {
+      tone(t0 + (tr.g === "boombap" ? k * .012 : 0), hz(base + 24 + iv), tr.chordWave, tr.chordVol, d, tr.chordCut, tr.chordDist); }); }
+  function crackle(t0, d) { if (tr.g !== "boombap") return; for (let k = 0; k < 3; k++) if (Math.random() < .5) noise(t0 + Math.random() * d, 6000, "highpass", .05, .01); }
   function schedule() {
     const spb = 60 / tr.bpm / 4;
     while (nextT < a.currentTime + .12) {
       const s = step % 16, bar = Math.floor(step / 16) % 4, t0 = nextT + (s % 2 ? tr.swing * spb : 0);
       const base = tr.root + tr.prog[bar];
       if (tr.kick[s]) kick(t0);
-      if (tr.snare[s]) snare(t0);
-      if (tr.hat[s]) noise(t0, 8000, "highpass", .16 * tr.hat[s], tr.punk ? .04 : .05);
-      if (tr.bass[s] !== null) tone(t0, hz(base + tr.bass[s]), tr.punk ? "sawtooth" : "sine", tr.punk ? .32 : .5, spb * (tr.punk ? .9 : 1.8), tr.punk ? 900 : 500, tr.punk);
-      if (s === 0 || (tr.punk && s === 8)) chord(t0, base, spb * (tr.punk ? 7.5 : 15));
+      if (tr.snare[s]) tr.clap ? clap(t0) : snare(t0);
+      if (tr.hat[s]) noise(t0, 8000, "highpass", .16 * tr.hat[s], tr.hatDecay);
+      if (tr.guira) noise(t0, 6500, "highpass", .13 * tr.guira[s % 4], s % 4 === 0 ? .09 : .035);
+      if (tr.conga[s] !== null) conga(t0, hz(tr.root + 36 + tr.conga[s]));
+      if (tr.bass[s] !== null) tone(t0, hz(base + deg(tr.bass[s])), tr.bassWave, tr.bassVol, spb * (tr.g === "punk" ? .9 : tr.g === "cumbia" ? 2.2 : 1.8), tr.bassCut, tr.bassDist);
+      if (tr.chord[s]) chord(t0, base, spb * tr.chordLen);
+      if (tr.lead[s] !== null) tone(t0, hz(base + 36 + deg(tr.lead[s])), tr.leadWave, tr.g === "cumbia" ? .07 : .045, spb * (tr.g === "cumbia" ? 1.7 : .8), tr.g === "cumbia" ? 3200 : 1800 + 1400 * Math.sin(step / 24));
       if (s % 4 === 0) crackle(t0, spb * 4);
       nextT += spb; step++;
     }
@@ -624,13 +736,14 @@ const radio = (() => {
     out.gain.value = vol; out.connect(comp).connect(an).connect(a.destination); nb = noiseBuf(a, 2);
     draw();
   }
-  function load(i) { n = (i + 1000) % 1000; tr = make(n); step = 0; $("track").textContent = tr.name + (tr.punk ? " · punk" : " · boom bap"); save(); }
+  const label = () => tr.name + " · " + GENRES.find(x => x[0] === tr.g)[1].toLowerCase();
+  function load(i) { n = (i + 1000) % 1000; tr = make(n); step = 0; $("track").textContent = label(); save(); }
   function start() { if (!a) setup(); if (!tr) load(n); playing = true; nextT = a.currentTime + .05;
     timer = setInterval(schedule, 25); $("rplay").textContent = "❚❚"; $("radio").classList.add("play"); save(); }
   function stop() { playing = false; clearInterval(timer); $("rplay").textContent = "▶"; $("radio").classList.remove("play"); save(); }
   // the page has no fixed origin, so the radio settings live in skate3-mods.ini
   let saveT = null;
-  function save() { clearTimeout(saveT); saveT = setTimeout(() => { if (S.root) call("radio", JSON.stringify({on: playing, n, vol})); }, 800); }
+  function save() { clearTimeout(saveT); saveT = setTimeout(() => { if (S.root) call("radio", JSON.stringify({on: playing, n, vol, genre})); }, 800); }
   function draw() {
     const c = $("viz"), x = c.getContext("2d"), d = new Uint8Array(an.frequencyBinCount);
     (function f() { requestAnimationFrame(f); an.getByteFrequencyData(d); x.clearRect(0, 0, c.width, c.height);
@@ -638,16 +751,22 @@ const radio = (() => {
         x.fillStyle = i % 6 === 0 ? "#c6ff3d" : `rgba(255,${90 + i * 2},31,${.35 + v * .65})`; x.fillRect(i * w + 1, (c.height - h) / 2, w - 3, h); } })();
   }
   const saved = {on: true, n: Math.floor(Math.random() * 1000), vol: .45};
-  function show() { $("vol").value = Math.round(vol * 100); tr = make(n); $("track").textContent = tr.name + (tr.punk ? " · punk" : " · boom bap"); }
+  function showGenre() { $("rgen").textContent = genre === "mix" ? "Mix" : GENRES.find(x => x[0] === genre)[1]; }
+  function show() { $("vol").value = Math.round(vol * 100); tr = make(n); $("track").textContent = label(); showGenre(); }
   n = saved.n; vol = saved.vol; show();
   return {
     get wantsAutoplay() { return saved.on; },
     restore(json) { try { const o = JSON.parse(json); if (typeof o.n === "number") n = o.n; if (typeof o.vol === "number") vol = o.vol;
+      if (o.genre === "mix" || GENRES.some(x => x[0] === o.genre)) genre = o.genre;
       if (o.on === false) saved.on = false; if (out) out.gain.value = vol; if (!playing) show(); } catch (e) {} },
     toggle() { playing ? stop() : start(); },
     next() { load(n + 1); if (!playing) start(); },
     prev() { load(n - 1); if (!playing) start(); },
     volume(v) { vol = v; if (out) out.gain.value = v; save(); },
+    setGenre(g) { genre = g; showGenre(); $("gmenu").classList.remove("on"); sfx.tick(); load(n + 1); if (!playing) start(); },
+    menu() { $("gmenu").innerHTML = [["mix","Mix"]].concat(GENRES).map(([k, l]) => `<button class="${k === genre ? "on" : ""}" onclick="radio.setGenre('${k}')">${l}</button>`).join("");
+      const b = $("rgen").getBoundingClientRect(); $("gmenu").style.left = b.left + "px"; $("gmenu").classList.toggle("on"); },
+    pause() { if (playing) stop(); },
     get playing() { return playing; }
   };
 })();
@@ -656,6 +775,7 @@ document.addEventListener("pointerdown", () => { if (radio.wantsAutoplay && !rad
 
 // ------------------------------------------------------------------ boot
 (async function boot() {
+  win("");
   await refresh();
   if (S.radio) radio.restore(S.radio);
   if (!S.root) {

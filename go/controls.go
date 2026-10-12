@@ -130,6 +130,7 @@ func controlsState(root string) map[string]any {
 		"monitor": mon, "monitors": monitors(),
 		"mnk": tomlBool(m, "mnk_mode", false), "capture": tomlBool(m, "mnk_capture_mouse", false),
 		"sens": sens, "binds": binds,
+		"direct": tomlBool(m, "skate3_demo_path", false) && tomlBool(m, "skate3_demo_path_signed_in", false),
 	}
 }
 
@@ -190,4 +191,22 @@ type screen struct {
 	W       int  `json:"w"`
 	H       int  `json:"h"`
 	Primary bool `json:"primary"`
+}
+
+// setDirect turns on the recomp's own boot automation ("demo path") with the
+// real profile kept: no intro movie, the language screen and Press Start are
+// accepted by themselves and the boot dialogs too, straight into the career.
+// Input injection stops for good once gameplay starts.
+func setDirect(root string, on bool) (string, error) {
+	vals := [][2]string{{"skate3_demo_path", strconv.FormatBool(on)}, {"skate3_demo_path_signed_in", strconv.FormatBool(on)}}
+	if on {
+		vals = append(vals, [2]string{"skate3_demo_path_gameplay_inputs", `""`})
+	}
+	if err := setTomlValues(root, vals); err != nil {
+		return "", err
+	}
+	if on {
+		return T("Directo a tu partida: sin intro ni menús al arrancar", "Straight to your save: no intro or menus at startup"), nil
+	}
+	return T("Arranque normal, con intro y menús", "Normal startup, with intro and menus"), nil
 }

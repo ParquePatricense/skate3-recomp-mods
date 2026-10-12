@@ -13,6 +13,9 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
+	"time"
+	"unsafe"
 
 	webview2 "github.com/jchv/go-webview2"
 )
@@ -57,9 +60,118 @@ func runGUI() error {
 			w.Dispatch(func() { w.Eval(fmt.Sprintf("window.s3done(%d,%s)", id, b)) })
 		}()
 	})
+	hwnd := uintptr(w.Window())
+	w.Bind("s3win", func(mode string) string {
+		switch mode {
+		case "full", "window":
+			setFullscreen(hwnd, mode == "full")
+			saveWindowMode(mode)
+		case "toggle":
+			setFullscreen(hwnd, !uiFull)
+			saveWindowMode(map[bool]string{true: "full", false: "window"}[uiFull])
+		case "min":
+			pShowWindow.Call(hwnd, swMinimize)
+		case "close":
+			w.Terminate()
+		}
+		return map[bool]string{true: "full", false: "window"}[uiFull]
+	})
+	gameExitHook = func() {
+		w.Dispatch(func() {
+			pShowWindow.Call(hwnd, swRestore)
+			pSetForegroundWindow.Call(hwnd)
+			w.Eval("window.s3back && window.s3back()")
+		})
+	}
+	setFullscreen(hwnd, windowModeSetting() != "window")
 	w.SetHtml(indexHTML)
 	w.Run()
 	return nil
+}
+
+// The modder opens fullscreen (borderless, on its monitor) unless the user
+// switched it to a window; the choice is kept next to the remembered folder.
+const (
+	wsOverlappedWindow = 0x00CF0000
+	swMinimize         = 6
+	swRestore          = 9
+	swpNoSize          = 0x0001
+	swpNoMove          = 0x0002
+	swpNoZOrder        = 0x0004
+	swpFrameChanged    = 0x0020
+	swpNoOwnerZOrder   = 0x0200
+)
+
+type windowPlacement struct {
+	Length, Flags, ShowCmd uint32
+	Min, Max               point
+	Normal                 rect
+}
+
+var (
+	pSetWindowLongW      = user32.NewProc("SetWindowLongW")
+	pSetWindowPos        = user32.NewProc("SetWindowPos")
+	pGetWindowPlacement  = user32.NewProc("GetWindowPlacement")
+	pSetWindowPlacement  = user32.NewProc("SetWindowPlacement")
+	pShowWindow          = user32.NewProc("ShowWindow")
+	pSetForegroundWindow = user32.NewProc("SetForegroundWindow")
+	uiFull               bool
+	uiPlacement          windowPlacement
+)
+
+func setFullscreen(h uintptr, on bool) {
+	if h == 0 || on == uiFull {
+		return
+	}
+	style, _, _ := pGetWindowLongW.Call(h, gwlStyle)
+	if on {
+		uiPlacement.Length = uint32(unsafe.Sizeof(uiPlacement))
+		pGetWindowPlacement.Call(h, uintptr(unsafe.Pointer(&uiPlacement)))
+		pSetWindowLongW.Call(h, gwlStyle, style&^wsOverlappedWindow)
+		mon, _, _ := pMonitorFromWindow.Call(h, 2)
+		mi := monitorInfo{Size: uint32(unsafe.Sizeof(monitorInfo{}))}
+		pGetMonitorInfoW.Call(mon, uintptr(unsafe.Pointer(&mi)))
+		r := mi.Monitor
+		pSetWindowPos.Call(h, 0, uintptr(r.L), uintptr(r.T), uintptr(r.R-r.L), uintptr(r.B-r.T), swpNoOwnerZOrder|swpFrameChanged)
+	} else {
+		pSetWindowLongW.Call(h, gwlStyle, style|wsOverlappedWindow)
+		pSetWindowPlacement.Call(h, uintptr(unsafe.Pointer(&uiPlacement)))
+		pSetWindowPos.Call(h, 0, 0, 0, 0, 0, swpNoMove|swpNoSize|swpNoZOrder|swpNoOwnerZOrder|swpFrameChanged)
+	}
+	uiFull = on
+}
+
+func windowModeFile() string {
+	return filepath.Join(os.Getenv("APPDATA"), "Skate3-Mods", "ventana.txt")
+}
+
+func windowModeSetting() string {
+	b, _ := os.ReadFile(windowModeFile())
+	return strings.TrimSpace(string(b))
+}
+
+func saveWindowMode(mode string) {
+	os.MkdirAll(filepath.Dir(windowModeFile()), 0o755)
+	os.WriteFile(windowModeFile(), []byte(mode), 0o644)
+}
+
+// gameExitHook brings the modder back when the game closes.
+var gameExitHook func()
+
+// waitGameExit waits for the game to start and then to close.
+func waitGameExit() {
+	seen := false
+	for start := time.Now(); ; time.Sleep(2 * time.Second) {
+		_, running := findGamePID()
+		if running {
+			seen = true
+		} else if seen || time.Since(start) > 30*time.Second {
+			break
+		}
+	}
+	if gameExitHook != nil {
+		gameExitHook()
+	}
 }
 
 // windowSize scales the window to the screen's DPI (the exe is DPI aware)
