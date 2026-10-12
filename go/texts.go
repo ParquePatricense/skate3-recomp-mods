@@ -5,12 +5,14 @@
 package main
 
 import (
+	"bytes"
 	_ "embed"
 	"encoding/binary"
 	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
+	"sort"
 	"strings"
 	"unicode"
 )
@@ -265,98 +267,207 @@ func textsArchivePath(game string) (string, error) {
 	return p, nil
 }
 
+// bootLangs are the languages "straight to your save" can start in. The
+// recomp's boot automation always accepts English on the language screen, so
+// the chosen language's texts go into the English slot.
+var bootLangs = []struct{ key, name, src string }{
+	{"en", "English", "English"}, {"es", "Español", "Spanish"}, {"arg", "Español ARG", "Spanish"},
+	{"fr", "Français", "French"}, {"de", "Deutsch", "German"}, {"it", "Italiano", "Italian"},
+}
+
+func bootLangSrc(key string) string {
+	for _, l := range bootLangs {
+		if l.key == key {
+			return l.src
+		}
+	}
+	return ""
+}
+
+// wantedTexts says which miscboot.big entries the language mods change and
+// to what, built from the original archive: Español ARG in Dutch's slot
+// (ini texts = 1) and the boot language in English's slot (ini boot_lang).
+func wantedTexts(root string, orig *bigArchive) (map[string][]byte, int, error) {
+	c := loadConfig(root)
+	arg, boot := c["texts"] == "1", c["boot_lang"]
+	if boot == "en" || bootLangSrc(boot) == "" {
+		boot = ""
+	}
+	out := map[string][]byte{}
+	get := func(name string) ([]byte, error) {
+		i, err := orig.find(name)
+		if err != nil {
+			return nil, err
+		}
+		return orig.read(i)
+	}
+	rename := func(d []byte) ([]byte, error) {
+		d, _, err := rewriteTable(d, func(h uint32, s string) string {
+			if h == langNameHash {
+				return langNameAR
+			}
+			return s
+		})
+		return d, err
+	}
+	changed := 0
+	if arg {
+		es, err := get(textsEntry)
+		if err != nil {
+			return nil, 0, err
+		}
+		ar, n, err := rioplatensize(es)
+		if err != nil {
+			return nil, 0, err
+		}
+		changed = n
+		out["LANGUAGE_Dutch_Global_skate3ng.BIN"] = ar
+		for _, cp := range [][2]string{{"LANGUAGE_Spanish_HISTOGRAM_skate3ng.BIN", "LANGUAGE_Dutch_HISTOGRAM_skate3ng.BIN"},
+			{"LOCALE_SPANISH.loc", "LOCALE_DUTCH.loc"}} {
+			if out[cp[1]], err = get(cp[0]); err != nil {
+				return nil, 0, err
+			}
+		}
+		for _, lang := range []string{"English", "Spanish", "French", "German", "Italian", "Largest"} {
+			d, err := get("LANGUAGE_" + lang + "_Global_skate3ng.BIN")
+			if err != nil {
+				return nil, 0, err
+			}
+			if out["LANGUAGE_"+lang+"_Global_skate3ng.BIN"], err = rename(d); err != nil {
+				return nil, 0, err
+			}
+		}
+	}
+	if boot != "" {
+		src := bootLangSrc(boot)
+		var g []byte
+		var err error
+		if boot == "arg" {
+			es, err := get(textsEntry)
+			if err != nil {
+				return nil, 0, err
+			}
+			if g, _, err = rioplatensize(es); err != nil {
+				return nil, 0, err
+			}
+		} else if g, err = get("LANGUAGE_" + src + "_Global_skate3ng.BIN"); err != nil {
+			return nil, 0, err
+		}
+		if arg && boot != "arg" {
+			if g, err = rename(g); err != nil {
+				return nil, 0, err
+			}
+		}
+		out["LANGUAGE_English_Global_skate3ng.BIN"] = g
+		if out["LANGUAGE_English_HISTOGRAM_skate3ng.BIN"], err = get("LANGUAGE_" + src + "_HISTOGRAM_skate3ng.BIN"); err != nil {
+			return nil, 0, err
+		}
+		if out["LOCALE_ENGLISH.loc"], err = get("LOCALE_" + strings.ToUpper(src) + ".loc"); err != nil {
+			return nil, 0, err
+		}
+	}
+	return out, changed, nil
+}
+
+// applyTexts rebuilds miscboot.big from its original with whatever language
+// mods are on, or puts the original back when none is.
+func applyTexts(root, game string) (int, error) {
+	archive, err := textsArchivePath(game)
+	if err != nil {
+		return 0, err
+	}
+	backup := archive + textsBackup
+	if !exists(backup) {
+		if err := copyFile(archive, backup); err != nil {
+			return 0, err
+		}
+	}
+	orig, err := os.ReadFile(backup)
+	if err != nil {
+		return 0, err
+	}
+	big, err := parseBig(orig)
+	if err != nil {
+		return 0, err
+	}
+	want, changed, err := wantedTexts(root, big)
+	if err != nil {
+		return 0, err
+	}
+	if len(want) == 0 {
+		os.Remove(archive)
+		if err := os.Rename(backup, archive); err != nil {
+			return 0, fmt.Errorf(T("no pude restaurar %s (¿el juego está abierto?): %v", "could not restore %s (is the game running?): %v"), textsArchive, err)
+		}
+		os.Remove(archive + textsState)
+		return 0, nil
+	}
+	names := make([]string, 0, len(want))
+	for n := range want {
+		names = append(names, n)
+	}
+	sort.Strings(names)
+	for _, n := range names {
+		i, err := big.find(n)
+		if err != nil {
+			return 0, err
+		}
+		if err := big.replace(i, want[n]); err != nil {
+			return 0, err
+		}
+	}
+	tmp := archive + ".tmp"
+	if err := os.WriteFile(tmp, big.data, 0o644); err != nil {
+		return 0, err
+	}
+	if err := os.Rename(tmp, archive); err != nil {
+		os.Remove(tmp)
+		return 0, fmt.Errorf(T("no pude reemplazar %s (¿el juego está abierto?): %v", "could not replace %s (is the game running?): %v"), textsArchive, err)
+	}
+	if err := os.WriteFile(archive+textsState, []byte("1"), 0o644); err != nil {
+		return 0, err
+	}
+	recordStamp(archive, "texts")
+	return changed, nil
+}
+
+// textsPatched: is miscboot.big exactly what applyTexts writes?
+func textsPatched(root string) bool {
+	p := filepath.Join(bigDir(root), textsArchive)
+	orig, err := os.ReadFile(p + textsBackup)
+	if err != nil {
+		return false
+	}
+	ob, err := parseBig(orig)
+	if err != nil {
+		return false
+	}
+	want, _, err := wantedTexts(root, ob)
+	if err != nil || len(want) == 0 {
+		return false
+	}
+	for n, w := range want {
+		cur, err := readEntry(p, n)
+		if err != nil || !bytes.Equal(cur, w) {
+			return false
+		}
+	}
+	return true
+}
+
 // installTexts turns the Dutch slot of the language screen into
 // "Español ARG": Dutch gets the Rioplatense version of the Spanish texts
 // (plus Spanish's glyph histogram and locale file), and every language's
 // list shows "Español ARG" instead of "Nederlands". Spanish stays as is.
 func installTexts(root, game string) error {
-	archive, err := textsArchivePath(game)
-	if err != nil {
-		return err
-	}
-	backup := archive + textsBackup
-	if !exists(backup) {
-		fmt.Printf(T("Guardando copia del %s original...\n", "Backing up the original %s...\n"), textsArchive)
-		if err := copyFile(archive, backup); err != nil {
-			return err
-		}
-	}
-	orig, err := os.ReadFile(backup)
-	if err != nil {
-		return err
-	}
-	big, err := parseBig(orig)
-	if err != nil {
-		return err
-	}
-	get := func(name string) (int, []byte, error) {
-		i, err := big.find(name)
-		if err != nil {
-			return 0, nil, err
-		}
-		d, err := big.read(i)
-		return i, d, err
-	}
-	fmt.Println(T("Armando el idioma \"Español ARG\"...", "Building the \"Español ARG\" language..."))
-	_, es, err := get(textsEntry)
-	if err != nil {
-		return err
-	}
-	ar, changed, err := rioplatensize(es)
-	if err != nil {
-		return err
-	}
-	copies := [][2]string{
-		{"LANGUAGE_Spanish_HISTOGRAM_skate3ng.BIN", "LANGUAGE_Dutch_HISTOGRAM_skate3ng.BIN"},
-		{"LOCALE_SPANISH.loc", "LOCALE_DUTCH.loc"},
-	}
-	for _, c := range copies {
-		_, d, err := get(c[0])
-		if err != nil {
-			return err
-		}
-		i, _, err := get(c[1])
-		if err != nil {
-			return err
-		}
-		if err := big.replace(i, d); err != nil {
-			return err
-		}
-	}
-	for _, lang := range []string{"English", "Spanish", "French", "German", "Italian", "Largest", "Dutch"} {
-		i, d, err := get("LANGUAGE_" + lang + "_Global_skate3ng.BIN")
-		if err != nil {
-			return err
-		}
-		if lang == "Dutch" {
-			d = ar
-		} else if d, _, err = rewriteTable(d, func(h uint32, s string) string {
-			if h == langNameHash {
-				return langNameAR
-			}
-			return s
-		}); err != nil {
-			return err
-		}
-		if err := big.replace(i, d); err != nil {
-			return err
-		}
-	}
-	tmp := archive + ".tmp"
-	if err := os.WriteFile(tmp, big.data, 0o644); err != nil {
-		return err
-	}
-	if err := os.Rename(tmp, archive); err != nil {
-		os.Remove(tmp)
-		return fmt.Errorf(T("no pude reemplazar %s (¿el juego está abierto?): %v", "could not replace %s (is the game running?): %v"), textsArchive, err)
-	}
-	if err := os.WriteFile(archive+textsState, []byte("1"), 0o644); err != nil {
-		return err
-	}
-	recordStamp(archive, "texts")
 	c := loadConfig(root)
 	c["texts"] = "1"
 	if err := c.save(root); err != nil {
+		return err
+	}
+	fmt.Println(T("Armando el idioma \"Español ARG\"...", "Building the \"Español ARG\" language..."))
+	changed, err := applyTexts(root, game)
+	if err != nil {
 		return err
 	}
 	fmt.Printf(T("Listo: %d textos en rioplatense. Elegí \"Español ARG\" en la pantalla de idiomas del juego.\n",
@@ -365,21 +476,15 @@ func installTexts(root, game string) error {
 }
 
 func uninstallTexts(root, game string) error {
-	archive, err := textsArchivePath(game)
-	if err != nil {
-		return err
-	}
-	backup := archive + textsBackup
-	if exists(backup) {
-		os.Remove(archive)
-		if err := os.Rename(backup, archive); err != nil {
-			return fmt.Errorf(T("no pude restaurar %s (¿el juego está abierto?): %v", "could not restore %s (is the game running?): %v"), textsArchive, err)
-		}
-	}
-	os.Remove(archive + textsState)
 	c := loadConfig(root)
 	delete(c, "texts")
+	if c["boot_lang"] == "arg" {
+		c["boot_lang"] = "es"
+	}
 	if err := c.save(root); err != nil {
+		return err
+	}
+	if _, err := applyTexts(root, game); err != nil {
 		return err
 	}
 	fmt.Println(T("Listo: idiomas originales restaurados (vuelve el neerlandés).", "Done: original languages restored (Dutch is back)."))
@@ -388,5 +493,9 @@ func uninstallTexts(root, game string) error {
 
 func textsOn(game string) bool {
 	archive, err := textsArchivePath(game)
-	return err == nil && exists(archive+textsState) && exists(archive+textsBackup)
+	if err != nil || !exists(archive+textsState) || !exists(archive+textsBackup) {
+		return false
+	}
+	root, err := findRoot(game)
+	return err == nil && loadConfig(root)["texts"] == "1"
 }

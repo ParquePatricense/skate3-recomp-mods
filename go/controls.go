@@ -130,7 +130,9 @@ func controlsState(root string) map[string]any {
 		"monitor": mon, "monitors": monitors(),
 		"mnk": tomlBool(m, "mnk_mode", false), "capture": tomlBool(m, "mnk_capture_mouse", false),
 		"sens": sens, "binds": binds,
-		"direct": tomlBool(m, "skate3_demo_path", false) && tomlBool(m, "skate3_demo_path_signed_in", false),
+		"direct":    tomlBool(m, "skate3_demo_path", false) && tomlBool(m, "skate3_demo_path_signed_in", false),
+		"letterbox": tomlBool(m, "present_letterbox", true), "ssr": tomlBool(m, "skate3_native_render_scene_ssr", false),
+		"bootLang": loadConfig(root)["boot_lang"], "bootLangs": bootLangList(),
 	}
 }
 
@@ -196,17 +198,89 @@ type screen struct {
 // setDirect turns on the recomp's own boot automation ("demo path") with the
 // real profile kept: no intro movie, the language screen and Press Start are
 // accepted by themselves and the boot dialogs too, straight into the career.
-// Input injection stops for good once gameplay starts.
+// Input injection stops for good once gameplay starts. The automation always
+// accepts English, so the chosen language (setBootLang) goes in that slot.
 func setDirect(root string, on bool) (string, error) {
 	vals := [][2]string{{"skate3_demo_path", strconv.FormatBool(on)}, {"skate3_demo_path_signed_in", strconv.FormatBool(on)}}
+	c := loadConfig(root)
 	if on {
 		vals = append(vals, [2]string{"skate3_demo_path_gameplay_inputs", `""`})
+		if _, set := c["boot_prev_language"]; !set {
+			prev, ok := readToml(root)["user_language"]
+			if !ok {
+				prev = "-"
+			}
+			c["boot_prev_language"] = prev
+		}
+		vals = append(vals, [2]string{"user_language", "1"})
+		if bootLangSrc(c["boot_lang"]) == "" {
+			switch {
+			case c["texts"] == "1":
+				c["boot_lang"] = "arg"
+			case systemSpanish():
+				c["boot_lang"] = "es"
+			default:
+				c["boot_lang"] = "en"
+			}
+		}
+	} else {
+		if prev := c["boot_prev_language"]; prev != "" && prev != "-" {
+			vals = append(vals, [2]string{"user_language", prev})
+		} else if prev == "-" {
+			vals = append(vals, [2]string{"user_language", "1"})
+		}
+		delete(c, "boot_prev_language")
+		delete(c, "boot_lang")
+	}
+	if err := c.save(root); err != nil {
+		return "", err
 	}
 	if err := setTomlValues(root, vals); err != nil {
 		return "", err
 	}
-	if on {
-		return T("Directo a tu partida: sin intro ni menús al arrancar", "Straight to your save: no intro or menus at startup"), nil
+	if _, err := applyTexts(root, root); err != nil {
+		return "", err
 	}
-	return T("Arranque normal, con intro y menús", "Normal startup, with intro and menus"), nil
+	if on {
+		return T("Directo a tu partida en ", "Straight to your save in ") + bootLangName(c["boot_lang"]), nil
+	}
+	return T("Arranque normal, con intro y pantalla de idioma", "Normal startup, with intro and language screen"), nil
+}
+
+// setBootLang picks the language "straight to your save" starts in.
+func setBootLang(root, key string) (string, error) {
+	if bootLangSrc(key) == "" {
+		return "", errors.New("?")
+	}
+	if key == "arg" && !textsOn(root) {
+		if err := installTexts(root, root); err != nil {
+			return "", err
+		}
+	}
+	c := loadConfig(root)
+	c["boot_lang"] = key
+	if err := c.save(root); err != nil {
+		return "", err
+	}
+	if _, err := applyTexts(root, root); err != nil {
+		return "", err
+	}
+	return T("Entra en ", "Starts in ") + bootLangName(key), nil
+}
+
+func bootLangName(key string) string {
+	for _, l := range bootLangs {
+		if l.key == key {
+			return l.name
+		}
+	}
+	return key
+}
+
+func bootLangList() []map[string]string {
+	out := []map[string]string{}
+	for _, l := range bootLangs {
+		out = append(out, map[string]string{"key": l.key, "name": l.name})
+	}
+	return out
 }

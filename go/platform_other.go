@@ -54,3 +54,5 @@ func pickFolder(string) (string, error) {
 }
 
 func monitors() []screen { return nil }
+
+func copyToClipboard(string) error { return errors.New("only on Windows") }

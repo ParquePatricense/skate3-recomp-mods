@@ -7,8 +7,8 @@ Pack de mods **modular** para [skate3recomp](https://github.com/mchughalex/skate
 | 🎮 **Iconos PlayStation** | Cambia los iconos de Xbox por PS3, PS4 o PS5 |
 | 🖼️ **Presets gráficos** | Máxima calidad, Equilibrado, Rendimiento o Ultra liviano, con un clic |
 | 🖥️ **Pantalla** | VSync, pantalla completa y en qué monitor abre el juego (ideal con dos monitores) |
-| ⏩ **Directo a tu partida** | Arranca sin intro, sin pantalla de idioma ni Press Start, directo a tu carrera |
-| 🎧 **Tu música** | Tus MP3/WAV/WMA/M4A/FLAC suenan mientras jugás, con aleatorio, pausa al Alt+Tab y atajos (Ctrl+Alt+flechas) |
+| ⏩ **Directo a tu partida** | Arranca sin intro, sin pantalla de idioma ni Press Start, directo a tu carrera, en el idioma que elijas |
+| 🎮 **Modeador con joystick** | Se maneja con el mando (cruz, A, LB/RB, Start) o con atajos de teclado; radio con favoritos y DJ; reportar un problema en un toque |
 | ⌨️ **Teclado y mouse** | Activa el modo teclado+mouse del recomp, sensibilidad y remapeo de cada botón tocando la tecla |
 | 🔭 **FOV y ultrawide** | Campo de visión (40–120) y modo 21:9 |
 | 🛹 **Ayudante en sesión** | Alt+F4, reinicio rápido (Ctrl+Alt+R), prioridad alta, pantalla siempre encendida, cursor oculto, tecla Windows bloqueada, ventana recordada y no molestar |
@@ -54,7 +54,7 @@ Los iconos están en `game/data/big/fedynamic.big` ➡️ `buttons.rx2`. El mod 
 
 Escriben valores en `skate3.toml` (el mismo archivo que usa el menú *Settings* del juego, así que después podés seguir ajustando ahí). La primera vez se guarda tu `skate3.toml` como `skate3.toml.mods-original`; "Volver a mi configuración de antes" lo restaura.
 
-**Ultra liviano** apaga sombras, SSAO, bloom, rayos de sol, niebla y MSAA, y acorta la distancia de dibujado: para PCs muy justas. **Pantalla** escribe `vsync`, `fullscreen` y `monitor` (0 = automática, 1 = primera pantalla, 2 = segunda...).
+**Ultra liviano** apaga sombras, SSAO, bloom, rayos de sol, niebla y MSAA, y acorta la distancia de dibujado: para PCs muy justas. **Imagen** escribe `present_letterbox` (bandas negras) y `skate3_native_render_scene_ssr` (reflejos, experimental). **Pantalla** escribe `vsync`, `fullscreen` y `monitor` (0 = automática, 1 = primera pantalla, 2 = segunda...).
 
 ## ⌨️ Teclado y mouse
 
@@ -62,11 +62,7 @@ Activa `mnk_mode` del recomp: el mouse mueve la cámara (stick derecho) y cada b
 
 ## ⏩ Directo a tu partida
 
-Usa la automatización de arranque del propio recomp (`skate3_demo_path` con `skate3_demo_path_signed_in`, así conserva tu perfil y tu partida): saltea la intro, acepta la pantalla de idioma con el idioma marcado, el Press Start y los avisos de arranque, y deja de tocar los controles en cuanto empezás a patinar.
-
-## 🎧 Tu música
-
-Los temas del juego están en XMA dentro de archivos de RenderWare Audio (`.mus`) y no hay un conversor libre a XMA, así que no se reemplazan: el ayudante pasa tus canciones mientras jugás (como los soundtracks propios de la Xbox 360) y vos bajás *Música* a 0 en el audio del juego. Atajos: Ctrl+Alt+→ / ← siguiente y anterior, Ctrl+Alt+Espacio pausa, Ctrl+Alt+↑ / ↓ volumen.
+Usa la automatización de arranque del propio recomp (`skate3_demo_path` con `skate3_demo_path_signed_in`, así conserva tu perfil y tu partida): saltea la intro, acepta la pantalla de idioma, el Press Start y los avisos de arranque, y deja de tocar los controles en cuanto empezás a patinar. Esa automatización siempre acepta inglés, así que el idioma que elegís en el modeador (Español, Español ARG, Français, Deutsch, Italiano) se pone en el lugar del inglés dentro de `miscboot.big` mientras la opción está activa; al apagarla vuelve el original.
 
 ## 🧉 Español ARG
 
@@ -100,7 +96,7 @@ Corre en segundo plano mientras jugás y se cierra con el juego. Cada cosa se pr
 
 ## 📻 Radio Carverton
 
-El modeador tiene radio: beats de boom bap y skate punk generados en vivo con Web Audio, distintos en cada tema. No usa ningún archivo de música ni temas con copyright.
+El modeador tiene radio: boom bap, punk, rock, electro y cumbia generados en vivo con Web Audio, distintos en cada tema (elegís el género o mix). No usa ningún archivo de música ni temas con copyright.
 
 ## ⚙️ Cómo funciona
 
@@ -139,4 +135,4 @@ Fuente: Inter (SIL Open Font License, ver `tools/fonts/Inter-LICENSE.txt`).
 
 ### 🇬🇧 English
 
-Modular mod pack for skate3recomp with a Skate 3 styled modder window (and its own generated-beats radio): PlayStation button icons (PS3/PS4/PS5), graphics presets (including an ultra light one), FOV/ultrawide, VSync/fullscreen/which monitor the game opens on, keyboard and mouse play with click-to-remap keys, an in-game helper (Alt+F4, Ctrl+Alt+R quick restart, high priority, keep awake, hidden cursor, Windows key block, window memory, do not disturb), a desktop shortcut, a "straight to your save" boot, your own music folder played while you skate, an "Español ARG" (Rioplatense Spanish) language in Dutch's slot, and a shop with a skate3recomp new-version notice, repair, auto re-apply after recomp updates, diagnostics, one-click update and uninstall-all. Unzip anywhere and run `Skate3-Mods.exe` (it finds the skate3recomp folder by itself and copies itself there) to toggle modules, then hit DROP IN (or use the "Skate 3" shortcut) so the helper runs. Every module is reversible. Not affiliated with EA, Sony or the skate3recomp project.
+Modular mod pack for skate3recomp with a Skate 3 styled modder window (and its own generated-beats radio): PlayStation button icons (PS3/PS4/PS5), graphics presets (including an ultra light one), FOV/ultrawide, VSync/fullscreen/which monitor the game opens on, keyboard and mouse play with click-to-remap keys, an in-game helper (Alt+F4, Ctrl+Alt+R quick restart, high priority, keep awake, hidden cursor, Windows key block, window memory, do not disturb), a desktop shortcut, a "straight to your save" boot, an "Español ARG" (Rioplatense Spanish) language in Dutch's slot, and a shop with a skate3recomp new-version notice, repair, auto re-apply after recomp updates, diagnostics, one-click update and uninstall-all. Unzip anywhere and run `Skate3-Mods.exe` (it finds the skate3recomp folder by itself and copies itself there) to toggle modules, then hit DROP IN (or use the "Skate 3" shortcut) so the helper runs. Every module is reversible. Not affiliated with EA, Sony or the skate3recomp project.

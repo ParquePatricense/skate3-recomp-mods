@@ -208,9 +208,11 @@ body.full #winctl{display:flex}
 body.full #top{padding-top:34px}
 .opts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
 .opts .card{padding:14px 16px}.opts b{display:block;font-size:15px}.opts span{color:var(--dim);font-size:12.5px}
-.songs{columns:2;column-gap:24px;color:var(--dim);font-size:13px;margin:10px 0 0;padding-left:18px}
-.keys2{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}.keys2 span{padding:5px 10px;background:#191919;border:1px solid #2a2a2a;border-radius:8px;font-size:12.5px;color:var(--dim)}
-.keys2 b{color:var(--ink)}
+.langs{display:flex;flex-wrap:wrap;gap:8px}
+:focus-visible{outline:3px solid var(--lime);outline-offset:3px}
+textarea{width:100%;min-height:110px;background:#111;color:var(--ink);border:1px solid #333;border-radius:10px;padding:10px;font:14px "Segoe UI";resize:vertical;user-select:text}
+.decks{display:flex;gap:10px;flex-wrap:wrap}.decks .d{width:46px;height:110px;border-radius:23px;border:3px solid #050505;cursor:pointer}
+.decks .d.sel{outline:3px solid var(--orange);outline-offset:3px}
 #tip{padding:0 30px;color:var(--mute);font-size:12.5px;height:18px}
 #tip b{color:var(--orange2)}
 </style>
@@ -245,6 +247,7 @@ body.full #top{padding-top:34px}
 <div id="radio">
   <div class="tape"></div>
   <div class="meta"><b id="track">—</b><span>Radio Carverton · <span data-t="original"></span></span></div>
+  <button class="rb" id="rfav" onclick="radio.fav()" title="★">☆</button>
   <button class="rb" id="rgen" onclick="radio.menu()">Mix</button>
   <button class="rb" onclick="radio.prev()" title="⏮">⏮</button>
   <button class="rb main" id="rplay" onclick="radio.toggle()">▶</button>
@@ -275,13 +278,15 @@ const L = {
   argT:"Español ARG",argd:"Reemplaza \"Nederlands\" en la pantalla de idiomas por \"Español ARG\": voseo y vocabulario de acá. El español de siempre queda igual.",
   argBefore:"¿Quieres jugar? Haz un kickflip, colega.",argAfter:"¿Querés jugar? Hacé un kickflip, loco.",
   uiLang:"Idioma de esta ventana",
-  t_music:"Tu música",s_music:"Tus canciones suenan mientras patinás, como los soundtracks propios de la Xbox 360.",
-  musOn:"Tu música en el juego",musOnD:"El ayudante pasa tus canciones mientras jugás. Bajá Música a 0 en las opciones de audio del juego.",
-  musDir:"Carpeta de canciones",musPick:"Elegir carpeta",musOpen:"Abrir",musNone:"Todavía no elegiste carpeta.",musCount:"{n} canciones",
-  musShuf:"Orden aleatorio",musShufD:"Mezcla las canciones cada vez que jugás.",musFocus:"Pausar con Alt+Tab",musFocusD:"Si salís del juego, la música espera.",
-  musVol:"Volumen",musKeys:"Atajos mientras jugás",kNext:"siguiente",kPrev:"anterior",kPause:"pausa",kVol:"volumen",
-  musWhy:"¿Por qué no reemplaza la música del juego? Los temas del juego están en XMA dentro de archivos de RenderWare Audio, y no existe un conversor libre a XMA. Cuando lo haya, se suma.",
-  bootT:"Al arrancar",direct:"Directo a tu partida",directD:"Saltea la intro, la pantalla de idioma, el Press Start y los avisos de arranque, y entra a tu carrera. Toma el idioma que esté marcado.",
+  bootLangT:"Idioma al entrar directo",bootLangD:"El juego entra en este idioma sin mostrar la pantalla de idiomas.",
+  imgT:"Imagen",lbox:"Bandas negras",lboxD:"En pantallas que no son 16:9 deja bandas a los costados. Apagado estira la imagen.",
+  ssr:"Reflejos en vidrios y agua (experimental)",ssrD:"Reflejos en tiempo real. Pide más placa de video y a veces se ven manchas.",
+  modder:"El modeador",deckT:"Gráfico de la tabla",sfxT:"Sonidos del modeador",sfxD:"Los ruidos de ollie y aterrizaje al tocar botones.",
+  djT:"DJ de la radio",djD:"Una voz presenta cada tema de Radio Carverton.",
+  report:"Reportar un problema",reportD:"Arma el reporte con lo que pasó y lo copia para pegarlo en el chat.",reportQ:"¿Qué pasó? Contalo con tus palabras.",send:"Armar reporte",
+  favs:"Favoritos",noFavs:"Marcá temas con ☆ para armar tus favoritos.",
+  news:"Novedades de la v{v}",keysHelp:"Atajos: 1 a 7 cambian de pestaña, Enter hace Drop in, F11 pantalla completa. Con joystick: cruz para moverte, A elegir, LB/RB pestañas, Start Drop in.",
+  bootT:"Al arrancar",direct:"Directo a tu partida",directD:"Saltea la intro, la pantalla de idioma, el Press Start y los avisos de arranque, y entra a tu carrera en el idioma que elijas abajo.",
   afterT:"Al tocar Drop in",aMin:"Minimizar",aMinD:"Se esconde y vuelve sola cuando cerrás el juego.",aClose:"Cerrar",aCloseD:"El modeador se cierra; el ayudante sigue.",aStay:"Dejarlo abierto",aStayD:"Queda abierto detrás del juego.",
   back:"¡De vuelta!",backD:"Sesión terminada.",
   t_ctl:"Controles",s_ctl:"Jugá con teclado y mouse: activalo y elegí qué tecla aprieta cada botón del joystick.",
@@ -310,7 +315,7 @@ const L = {
   tips:["<b>Tip:</b> Ctrl+Alt+R reinicia el juego si se traba (con el ayudante).","<b>Tip:</b> en la intro, Enter o A la saltean.",
    "<b>Tip:</b> todo lo que actives se puede deshacer desde acá.","<b>Tip:</b> si actualizás el recomp, tus mods se vuelven a poner solos al jugar.",
    "<b>Tip:</b> el acceso directo del escritorio abre el juego con el ayudante.","<b>Tip:</b> Español ARG aparece en la pantalla de idiomas del juego, en lugar de Nederlands.",
-   "<b>Tip:</b> Alt+F4 cierra el juego como la X de la ventana.","<b>Tip:</b> en Controles podés jugar con teclado y mouse y cambiar cada tecla.","<b>Tip:</b> con dos monitores, elegí en Gráficos en cuál abre el juego.","<b>Tip:</b> F11 cambia el modeador entre pantalla completa y ventana.","<b>Tip:</b> tocá el género en la radio: boom bap, punk, rock, electro o cumbia."]},
+   "<b>Tip:</b> Alt+F4 cierra el juego como la X de la ventana.","<b>Tip:</b> en Controles podés jugar con teclado y mouse y cambiar cada tecla.","<b>Tip:</b> con dos monitores, elegí en Gráficos en cuál abre el juego.","<b>Tip:</b> F11 cambia el modeador entre pantalla completa y ventana.","<b>Tip:</b> tocá el género en la radio: boom bap, punk, rock, electro o cumbia.","<b>Tip:</b> el modeador se maneja con el joystick: LB/RB cambian de pestaña.","<b>Tip:</b> marcá con ☆ los temas de la radio que te gusten."]},
  en:{foot:"Modular mod pack · everything can be undone",drop:"Drop in",dropsub:"PLAY WITH MODS",folder:"GAME",original:"own music",
   t_buttons:"Buttons",t_gfx:"Graphics",t_session:"Session",t_lang:"Language",t_shop:"The shop",
   s_buttons:"Pick how the buttons look in the game. Swaps instantly and goes back to Xbox whenever you want.",
@@ -325,13 +330,15 @@ const L = {
   argT:"Español ARG",argd:"Turns \"Nederlands\" on the game's language screen into \"Español ARG\" (Rioplatense Spanish). Regular Spanish stays as is.",
   argBefore:"¿Quieres jugar? Haz un kickflip, colega.",argAfter:"¿Querés jugar? Hacé un kickflip, loco.",
   uiLang:"This window's language",
-  t_music:"Your music",s_music:"Your songs play while you skate, like the Xbox 360's custom soundtracks.",
-  musOn:"Your music in the game",musOnD:"The helper plays your songs while you play. Turn Music down to 0 in the game's audio options.",
-  musDir:"Songs folder",musPick:"Pick folder",musOpen:"Open",musNone:"No folder picked yet.",musCount:"{n} songs",
-  musShuf:"Shuffle",musShufD:"Mixes the songs every time you play.",musFocus:"Pause on Alt+Tab",musFocusD:"If you leave the game, the music waits.",
-  musVol:"Volume",musKeys:"Shortcuts while playing",kNext:"next",kPrev:"previous",kPause:"pause",kVol:"volume",
-  musWhy:"Why doesn't it replace the game's music? The game's songs are XMA inside RenderWare Audio archives, and there is no free XMA encoder. When there is one, it gets added.",
-  bootT:"At startup",direct:"Straight to your save",directD:"Skips the intro, the language screen, Press Start and the boot prompts, into your career. Uses whichever language is highlighted.",
+  bootLangT:"Language for straight-to-save",bootLangD:"The game starts in this language without showing the language screen.",
+  imgT:"Picture",lbox:"Black bars",lboxD:"On screens that aren't 16:9 it keeps bars on the sides. Off stretches the picture.",
+  ssr:"Glass and water reflections (experimental)",ssrD:"Real-time reflections. Needs more GPU and sometimes shows smudges.",
+  modder:"The modder",deckT:"Deck graphic",sfxT:"Modder sounds",sfxD:"The ollie and landing sounds on buttons.",
+  djT:"Radio DJ",djD:"A voice introduces every Radio Carverton track.",
+  report:"Report a problem",reportD:"Builds a report with what happened and copies it so you can paste it in the chat.",reportQ:"What happened? Tell it in your own words.",send:"Build report",
+  favs:"Favorites",noFavs:"Mark tracks with ☆ to build your favorites.",
+  news:"What's new in v{v}",keysHelp:"Shortcuts: 1 to 7 switch tabs, Enter is Drop in, F11 fullscreen. With a gamepad: D-pad to move, A to pick, LB/RB tabs, Start Drop in.",
+  bootT:"At startup",direct:"Straight to your save",directD:"Skips the intro, the language screen, Press Start and the boot prompts, into your career in the language you pick below.",
   afterT:"When you hit Drop in",aMin:"Minimize",aMinD:"Hides and comes back by itself when you close the game.",aClose:"Close",aCloseD:"The modder closes; the helper keeps going.",aStay:"Keep it open",aStayD:"Stays open behind the game.",
   back:"Back!",backD:"Session over.",
   t_ctl:"Controls",s_ctl:"Play with keyboard and mouse: turn it on and pick which key presses each pad button.",
@@ -360,7 +367,7 @@ const L = {
   tips:["<b>Tip:</b> Ctrl+Alt+R restarts the game if it hangs (with the helper).","<b>Tip:</b> Enter or A skips the intro.",
    "<b>Tip:</b> everything you turn on can be undone from here.","<b>Tip:</b> if you update the recomp, your mods come back by themselves when you play.",
    "<b>Tip:</b> the desktop shortcut starts the game with the helper.","<b>Tip:</b> Español ARG shows up on the game's language screen instead of Nederlands.",
-   "<b>Tip:</b> Alt+F4 closes the game like the window's X.","<b>Tip:</b> in Controls you can play with keyboard and mouse and change every key.","<b>Tip:</b> with two monitors, pick in Graphics which one the game opens on.","<b>Tip:</b> F11 switches the modder between fullscreen and window.","<b>Tip:</b> tap the genre on the radio: boom bap, punk, rock, electro or cumbia."]}
+   "<b>Tip:</b> Alt+F4 closes the game like the window's X.","<b>Tip:</b> in Controls you can play with keyboard and mouse and change every key.","<b>Tip:</b> with two monitors, pick in Graphics which one the game opens on.","<b>Tip:</b> F11 switches the modder between fullscreen and window.","<b>Tip:</b> tap the genre on the radio: boom bap, punk, rock, electro or cumbia.","<b>Tip:</b> the modder works with a gamepad: LB/RB switch tabs.","<b>Tip:</b> mark the radio tracks you like with ☆."]}
 };
 let S = {en:false}, page = "buttons";
 const t = k => (S.en ? L.en : L.es)[k] ?? k;
@@ -399,8 +406,8 @@ function toast(title, m, bad) {
   $("toasts").appendChild(el);
   setTimeout(() => { el.classList.add("out"); setTimeout(() => el.remove(), 450); }, bad ? 7000 : 3600);
 }
-function modal(title, text, buttons) {
-  $("mt").textContent = title; $("mp").textContent = text; $("ma").innerHTML = "";
+function modal(title, text, buttons, html) {
+  $("mt").textContent = title; if (html) $("mp").innerHTML = html; else $("mp").textContent = text; $("ma").innerHTML = "";
   buttons.forEach(([label, cls, fn]) => { const b = document.createElement("button");
     b.className = "btn " + cls; b.textContent = label; b.onclick = () => { $("modal").classList.remove("on"); fn && fn(); };
     $("ma").appendChild(b); });
@@ -409,7 +416,7 @@ function modal(title, text, buttons) {
 const sw = (on, onclick) => `<button class="sw ${on ? "on" : ""}" onclick="${onclick}"><span class="board"></span></button>`;
 const row = (ic, name, desc, ctl) => `<div class="row"><div class="ic">${ic}</div><div class="tx"><b>${esc(name)}</b><span>${esc(desc)}</span></div>${ctl}</div>`;
 
-const PAGES = [["buttons","🎮"],["gfx","🖼️"],["ctl","⌨️"],["session","🛹"],["music","🎧"],["lang","🧉"],["shop","🔧"]];
+const PAGES = [["buttons","🎮"],["gfx","🖼️"],["ctl","⌨️"],["session","🛹"],["lang","🧉"],["shop","🔧"]];
 function render() {
   document.documentElement.lang = S.en ? "en" : "es";
   document.querySelectorAll("[data-t]").forEach(e => e.textContent = t(e.dataset.t));
@@ -427,13 +434,14 @@ function render() {
     if (S.ctl && S.ctl.mnk) sum.push(S.en ? "Keyboard" : "Teclado");
     if (S.ctl && S.ctl.vsync) sum.push("VSync");
     if (S.ctl && S.ctl.direct) sum.push(S.en ? "Direct" : "Directo");
-    if (S.music && S.music.on) sum.push("🎧 " + S.music.count);
     const on = (S.features || []).filter(f => f.on).length; if (on) sum.push(on + (S.en ? " helpers" : " ayudas"));
   }
   $("sum").innerHTML = sum.map(x => `<span>${esc(x)}</span>`).join("");
   $("psub").textContent = t("s_" + page);
   if (!S.root) return;
-  $("pages").innerHTML = `<div class="page on">${({buttons, gfx, ctl, session, music, lang, shop})[page]()}</div>`;
+  $("pages").innerHTML = `<div class="page on">${({buttons, gfx, ctl, session, lang, shop})[page]()}</div>`;
+  document.querySelectorAll("#pages .pick,#pages .key").forEach(e => e.tabIndex = 0);
+  applyPrefs();
 }
 function go(p) { page = p; sfx.tick(); render(); $("pages").scrollTop = 0; }
 
@@ -466,6 +474,9 @@ function gfx() {
     <div class="sec"><h2 class="h">${t("screen")}</h2>
       ${row("🌀", t("vsync"), t("vsyncd"), sw(c.vsync, `act('vsync','${c.vsync ? "off" : "on"}')`))}
       ${row("⛶", t("fs"), t("fsd"), sw(c.fullscreen, `act('fullscreen','${c.fullscreen ? "off" : "on"}')`))}</div>
+    <div class="sec"><h2 class="h">${t("imgT")}</h2>
+      ${row("▭", t("lbox"), t("lboxD"), sw(c.letterbox, `act('letterbox','${c.letterbox ? "off" : "on"}')`))}
+      ${row("💧", t("ssr"), t("ssrD"), sw(c.ssr, `act('ssr','${c.ssr ? "off" : "on"}')`))}</div>
     ${mons.length ? `<div class="sec"><h2 class="h">${t("whereT")}</h2><p>${t("whered")}</p><div class="scr">
       ${[{n: 0}].concat(mons).map(m => `<div class="card pick ${c.monitor === m.n || (m.n === 0 && !mons.some(x => x.n === c.monitor)) ? "sel" : ""}" data-tag="✓" onclick="act('monitor','${m.n}')">
         <div class="mon">${m.n || "A"}</div><b>${m.n ? (m.primary ? t("main") : t("scr") + " " + m.n) : t("auto")}</b>
@@ -526,28 +537,13 @@ const FICON = {altf4:"⌨️",restart:"🔁",priority:"⚡",awake:"☀️",curso
 function session() {
   const ap = S.afterPlay || "min", opt = (k, n, d) => `<div class="card pick ${ap === k ? "sel" : ""}" data-tag="✓" onclick="act('afterplay','${k}')"><b>${n}</b><span>${d}</span></div>`;
   return `<div class="sec"><h2 class="h">${t("bootT")}</h2>
-     ${row("⏩", t("direct"), t("directD"), sw(S.ctl.direct, `act('direct','${S.ctl.direct ? "off" : "on"}')`))}</div>
+     ${row("⏩", t("direct"), t("directD"), sw(S.ctl.direct, `act('direct','${S.ctl.direct ? "off" : "on"}')`))}
+     ${S.ctl.direct ? `<div class="card" style="margin-top:8px"><b>${t("bootLangT")}</b><div class="sub" style="color:var(--dim);font-size:12.5px;margin:2px 0 12px">${t("bootLangD")}</div>
+       <div class="langs">${S.ctl.bootLangs.map(l => `<button class="btn ${S.ctl.bootLang === l.key ? "hot" : ""}" onclick="act('bootlang','${l.key}')">${esc(l.name)}</button>`).join("")}</div></div>` : ""}</div>
     <div class="sec"><h2 class="h">${t("afterT")}</h2><div class="opts">${opt("min", t("aMin"), t("aMinD"))}${opt("close", t("aClose"), t("aCloseD"))}${opt("stay", t("aStay"), t("aStayD"))}</div></div>
     <div class="sec"><h2 class="h">${t("helper")}</h2>
      ${S.features.map(f => row(FICON[f.key] || "•", f.name, f.desc, sw(f.on, `act('feature','${f.key}=${f.on ? "off" : "on"}')`))).join("")}</div>
     <div class="sec">${row("🖱️", t("shortcut"), t("shortcutd"), sw(S.shortcut, `act('shortcut','${S.shortcut ? "off" : "on"}')`))}</div>`;
-}
-function music() {
-  const m = S.music;
-  return `<div class="sec">
-      ${row("🎧", t("musOn"), t("musOnD"), sw(m.on, `act('music','${m.on ? "off" : "on"}')`))}
-      ${row("📂", t("musDir"), m.dir ? m.dir + " · " + t("musCount").replace("{n}", m.count) : t("musNone"), `<div style="display:flex;gap:8px">
-         <button class="btn hot" onclick="act('music','dir')">${t("musPick")}</button>${m.dir ? `<button class="btn" onclick="call('music','open')">${t("musOpen")}</button>` : ""}</div>`)}
-      ${row("🔀", t("musShuf"), t("musShufD"), sw(m.shuffle, `act('music','shuffle=${m.shuffle ? "off" : "on"}')`))}
-      ${row("⏸️", t("musFocus"), t("musFocusD"), sw(m.focus, `act('music','focus=${m.focus ? "off" : "on"}')`))}</div>
-    <div class="sec grid g2"><div class="ramp"><div class="h" style="font-size:20px">${t("musVol")}</div>
-        <div class="val h"><span id="mvol">${m.vol}</span><small>%</small></div>
-        <input type="range" min="0" max="100" step="5" value="${m.vol}" oninput="$('mvol').textContent=this.value" onchange="call('music','vol='+this.value)"></div>
-      <div class="card"><div class="h" style="font-size:20px">${t("musKeys")}</div><div class="keys2">
-        <span><b>Ctrl+Alt+→</b> ${t("kNext")}</span><span><b>Ctrl+Alt+←</b> ${t("kPrev")}</span>
-        <span><b>Ctrl+Alt+${S.en ? "Space" : "Espacio"}</b> ${t("kPause")}</span><span><b>Ctrl+Alt+↑↓</b> ${t("kVol")}</span></div></div></div>
-    ${m.names.length ? `<div class="sec"><ol class="songs">${m.names.map(n => `<li>${esc(n)}</li>`).join("")}</ol></div>` : ""}
-    <div class="sec"><p>${t("musWhy")}</p></div>`;
 }
 function lang() {
   return `<div class="sec"><div class="card"><div style="display:flex;align-items:center;gap:16px">
@@ -568,7 +564,14 @@ function shop() {
          <button class="btn" onclick="act('folder','game','${t("fGame")}')">${t("fGame")}</button>
          <button class="btn" onclick="act('folder','saves','${t("fSaves")}')">${t("fSaves")}</button>
          <button class="btn" onclick="act('folder','data','${t("fData")}')">${t("fData")}</button></div>`)}
-      ${row("🔀", t("chg"), "", `<button class="btn" onclick="pickFolder()">${t("pick")}</button>`)}</div>
+      ${row("🔀", t("chg"), "", `<button class="btn" onclick="pickFolder()">${t("pick")}</button>`)}
+      ${row("📣", t("report"), t("reportD"), `<button class="btn" onclick="askReport()">${t("report")}</button>`)}</div>
+    <div class="sec"><h2 class="h">${t("modder")}</h2>
+      <div class="card"><b>${t("deckT")}</b><div class="decks" style="margin-top:10px">${Object.keys(DECKS).map(k => `<div class="d ${deckKey() === k ? "sel" : ""}" tabindex="0" style="background:${DECKS[k]}" onclick="setPref('deck','${k}')"></div>`).join("")}</div></div>
+      <div style="height:8px"></div>
+      ${row("🔊", t("sfxT"), t("sfxD"), sw(sfx.on, `setPref('sfx','${sfx.on ? "0" : "1"}')`))}
+      ${row("🎙️", t("djT"), t("djD"), sw(S.prefs?.dj === "1", `setPref('dj','${S.prefs?.dj === "1" ? "0" : "1"}')`))}
+      <p style="color:var(--mute);font-size:12.5px;margin-top:12px">${t("keysHelp")}</p></div>
     <div class="sec"><h2 class="h" style="color:#ff8a8a">💀 ${t("hom")}</h2>
       ${row("🧨", t("uninst"), t("uninstd"), `<button class="btn danger" onclick="askUninstall()">${t("uninst")}</button>`)}</div>`;
 }
@@ -597,10 +600,86 @@ function doUpdate() {
 
 async function checkRecomp(manual) {
   const r = await call("recompcheck"), [have, tag] = (r.msg || "").split("|");
+  if (!manual && $("modal").classList.contains("on")) return;
   if (!tag) { if (manual) toast("skate3recomp", t("noupd")); return; }
   modal(t("recompT").replace("{v}", "v" + tag), t("recompd").replace("{h}", "v" + have),
     [[t("recompSkip"), "", () => call("recompskip", tag)], [t("later"), "", null], [t("recompGo"), "hot", () => call("recompopen")]]);
 }
+const DECKS = {
+  clasica: "repeating-linear-gradient(115deg,#0c0c0c 0 3px,#121212 3px 6px)",
+  fuego: "linear-gradient(0deg,#140800 0 30%,#ff5a1f 55%,#ffb020 70%,#140800 85%)",
+  damero: "repeating-conic-gradient(#111 0 25%,#eee 0 50%) 0 0/22px 22px",
+  camuflado: "radial-gradient(circle at 30% 20%,#3d4a2a 0 18%,transparent 19%),radial-gradient(circle at 70% 60%,#2a3320 0 22%,transparent 23%),radial-gradient(circle at 40% 85%,#55603a 0 16%,transparent 17%),#1d2416",
+  madera: "repeating-linear-gradient(90deg,#6b4423 0 6px,#7a5230 6px 9px,#5c3a1e 9px 14px)",
+  celeste: "linear-gradient(180deg,#74acdf 0 33%,#fff 33% 66%,#74acdf 66%)"};
+const deckKey = () => DECKS[S.prefs?.deck] ? S.prefs.deck : "clasica";
+function applyPrefs() {
+  const k = deckKey(); $("deck").style.background = k === "clasica" ? DECKS[k] : "linear-gradient(rgba(8,8,8,.62),rgba(8,8,8,.62))," + DECKS[k];
+  sfx.on = S.prefs?.sfx !== "0";
+}
+async function setPref(k, v) { await call("pref", k + "=" + v); await refresh(); sfx.tick(); }
+function askReport() {
+  modal(t("report"), "", [[t("cancel"), "", null], [t("send"), "hot", () => act("report", $("rtext").value, t("report"))]],
+    `${esc(t("reportQ"))}<br><br><textarea id="rtext"></textarea>`);
+  setTimeout(() => $("rtext").focus(), 50);
+}
+const CHANGES = {
+  "3.3.0": {es: ["Directo a tu partida: elegís el idioma en que entra (antes entraba siempre en inglés).",
+      "Radio: favoritos (☆) y DJ que presenta los temas.", "Manejo con joystick y atajos de teclado en el modeador.",
+      "Gráficos: bandas negras y reflejos en vidrios y agua.", "El taller: reportar un problema, gráfico de la tabla y sonidos del modeador.",
+      "Se sacó Tu música."],
+    en: ["Straight to your save: pick the language it starts in (it always started in English).",
+      "Radio: favorites (☆) and a DJ that introduces tracks.", "Gamepad control and keyboard shortcuts in the modder.",
+      "Graphics: black bars and glass and water reflections.", "The shop: report a problem, deck graphic and modder sounds.",
+      "Your music was removed."]}};
+function showNews() {
+  const seen = S.prefs?.seen;
+  if (!S.root || seen === S.version) return;
+  call("pref", "seen=" + S.version);
+  const c = CHANGES[S.version]; if (!seen || !c) return;
+  modal(t("news").replace("{v}", S.version), "", [[t("ok"), "hot", null]], "<ul>" + c[S.en ? "en" : "es"].map(x => `<li>${esc(x)}</li>`).join("") + "</ul>");
+}
+// keyboard: 1-7 tabs, Enter = Drop in (when nothing is focused), Enter/Space click focused cards
+addEventListener("keydown", e => {
+  if (listening || e.target.tagName === "TEXTAREA" || e.target.tagName === "INPUT" && e.target.type !== "range") return;
+  if ($("modal").classList.contains("on")) { if (e.key === "Escape") $("modal").classList.remove("on"); return; }
+  const k = +e.key;
+  if (k >= 1 && k <= PAGES.length && !e.ctrlKey && !e.altKey) { go(PAGES[k - 1][0]); return; }
+  if ((e.key === "Enter" || e.key === " ") && document.activeElement?.matches?.(".pick,.d,.key")) { e.preventDefault(); document.activeElement.click(); return; }
+  if (e.key === "Enter" && (document.activeElement === document.body || !document.activeElement)) dropIn();
+});
+// gamepad: D-pad / left stick move between controls, A picks, B closes, LB/RB tabs, Start = Drop in
+const FOCUSABLE = "#nav button,#drop,#pages button,#pages .pick,#pages .key,#pages .d,#pages input[type=range],#modal.on .act button,#radio button";
+function moveFocus(dx, dy) {
+  const els = [...document.querySelectorAll($("modal").classList.contains("on") ? "#modal.on .act button,#modal textarea" : FOCUSABLE)].filter(e => e.offsetParent);
+  const cur = document.activeElement && els.includes(document.activeElement) ? document.activeElement : null;
+  if (!cur) { els[0]?.focus(); return; }
+  if (cur.type === "range" && dx) { cur.value = +cur.value + dx * (+cur.step || 1) * 5; cur.dispatchEvent(new Event("input")); cur.dispatchEvent(new Event("change")); return; }
+  const r = cur.getBoundingClientRect(), cx = r.left + r.width / 2, cy = r.top + r.height / 2;
+  let best = null, bd = Infinity;
+  for (const e of els) { if (e === cur) continue; const q = e.getBoundingClientRect(), ex = q.left + q.width / 2, ey = q.top + q.height / 2;
+    const ddx = ex - cx, ddy = ey - cy; if ((dx && Math.sign(ddx) !== dx) || (dy && Math.sign(ddy) !== dy)) continue;
+    const d = dx ? Math.abs(ddx) + 2 * Math.abs(ddy) : Math.abs(ddy) + 2 * Math.abs(ddx); if (d < bd) { bd = d; best = e; } }
+  if (best) { best.focus(); best.scrollIntoView({block: "nearest"}); sfx.tick(); }
+}
+let padPrev = [], padRepeat = 0;
+(function pad() {
+  requestAnimationFrame(pad);
+  const gp = [...(navigator.getGamepads ? navigator.getGamepads() : [])].find(g => g);
+  if (!gp || !document.hasFocus()) return;
+  const b = gp.buttons.map(x => x.pressed), ax = gp.axes;
+  const dir = [b[14] || ax[0] < -.6 ? -1 : b[15] || ax[0] > .6 ? 1 : 0, b[12] || ax[1] < -.6 ? -1 : b[13] || ax[1] > .6 ? 1 : 0];
+  const edge = i => b[i] && !padPrev[i];
+  if (dir[0] || dir[1]) { if (padRepeat-- <= 0) { moveFocus(dir[0], dir[0] ? 0 : dir[1]); padRepeat = padPrev.dir ? 9 : 22; } padPrev.dir = true; }
+  else { padRepeat = 0; padPrev.dir = false; }
+  if (edge(0)) document.activeElement?.click?.();
+  if (edge(1)) { $("modal").classList.remove("on"); $("gmenu").classList.remove("on"); stopListen(); }
+  const pi = PAGES.findIndex(p => p[0] === page);
+  if (edge(4)) go(PAGES[(pi - 1 + PAGES.length) % PAGES.length][0]);
+  if (edge(5)) go(PAGES[(pi + 1) % PAGES.length][0]);
+  if (edge(9)) dropIn();
+  padPrev = Object.assign(b, {dir: padPrev.dir});
+})();
 let radioWasOn = false;
 async function dropIn() {
   radioWasOn = radio.playing; radio.pause();
@@ -661,8 +740,9 @@ const radio = (() => {
   function rng(seed) { return () => { seed = (seed * 1664525 + 1013904223) >>> 0; return seed / 4294967296; }; }
   const pick = (r, arr) => arr[Math.floor(r() * arr.length)];
   const steps = f => Array.from({length: 16}, (_, k) => f(k));
-  function make(i) {
-    const g = genre === "mix" ? GENRES[i % GENRES.length][0] : genre;
+  let favs = [], fi = 0;
+  function make(i, forced) {
+    const g = forced || (genre === "mix" || genre === "fav" ? GENRES[i % GENRES.length][0] : genre);
     const r = rng(i * 7919 + 13 + g.length * 104729);
     const minor = [[0,3,5,7,10],[0,2,3,7,8],[0,3,5,6,7,10]], major = [[0,2,4,7,9],[0,2,4,5,7,9,11]];
     const sc = g === "cumbia" ? pick(r, [[0,2,3,5,7,8,10], minor[0]]) : g === "rock" && r() < .4 ? pick(r, major) : pick(r, minor);
@@ -737,13 +817,30 @@ const radio = (() => {
     draw();
   }
   const label = () => tr.name + " · " + GENRES.find(x => x[0] === tr.g)[1].toLowerCase();
-  function load(i) { n = (i + 1000) % 1000; tr = make(n); step = 0; $("track").textContent = label(); save(); }
+  function load(i, dir = 1) {
+    if (genre === "fav" && favs.length) { fi = (fi + dir + favs.length) % favs.length; n = favs[fi].n; tr = make(n, favs[fi].g); }
+    else { n = (i + 1000) % 1000; tr = make(n); }
+    step = 0; showTrack(); save(); if (playing) dj();
+  }
+  const isFav = () => favs.some(f => f.n === n && f.g === tr.g);
+  function showTrack() { $("track").textContent = label(); $("rfav").textContent = isFav() ? "★" : "☆"; }
+  // DJ: a voice says the track name between songs (Windows' own voices)
+  function dj() {
+    if (S.prefs?.dj !== "1" || !window.speechSynthesis) return;
+    speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance((S.en ? "Radio Carverton. Now playing: " : "Radio Carverton. Suena: ") + tr.name);
+    const want = S.en ? "en" : "es", v = speechSynthesis.getVoices().filter(v => v.lang.startsWith(want));
+    if (v.length) u.voice = v.find(x => /AR|419|MX/.test(x.lang)) || v[0];
+    u.lang = S.en ? "en-US" : "es-AR"; u.rate = 1.05;
+    if (out) { out.gain.setTargetAtTime(vol * .35, a.currentTime, .1); u.onend = () => out.gain.setTargetAtTime(vol, a.currentTime, .3); }
+    speechSynthesis.speak(u);
+  }
   function start() { if (!a) setup(); if (!tr) load(n); playing = true; nextT = a.currentTime + .05;
     timer = setInterval(schedule, 25); $("rplay").textContent = "❚❚"; $("radio").classList.add("play"); save(); }
   function stop() { playing = false; clearInterval(timer); $("rplay").textContent = "▶"; $("radio").classList.remove("play"); save(); }
   // the page has no fixed origin, so the radio settings live in skate3-mods.ini
   let saveT = null;
-  function save() { clearTimeout(saveT); saveT = setTimeout(() => { if (S.root) call("radio", JSON.stringify({on: playing, n, vol, genre})); }, 800); }
+  function save() { clearTimeout(saveT); saveT = setTimeout(() => { if (S.root) call("radio", JSON.stringify({on: playing, n, vol, genre, favs})); }, 800); }
   function draw() {
     const c = $("viz"), x = c.getContext("2d"), d = new Uint8Array(an.frequencyBinCount);
     (function f() { requestAnimationFrame(f); an.getByteFrequencyData(d); x.clearRect(0, 0, c.width, c.height);
@@ -751,20 +848,23 @@ const radio = (() => {
         x.fillStyle = i % 6 === 0 ? "#c6ff3d" : `rgba(255,${90 + i * 2},31,${.35 + v * .65})`; x.fillRect(i * w + 1, (c.height - h) / 2, w - 3, h); } })();
   }
   const saved = {on: true, n: Math.floor(Math.random() * 1000), vol: .45};
-  function showGenre() { $("rgen").textContent = genre === "mix" ? "Mix" : GENRES.find(x => x[0] === genre)[1]; }
-  function show() { $("vol").value = Math.round(vol * 100); tr = make(n); $("track").textContent = label(); showGenre(); }
+  function showGenre() { $("rgen").textContent = genre === "mix" ? "Mix" : genre === "fav" ? "★" : GENRES.find(x => x[0] === genre)[1]; }
+  function show() { $("vol").value = Math.round(vol * 100); tr = make(n); showTrack(); showGenre(); }
   n = saved.n; vol = saved.vol; show();
   return {
     get wantsAutoplay() { return saved.on; },
     restore(json) { try { const o = JSON.parse(json); if (typeof o.n === "number") n = o.n; if (typeof o.vol === "number") vol = o.vol;
-      if (o.genre === "mix" || GENRES.some(x => x[0] === o.genre)) genre = o.genre;
+      if (Array.isArray(o.favs)) favs = o.favs.filter(f => typeof f.n === "number" && GENRES.some(x => x[0] === f.g));
+      if (o.genre === "mix" || (o.genre === "fav" && favs.length) || GENRES.some(x => x[0] === o.genre)) genre = o.genre;
       if (o.on === false) saved.on = false; if (out) out.gain.value = vol; if (!playing) show(); } catch (e) {} },
     toggle() { playing ? stop() : start(); },
     next() { load(n + 1); if (!playing) start(); },
-    prev() { load(n - 1); if (!playing) start(); },
+    prev() { load(n - 1, -1); if (!playing) start(); },
+    fav() { if (!tr) return; if (isFav()) favs = favs.filter(f => !(f.n === n && f.g === tr.g)); else favs.push({n, g: tr.g});
+      sfx.tick(); showTrack(); save(); },
     volume(v) { vol = v; if (out) out.gain.value = v; save(); },
-    setGenre(g) { genre = g; showGenre(); $("gmenu").classList.remove("on"); sfx.tick(); load(n + 1); if (!playing) start(); },
-    menu() { $("gmenu").innerHTML = [["mix","Mix"]].concat(GENRES).map(([k, l]) => `<button class="${k === genre ? "on" : ""}" onclick="radio.setGenre('${k}')">${l}</button>`).join("");
+    setGenre(g) { if (g === "fav" && !favs.length) { toast("★", t("noFavs"), true); return; } genre = g; fi = -1; showGenre(); $("gmenu").classList.remove("on"); sfx.tick(); load(n + 1); if (!playing) start(); },
+    menu() { $("gmenu").innerHTML = [["mix","Mix"]].concat(GENRES, favs.length ? [["fav","★ " + t("favs")]] : []).map(([k, l]) => `<button class="${k === genre ? "on" : ""}" onclick="radio.setGenre('${k}')">${l}</button>`).join("");
       const b = $("rgen").getBoundingClientRect(); $("gmenu").style.left = b.left + "px"; $("gmenu").classList.toggle("on"); },
     pause() { if (playing) stop(); },
     get playing() { return playing; }
@@ -794,6 +894,7 @@ document.addEventListener("pointerdown", () => { if (radio.wantsAutoplay && !rad
   render();
   $("tip").innerHTML = t("tips")[0];
   setTimeout(() => toast("Skate 3 Recomp Mods", radio.wantsAutoplay ? t("radioHint") : ""), 600);
+  showNews();
   await checkUpdate(false);
   if (S.root && !newVer) checkRecomp(false);
 })();

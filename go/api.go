@@ -54,8 +54,8 @@ func apiState(root string) map[string]any {
 	st["tomlBackup"] = exists(filepath.Join(root, tomlBackup))
 	st["radio"] = c["radio"]
 	st["ctl"] = controlsState(root)
-	st["music"] = musicState(root)
 	st["afterPlay"] = c["after_play"]
+	st["prefs"] = map[string]string{"deck": c["ui_deck"], "sfx": c["ui_sfx"], "seen": c["ui_seen"], "dj": c["ui_dj"]}
 	st["uiWindow"] = c["ui_window"]
 	st["recomp"] = c["recomp_version"]
 	return st
@@ -184,8 +184,22 @@ func apiDo(root *string, cmd, arg string) (string, error) {
 		return "", c.save(r)
 	case "direct":
 		return setDirect(r, onArg(arg))
-	case "music":
-		return musicDo(r, arg)
+	case "report":
+		return problemReport(r, arg)
+	case "letterbox":
+		return T("Bandas negras ", "Black bars ") + onOff(onArg(arg)), setBool(r, "present_letterbox", onArg(arg))
+	case "ssr":
+		return T("Reflejos ", "Reflections ") + onOff(onArg(arg)), setBool(r, "skate3_native_render_scene_ssr", onArg(arg))
+	case "pref":
+		key, val, _ := strings.Cut(arg, "=")
+		if key != "deck" && key != "sfx" && key != "seen" && key != "dj" {
+			return "", errors.New("?")
+		}
+		c := loadConfig(r)
+		c["ui_"+key] = val
+		return "", c.save(r)
+	case "bootlang":
+		return setBootLang(r, arg)
 	case "afterplay":
 		c := loadConfig(r)
 		c["after_play"] = arg

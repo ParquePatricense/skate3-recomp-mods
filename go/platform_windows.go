@@ -160,8 +160,6 @@ func keyboardProc(code int, wParam uintptr, lParam uintptr) uintptr {
 				pPostMessageW.Call(fg, wmClose, 0, 0)
 				closeSent = time.Now()
 				return 1
-			case (wParam == wmSysKeyDown || wParam == wmKeyDown) && musicKey(k.VkCode):
-				return 1
 			case hc.feature("restart") && (wParam == wmSysKeyDown || wParam == wmKeyDown) && k.VkCode == vkR &&
 				k.Flags&llkhfAltDown != 0 && keyDown(vkControl):
 				wantRestart = true
@@ -376,7 +374,7 @@ func play(root string) error {
 			return err
 		}
 	}
-	if !hc.anyHelper() && !musicOn(hc) {
+	if !hc.anyHelper() {
 		return nil
 	}
 	pFreeConsole.Call()
@@ -395,10 +393,7 @@ func play(root string) error {
 	if hc.feature("awake") {
 		pSetThreadExecutionState.Call(esContinuous | esSystemRequired | esDisplayRequired)
 	}
-	if musicOn(hc) {
-		music = newSongPlayer(hc)
-	}
-	if hc.feature("altf4") || hc.feature("restart") || hc.feature("winkey") || music != nil {
+	if hc.feature("altf4") || hc.feature("restart") || hc.feature("winkey") {
 		inst, _, _ := pGetModuleHandleW.Call(0)
 		if r, _, e := pSetWindowsHookExW.Call(whKeyboardLL, syscall.NewCallback(keyboardProc), inst, 0); r == 0 {
 			msgBox(T("No pude activar los atajos de teclado: ", "Could not enable the keyboard shortcuts: ") + e.Error())
@@ -412,9 +407,6 @@ func play(root string) error {
 			dndOff(root)
 		}
 		pSetThreadExecutionState.Call(esContinuous)
-		if music != nil {
-			music.close()
-		}
 	}
 	var lastWin windowState
 	tick := 0
@@ -434,10 +426,6 @@ func play(root string) error {
 			}
 			if hc.feature("cursor") {
 				cursorTick()
-			}
-			if music != nil {
-				_, front := gameInFront()
-				music.tick(front)
 			}
 			if wantRestart {
 				wantRestart = false
@@ -535,6 +523,11 @@ func powershell(script string) error {
 		return fmt.Errorf("%v: %s", err, strings.TrimSpace(string(out)))
 	}
 	return nil
+}
+
+// copyToClipboard copies a text file's contents to the clipboard.
+func copyToClipboard(path string) error {
+	return powershell("Get-Content -Raw -Encoding UTF8 -LiteralPath " + psQuote(path) + " | Set-Clipboard")
 }
 
 func desktopShortcut() string {

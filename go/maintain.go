@@ -42,16 +42,10 @@ func modFiles() []modFile {
 			return err == nil && bytes.Equal(cur, want)
 		}},
 		{"texts", textsArchive, textsEntry, textsBackup, textsState, func(root string) error {
-			return installTexts(root, root)
+			_, err := applyTexts(root, root)
+			return err
 		}, func(root string) bool {
-			p := filepath.Join(bigDir(root), textsArchive)
-			es, err1 := readEntry(p+textsBackup, textsEntry)
-			cur, err2 := readEntry(p, "LANGUAGE_Dutch_Global_skate3ng.BIN")
-			if err1 != nil || err2 != nil {
-				return false
-			}
-			want, _, err := rioplatensize(es)
-			return err == nil && bytes.Equal(cur, want)
+			return textsPatched(root)
 		}},
 	}
 }
@@ -206,7 +200,12 @@ func uninstallAll(root string) []string {
 		}
 	}
 	add(T("iconos", "icons"), uninstallIcons(root))
-	add(T("idioma", "language"), uninstallTexts(root, root))
+	c := loadConfig(root)
+	delete(c, "texts")
+	delete(c, "boot_lang")
+	c.save(root)
+	_, err := applyTexts(root, root)
+	add(T("idioma", "language"), err)
 	add("skate3.toml", restoreToml(root))
 	add(T("acceso directo", "shortcut"), removeShortcut())
 	dndOff(root)
@@ -291,7 +290,7 @@ func diagnose(root string) (string, error) {
 	w("")
 	w("== skate3.toml (valores que tocan los mods)")
 	if t, err := os.ReadFile(filepath.Join(root, tomlName)); err == nil {
-		re := regexp.MustCompile(`^\s*(skate3_|anisotropic|fullscreen|window_|monitor|resolution|user_language|vsync)`)
+		re := regexp.MustCompile(`^\s*(skate3_|anisotropic|fullscreen|window_|monitor|resolution|user_language|vsync|mnk_|keybind_|present_)`)
 		for _, ln := range strings.Split(string(t), "\n") {
 			if re.MatchString(ln) {
 				w("  %s", strings.TrimSpace(ln))
@@ -313,4 +312,25 @@ func diagnose(root string) (string, error) {
 	}
 	openPath(p)
 	return p, nil
+}
+
+// problemReport is the diagnostics plus what the user says happened, saved on the
+// desktop and copied so it can be pasted straight into a message.
+func problemReport(root, what string) (string, error) {
+	p, err := diagnose(root)
+	if err != nil {
+		return "", err
+	}
+	b, err := os.ReadFile(p)
+	if err != nil {
+		return "", err
+	}
+	text := "== " + T("Qué pasó", "What happened") + "\n" + strings.TrimSpace(what) + "\n\n" + string(b)
+	if err := os.WriteFile(p, []byte(text), 0o644); err != nil {
+		return "", err
+	}
+	if copyToClipboard(p) == nil {
+		return T("Reporte copiado: pegalo en el chat. También quedó en ", "Report copied: paste it in the chat. It is also in ") + p, nil
+	}
+	return T("Reporte guardado en ", "Report saved to ") + p, nil
 }
