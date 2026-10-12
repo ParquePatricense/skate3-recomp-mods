@@ -20,6 +20,9 @@ const (
 	batScript = "@echo off\r\ncd /d \"%~dp0\"\r\nstart \"\" \"%~dp0Skate3-Mods.exe\" play\r\n"
 )
 
+// guiMode is set while the graphical modder runs (no console questions).
+var guiMode bool
+
 // isGameRoot reports whether dir is an installed skate3recomp folder.
 func isGameRoot(dir string) bool {
 	return (exists(filepath.Join(dir, "skate3.exe")) || exists(filepath.Join(dir, "skate3"))) &&
@@ -134,6 +137,10 @@ func locateGame() (string, bool) {
 	case 0:
 		return "", false
 	case 1:
+		rememberRoot(found[0])
+		return found[0], true
+	}
+	if guiMode { // the window offers "change folder" instead of asking here
 		rememberRoot(found[0])
 		return found[0], true
 	}

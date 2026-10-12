@@ -1,17 +1,21 @@
 # 🛹 Skate 3 Recomp Mods 🎮
 
-Pack de mods **modular** para [skate3recomp](https://github.com/mchughalex/skate3recomp): se baja todo junto y activás solo lo que quieras. Cada módulo se pone y se saca desde un menú, sin tocar nada más.
+Pack de mods **modular** para [skate3recomp](https://github.com/mchughalex/skate3recomp): se baja todo junto y activás solo lo que quieras. Cada módulo se pone y se saca desde **el modeador**, una ventana con onda Skate 3 y radio propia, sin tocar nada más.
 
 | Módulo | Qué hace |
 |---|---|
 | 🎮 **Iconos PlayStation** | Cambia los iconos de Xbox por PS3, PS4 o PS5 |
 | 🖼️ **Presets gráficos** | Máxima calidad, Equilibrado o Rendimiento, con un clic |
 | 🔭 **FOV y ultrawide** | Campo de visión (40–120) y modo 21:9 |
-| ⌨️ **Alt+F4** | Cierra el juego con Alt+F4 (el recomp no lo deja) |
+| 🛹 **Ayudante en sesión** | Alt+F4, reinicio rápido (Ctrl+Alt+R), prioridad alta, pantalla siempre encendida, cursor oculto, tecla Windows bloqueada, ventana recordada y no molestar |
 | 🖥️ **Acceso directo** | Crea "Skate 3" en el escritorio, con mods incluidos |
 | 🧉 **Español ARG** | Agrega el idioma "Español ARG" (voseo y vocabulario rioplatense) en lugar del neerlandés; el español original queda igual |
 
-➕ El menú sale en español o en inglés según el idioma de Windows (se cambia con `L`), y avisa cuando hay una versión nueva.
+🔧 **El taller:** reparar archivos, reaplicar los mods solo si actualizás el recomp, diagnóstico, carpetas a mano, actualización en un toque y desinstalar todo.
+
+➕ Sale en español o en inglés según el idioma de Windows.
+
+![modeador](preview/modeador.png)
 
 ![preview](preview/preview.png)
 
@@ -22,9 +26,11 @@ Pack de mods **modular** para [skate3recomp](https://github.com/mchughalex/skate
 ## 📦 Instalación (Windows)
 
 1. ⬇️ Descargá `Skate3-Mods.zip` desde [Releases](../../releases) y descomprimilo donde quieras (Descargas sirve).
-2. 🖱️ Abrí `Skate3-Mods.exe`: busca solo la carpeta de skate3recomp, se copia ahí y la recuerda. Si no la encuentra, arrastrás la carpeta a la ventana.
-3. ✅ Activá lo que quieras desde el menú.
-4. 🛹 Jugá con el acceso directo "Skate 3" (opción 5 del menú) o con `Jugar Skate 3 (mods).bat`. Hace falta para Alt+F4; el resto funciona igual abriendo `skate3.exe`.
+2. 🖱️ Abrí `Skate3-Mods.exe`: se abre el modeador, busca solo la carpeta de skate3recomp, se copia ahí y la recuerda. Si no la encuentra, te deja elegirla.
+3. ✅ Activá lo que quieras.
+4. 🛹 Jugá con **DROP IN**, el acceso directo "Skate 3" o `Jugar Skate 3 (mods).bat`. El ayudante en sesión solo corre si abrís el juego así; iconos, gráficos e idioma funcionan igual abriendo `skate3.exe`.
+
+> 🪟 El modeador usa WebView2, que ya viene con Windows 10 y 11. Si faltara, se abre el menú clásico de consola (también con `Skate3-Mods.exe menu`).
 
 > ⚠️ El juego tiene que haberse instalado al menos una vez (botón *Select ISO*). Cerralo antes de cambiar iconos o presets.
 > 🛡️ Si aparece SmartScreen: "Más información" ➡️ "Ejecutar de todas formas" (el .exe no está firmado).
@@ -50,10 +56,39 @@ En la pantalla de idiomas del juego, "Nederlands" pasa a ser **"Español ARG"**.
 
 Toca solo `miscboot.big` (lo guarda como `miscboot.big.original`); al desactivarlo vuelve el neerlandés, byte a byte.
 
+## 🛹 Ayudante en sesión
+
+Corre en segundo plano mientras jugás y se cierra con el juego. Cada cosa se prende o apaga en **En sesión**:
+
+- ⌨️ **Alt+F4** cierra el juego como la X de la ventana (el recomp se come la tecla).
+- 🔁 **Ctrl+Alt+R** cierra y vuelve a abrir el juego si se traba.
+- ⚡ **Prioridad alta** para el proceso del juego.
+- ☀️ **Pantalla siempre encendida**, aunque juegues solo con el mando.
+- 🖱️ **Cursor oculto** sobre el juego a los 3 segundos sin mover el mouse.
+- 🪟 **Tecla Windows bloqueada** mientras el juego está en primer plano.
+- 🗔 **Ventana recordada**: monitor, tamaño y modo se guardan en `skate3.toml` al cerrar.
+- 🔕 **No molestar**: apaga las notificaciones de Windows y las vuelve a prender al salir.
+
+ℹ️ La intro ya se saltea con Enter o A (lo trae el recomp). No la salteamos sola porque el mismo toque podría pasar de largo la pantalla de idiomas.
+
+## 🔧 El taller
+
+- 🩹 **Reparar:** revisa `fedynamic.big` y `miscboot.big`; si alguno está roto, vuelve desde la copia y se reaplica el mod.
+- 🔄 **Después de actualizar el recomp:** al jugar o abrir el modeador, si un archivo cambió, se toma como nuevo original y se vuelven a poner tus mods.
+- 🩺 **Diagnóstico:** deja `Skate3-Mods-diagnostico.txt` en el escritorio para pedir ayuda.
+- 📁 **Carpetas:** juego, partidas y datos, a un toque.
+- ⬇️ **Actualizar:** baja la versión nueva de Releases y se reemplaza solo.
+- 💀 **Desinstalar todo:** deja el juego exactamente como estaba antes de los mods.
+
+## 📻 Radio Carverton
+
+El modeador tiene radio: beats de boom bap y skate punk generados en vivo con Web Audio, distintos en cada tema. No usa ningún archivo de música ni temas con copyright.
+
 ## ⚙️ Cómo funciona
 
 - **Iconos y textos:** reemplazan solo su archivo dentro del `.big` (agregan la versión nueva al final); el resto queda intacto.
-- **Alt+F4:** `Jugar Skate 3 (mods).bat` abre el juego y deja corriendo un ayudante chico (sin ventana) que se cierra solo cuando cerrás el juego. Alt+F4 le pide al juego que se cierre, igual que la X de la ventana.
+- **Ayudante:** `Skate3-Mods.exe play` (lo usan DROP IN, el acceso directo y el `.bat`) abre el juego y deja corriendo un proceso chico sin ventana que se cierra con el juego.
+- **Modeador:** una página HTML embebida en el `.exe` (`go/ui/index.html`) dentro de WebView2.
 - 🚫 No incluye ni distribuye archivos de EA: los iconos son arte original, los textos se generan con reglas sobre tu propia copia.
 
 ### 🐧 Linux / 🍎 macOS
@@ -68,7 +103,7 @@ python3 src/skate3_ps_buttons.py uninstall    --game /ruta/a/skate3recomp
 ## 🛠️ Compilar
 
 ```sh
-cd go && GOOS=windows GOARCH=amd64 go build -ldflags "-s -w" -o ../dist/Skate3-Mods.exe .
+cd go && GOOS=windows GOARCH=amd64 go build -ldflags "-s -w -H windowsgui" -o ../dist/Skate3-Mods.exe .
 ```
 
 Al publicar un tag `v*`, GitHub Actions compila el `.exe` y sube el zip a Releases.
@@ -86,4 +121,4 @@ Fuente: Inter (SIL Open Font License, ver `tools/fonts/Inter-LICENSE.txt`).
 
 ### 🇬🇧 English
 
-Modular mod pack for skate3recomp: PlayStation button icons (PS3/PS4/PS5), graphics presets, FOV/ultrawide, Alt+F4 to quit, a desktop shortcut and an "Español ARG" (Rioplatense Spanish) language that takes Dutch's slot. Unzip anywhere and run `Skate3-Mods.exe` (it finds the skate3recomp folder by itself and copies itself there) to toggle modules (the menu follows your Windows language, press `L` to switch), and play through the "Skate 3" shortcut or `Jugar Skate 3 (mods).bat` for Alt+F4. Every module is reversible. Not affiliated with EA, Sony or the skate3recomp project.
+Modular mod pack for skate3recomp with a Skate 3 styled modder window (and its own generated-beats radio): PlayStation button icons (PS3/PS4/PS5), graphics presets, FOV/ultrawide, an in-game helper (Alt+F4, Ctrl+Alt+R quick restart, high priority, keep awake, hidden cursor, Windows key block, window memory, do not disturb), a desktop shortcut, an "Español ARG" (Rioplatense Spanish) language in Dutch's slot, and a shop with repair, auto re-apply after recomp updates, diagnostics, one-click update and uninstall-all. Unzip anywhere and run `Skate3-Mods.exe` (it finds the skate3recomp folder by itself and copies itself there) to toggle modules, then hit DROP IN (or use the "Skate 3" shortcut) so the helper runs. Every module is reversible. Not affiliated with EA, Sony or the skate3recomp project.

@@ -1,0 +1,574 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Skate 3 Recomp Mods</title>
+<style>
+:root{
+  --asphalt:#141414; --asphalt2:#1d1d1d; --ink:#f4f1ea; --dim:#a9a49a; --mute:#6f6a62;
+  --orange:#ff5a1f; --orange2:#ffb020; --lime:#c6ff3d; --red:#ff3b3b; --blue:#3fa9ff; --pink:#ff6fb5; --green:#2fe39a;
+  --tape:#f2e7c9; --sticker:#fffdf6; --line:rgba(255,255,255,.08);
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;overflow:hidden;background:var(--asphalt);color:var(--ink);
+  font-family:"Segoe UI",system-ui,sans-serif;user-select:none}
+body::before{content:"";position:fixed;inset:0;pointer-events:none;opacity:.55;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 .09 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>")}
+body::after{content:"";position:fixed;inset:0;pointer-events:none;
+  background:linear-gradient(90deg,transparent 0 calc(25% - 1px),var(--line) calc(25% - 1px) 25%,transparent 25%) 0 0/440px 100%,
+             radial-gradient(1200px 600px at 75% -10%,rgba(255,90,31,.16),transparent 60%),
+             radial-gradient(900px 500px at -10% 110%,rgba(198,255,61,.08),transparent 60%)}
+.h{font-family:Impact,"Arial Black",sans-serif;letter-spacing:.5px;text-transform:uppercase;font-style:italic}
+button{font:inherit;color:inherit;cursor:pointer}
+#app{position:relative;z-index:1;display:grid;grid-template-columns:250px 1fr;height:100%}
+
+/* ---------- deck sidebar ---------- */
+#side{position:relative;padding:22px 18px 18px;display:flex;flex-direction:column;gap:14px}
+#deck{position:absolute;inset:12px 16px 12px 16px;border-radius:120px;
+  background:repeating-linear-gradient(115deg,#0c0c0c 0 3px,#121212 3px 6px);
+  border:3px solid #050505;box-shadow:0 0 0 2px #2a2a2a inset,0 18px 40px rgba(0,0,0,.6)}
+#deck::before,#deck::after{content:"";position:absolute;left:50%;width:120px;height:26px;margin-left:-60px;
+  border-radius:8px;background:repeating-linear-gradient(90deg,#2c2c2c 0 12px,#232323 12px 24px);opacity:.7}
+#deck::before{top:120px}#deck::after{bottom:120px}
+#logo{position:relative;text-align:center;margin-top:34px;line-height:.86}
+#logo .s3{font-size:46px;color:var(--ink);text-shadow:3px 3px 0 #000,0 0 22px rgba(255,90,31,.35)}
+#logo .rc{font-size:17px;color:var(--dim);letter-spacing:4px}
+#logo .mods{display:inline-block;margin-top:8px;padding:3px 14px 4px;background:var(--orange);color:#111;
+  transform:rotate(-4deg);font-size:22px;box-shadow:3px 3px 0 #000}
+nav{position:relative;display:flex;flex-direction:column;gap:9px;margin-top:20px;padding:0 10px}
+nav button{position:relative;text-align:left;border:0;background:transparent;padding:10px 14px 9px 40px;
+  font-family:Impact,"Arial Black",sans-serif;font-style:italic;text-transform:uppercase;font-size:20px;color:var(--dim);
+  transition:transform .15s,color .15s}
+nav button i{position:absolute;left:10px;top:50%;transform:translateY(-50%);font-style:normal;font-size:18px;filter:grayscale(1);opacity:.6}
+nav button:hover{color:var(--ink);transform:translateX(4px)}
+nav button.on{color:#111;background:var(--sticker);transform:rotate(-2deg);box-shadow:4px 4px 0 var(--orange)}
+nav button.on i{filter:none;opacity:1}
+#sum{position:relative;margin:22px 22px 0;display:flex;flex-wrap:wrap;gap:7px;justify-content:center}
+#sum span{padding:3px 9px 4px;font:800 11px "Segoe UI";letter-spacing:.5px;text-transform:uppercase;background:var(--tape);color:#222;box-shadow:2px 2px 0 #000}
+#sum span:nth-child(3n+1){transform:rotate(-4deg);background:var(--lime)}
+#sum span:nth-child(3n+2){transform:rotate(3deg)}
+#sum span:nth-child(3n){transform:rotate(-1deg);background:var(--orange)}
+#sideFoot{position:relative;margin-top:auto;padding:0 12px 34px;text-align:center;color:var(--mute);font-size:12px}
+#sideFoot b{color:var(--dim)}
+
+/* ---------- main ---------- */
+#main{position:relative;display:flex;flex-direction:column;min-width:0}
+#top{display:flex;align-items:center;gap:16px;padding:22px 30px 6px}
+#title{flex:1;min-width:0}
+#title h1{margin:0;font-size:44px;line-height:1;text-shadow:3px 3px 0 #000}
+#title p{margin:6px 0 0;color:var(--dim);font-size:14px}
+#drop{position:relative;border:0;padding:16px 34px 14px;background:var(--orange);color:#111;font-size:30px;
+  transform:rotate(-3deg);box-shadow:6px 6px 0 #000;transition:transform .12s,box-shadow .12s}
+#drop:hover{transform:rotate(-3deg) translate(-2px,-3px);box-shadow:8px 9px 0 #000}
+#drop:active{transform:rotate(-3deg) translate(3px,3px);box-shadow:2px 2px 0 #000}
+#drop small{display:block;font-size:12px;font-family:"Segoe UI",sans-serif;font-style:normal;letter-spacing:1px;font-weight:700}
+#rootbar{display:flex;align-items:center;gap:10px;padding:4px 30px 0;color:var(--mute);font-size:12px;white-space:nowrap}
+#rootbar span{overflow:hidden;text-overflow:ellipsis}
+.chip{padding:2px 8px;border:1px solid #333;border-radius:20px;color:var(--dim)}
+#upd{display:none;background:var(--lime);color:#111;border:0;border-radius:3px;padding:3px 10px;font-weight:800}
+#pages{flex:1;overflow:auto;padding:16px 30px 120px}
+#pages::-webkit-scrollbar{width:10px}#pages::-webkit-scrollbar-thumb{background:#333;border-radius:10px}
+.page{display:none;animation:in .25s ease-out}
+.page.on{display:block}
+@keyframes in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.sec{margin:6px 0 22px}
+.sec>h2{margin:0 0 4px;font-size:26px}
+.sec>p{margin:0 0 14px;color:var(--dim);font-size:14px;max-width:760px}
+.grid{display:grid;gap:16px}
+.g4{grid-template-columns:repeat(4,minmax(0,1fr))}
+.g3{grid-template-columns:repeat(3,minmax(0,1fr))}
+.g2{grid-template-columns:repeat(2,minmax(0,1fr))}
+
+/* sticker cards */
+.card{position:relative;background:#1b1b1b;border:2px solid #2a2a2a;border-radius:14px;padding:16px;
+  transition:transform .15s,border-color .15s,box-shadow .15s}
+.pick{cursor:pointer}
+.pick:hover{transform:translateY(-3px) rotate(-.6deg);border-color:#444}
+.pick.sel{border-color:var(--orange);box-shadow:0 0 0 3px rgba(255,90,31,.25),6px 6px 0 #000}
+.pick.sel::after{content:attr(data-tag);position:absolute;top:-11px;right:12px;padding:2px 10px;background:var(--tape);
+  color:#222;font:700 11px "Segoe UI";letter-spacing:1px;text-transform:uppercase;transform:rotate(3deg);box-shadow:2px 2px 0 rgba(0,0,0,.4)}
+.card h3{margin:10px 0 2px;font-size:22px}
+.card .sub{color:var(--dim);font-size:12.5px;line-height:1.35}
+.btns{display:flex;justify-content:center;gap:8px;padding:14px 0 6px;background:#101010;border-radius:9px}
+.gl{width:38px;height:38px;border-radius:50%;display:grid;place-items:center;font:900 19px "Segoe UI";background:#262626;
+  box-shadow:inset 0 -3px 0 rgba(0,0,0,.4)}
+.ps3 .gl{background:#1e1e1e;border:2px solid #333}
+.ps5 .gl{background:#e9e9e9;color:#222}
+.xb .gl{color:#111}
+/* meters */
+.meter{display:flex;gap:4px;margin-top:10px}
+.meter i{flex:1;height:8px;border-radius:3px;background:#2b2b2b}
+.meter i.f{background:linear-gradient(90deg,var(--orange),var(--orange2))}
+
+/* rows + skateboard toggles */
+.row{display:flex;align-items:center;gap:16px;padding:14px 16px;background:#191919;border:1px solid #262626;border-radius:12px}
+.row+.row{margin-top:8px}
+.row .tx{flex:1;min-width:0}
+.row .tx b{display:block;font-size:15.5px}
+.row .tx span{color:var(--dim);font-size:13px}
+.row .ic{font-size:22px;width:30px;text-align:center}
+.sw{position:relative;width:74px;height:34px;flex:none;border:0;border-radius:18px;background:#2a2a2a;
+  box-shadow:inset 0 2px 6px rgba(0,0,0,.6);transition:background .2s}
+.sw .board{position:absolute;top:6px;left:6px;width:34px;height:14px;border-radius:8px;background:#777;transition:left .22s cubic-bezier(.3,1.6,.6,1),background .2s}
+.sw .board::before,.sw .board::after{content:"";position:absolute;bottom:-7px;width:8px;height:8px;border-radius:50%;background:#bbb}
+.sw .board::before{left:4px}.sw .board::after{right:4px}
+.sw.on{background:rgba(255,90,31,.25)}
+.sw.on .board{left:34px;background:var(--orange)}
+.sw.on .board::before,.sw.on .board::after{background:var(--lime)}
+.btn{border:0;padding:11px 18px;border-radius:10px;background:#2a2a2a;font-weight:700;transition:transform .1s,background .15s}
+.btn:hover{background:#353535;transform:translateY(-1px)}
+.btn.hot{background:var(--orange);color:#111}
+.btn.danger{background:#3a1515;color:#ffb3b3}
+.btn.danger:hover{background:#5a1c1c}
+.btn:disabled{opacity:.5;cursor:default;transform:none}
+/* FOV ramp */
+.ramp{position:relative;padding:18px 18px 12px;background:#191919;border:1px solid #262626;border-radius:12px}
+.ramp .val{font-size:46px;line-height:1}
+.ramp .val small{font-size:18px;color:var(--dim)}
+input[type=range]{-webkit-appearance:none;width:100%;height:30px;background:transparent;margin:10px 0 0}
+input[type=range]::-webkit-slider-runnable-track{height:10px;border-radius:10px;
+  background:linear-gradient(90deg,#2a2a2a,#3a2a20 40%,var(--orange));clip-path:polygon(0 70%,100% 0,100% 100%,0 100%)}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:30px;height:30px;margin-top:-10px;border-radius:50%;
+  background:radial-gradient(circle at 50% 50%,#eee 0 5px,var(--lime) 6px 12px,#111 13px);box-shadow:0 2px 6px #000}
+/* before/after */
+.ba{display:grid;grid-template-columns:1fr auto 1fr;gap:12px;align-items:center;margin-top:12px}
+.ba div{padding:12px 14px;border-radius:10px;font-size:14px;background:#141414;border:1px dashed #333}
+.ba .new{border-color:var(--lime);color:var(--lime)}
+/* setup screen */
+#setup{display:none;position:absolute;inset:0;z-index:5;background:rgba(10,10,10,.92);place-items:center;text-align:center}
+#setup.on{display:grid}
+#setup .box{max-width:560px}
+#setup h2{font-size:40px;margin:16px 0 8px}
+#setup p{color:var(--dim)}
+.wheel{width:84px;height:84px;margin:0 auto;border-radius:50%;
+  background:radial-gradient(circle,#222 0 14px,var(--lime) 15px 30px,#d8f88a 31px 36px,var(--lime) 37px 42px);
+  box-shadow:0 0 30px rgba(198,255,61,.25);animation:spin 1s linear infinite}
+.wheel.stop{animation:none;filter:grayscale(1)}
+@keyframes spin{to{transform:rotate(360deg)}}
+/* radio */
+#radio{position:fixed;left:270px;right:20px;bottom:14px;z-index:4;display:flex;align-items:center;gap:14px;
+  padding:10px 16px;background:rgba(18,18,18,.92);border:1px solid #2c2c2c;border-radius:16px;backdrop-filter:blur(6px);
+  box-shadow:0 10px 30px rgba(0,0,0,.5)}
+#radio .tape{width:58px;height:38px;border-radius:6px;background:#2a2a2a;position:relative;flex:none}
+#radio .tape::before,#radio .tape::after{content:"";position:absolute;top:10px;width:16px;height:16px;border-radius:50%;
+  border:3px dotted #777}
+#radio .tape::before{left:8px}#radio .tape::after{right:8px}
+#radio.play .tape::before,#radio.play .tape::after{animation:spin 1.4s linear infinite;border-color:var(--orange)}
+#radio .meta{min-width:0;width:260px}
+#radio .meta b{display:block;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#radio .meta span{white-space:nowrap;font-size:11.5px;color:var(--mute);letter-spacing:1px;text-transform:uppercase}
+#radio canvas{flex:1;height:38px;min-width:60px}
+.rb{width:38px;height:38px;border-radius:50%;border:0;background:#2a2a2a;font-size:15px}
+.rb.main{width:44px;height:44px;background:var(--orange);color:#111;font-size:18px}
+#vol{width:90px;height:20px;margin:0}
+#vol::-webkit-slider-runnable-track{height:5px;clip-path:none;background:#333}
+#vol::-webkit-slider-thumb{width:14px;height:14px;margin-top:-5px;background:var(--ink)}
+/* trick toasts */
+#toasts{position:fixed;right:30px;bottom:96px;z-index:9;display:flex;flex-direction:column;align-items:flex-end;gap:10px;pointer-events:none}
+.toast{max-width:520px;padding:10px 18px 9px;background:var(--sticker);color:#111;box-shadow:5px 5px 0 #000;
+  transform:rotate(-2deg);animation:pop .45s cubic-bezier(.2,1.6,.4,1)}
+.toast .h{font-size:24px;line-height:1.05}
+.toast .m{font-size:13px;white-space:pre-line;margin-top:2px;color:#333}
+.toast.bad{background:#ffd6d6;box-shadow:5px 5px 0 #7a1010}
+.toast.out{transition:.4s;opacity:0;transform:rotate(-2deg) translateX(40px)}
+@keyframes pop{from{transform:scale(.4) rotate(8deg);opacity:0}to{transform:rotate(-2deg);opacity:1}}
+/* modal */
+#modal{display:none;position:fixed;inset:0;z-index:10;background:rgba(0,0,0,.7);place-items:center}
+#modal.on{display:grid}
+#modal .box{width:470px;background:#1b1b1b;border:2px solid #333;border-radius:16px;padding:24px;box-shadow:8px 8px 0 #000}
+#modal h3{margin:0 0 8px;font-size:28px}
+#modal p{color:var(--dim);white-space:pre-line}
+#modal .act{display:flex;justify-content:flex-end;gap:10px;margin-top:18px}
+/* busy */
+body.busy #pages{pointer-events:none;opacity:.6;transition:opacity .2s}
+#tip{padding:0 30px;color:var(--mute);font-size:12.5px;height:18px}
+#tip b{color:var(--orange2)}
+</style>
+</head>
+<body>
+<div id="app">
+  <aside id="side">
+    <div id="deck"></div>
+    <div id="logo"><div class="s3 h">Skate 3</div><div class="rc h">recomp</div><div class="mods h">mods</div></div>
+    <nav id="nav"></nav>
+    <div id="sum"></div>
+    <div id="sideFoot"><b id="ver"></b><br><span data-t="foot"></span></div>
+  </aside>
+  <main id="main">
+    <div id="top">
+      <div id="title"><h1 class="h" id="ptitle"></h1><p id="psub"></p></div>
+      <button id="drop" class="h" onclick="act('play')"><span data-t="drop"></span><small data-t="dropsub"></small></button>
+    </div>
+    <div id="rootbar"><span class="chip" data-t="folder"></span><span id="rootp"></span><button id="upd" onclick="doUpdate()"></button></div>
+    <div id="tip"></div>
+    <div id="pages"></div>
+  </main>
+</div>
+
+<div id="setup"><div class="box">
+  <div class="wheel" id="swheel"></div>
+  <h2 class="h" id="stitle"></h2>
+  <p id="stext"></p>
+  <p><button class="btn hot" id="spick" onclick="pickFolder()" style="display:none"></button></p>
+</div></div>
+
+<div id="radio">
+  <div class="tape"></div>
+  <div class="meta"><b id="track">—</b><span>Radio Carverton · <span data-t="original"></span></span></div>
+  <button class="rb" onclick="radio.prev()" title="⏮">⏮</button>
+  <button class="rb main" id="rplay" onclick="radio.toggle()">▶</button>
+  <button class="rb" onclick="radio.next()" title="⏭">⏭</button>
+  <canvas id="viz" width="600" height="76"></canvas>
+  <input type="range" id="vol" min="0" max="100" value="45" oninput="radio.volume(this.value/100)">
+</div>
+<div id="toasts"></div>
+<div id="modal"><div class="box"><h3 class="h" id="mt"></h3><p id="mp"></p><div class="act" id="ma"></div></div></div>
+
+<script>
+"use strict";
+// ------------------------------------------------------------------ texts
+const L = {
+ es:{foot:"Mod pack modular · todo se puede deshacer",drop:"Drop in",dropsub:"JUGAR CON MODS",folder:"JUEGO",original:"beats propios",
+  t_buttons:"Botones",t_gfx:"Gráficos",t_session:"En sesión",t_lang:"Idioma",t_shop:"El taller",
+  s_buttons:"Elegí cómo se ven los botones en el juego. Se cambian al toque y vuelven a Xbox cuando quieras.",
+  s_gfx:"Presets de un toque, campo de visión y ultrawide. Después podés seguir ajustando en Settings del juego.",
+  s_session:"Cosas que hace el ayudante mientras jugás. Funcionan si abrís el juego con DROP IN o con el acceso directo.",
+  s_lang:"Español ARG en la pantalla de idiomas del juego, y el idioma de esta ventana.",
+  s_shop:"Mantenimiento: reparar, carpetas, diagnóstico, actualizar y desinstalar.",
+  installed:"puesto",ps3d:"Clásicos de PS3, con los colores de siempre.",ps4d:"Share / Options, estilo PS4.",ps5d:"Blancos y limpios, Create / Options.",xbd:"Los originales del juego.",
+  presets:"Presets gráficos",restore:"Volver a mi configuración de antes",fov:"Campo de visión",fovd:"El original es 60°. Más alto = ves más de la calle.",
+  apply:"Aplicar",uw:"Ultrawide (21:9 o más)",uwd:"Para monitores anchos: sin bandas negras a los costados.",
+  helper:"El ayudante",shortcut:"Acceso directo \"Skate 3\" en el escritorio",shortcutd:"Abre el juego con todos los mods y el ayudante.",
+  argT:"Español ARG",argd:"Reemplaza \"Nederlands\" en la pantalla de idiomas por \"Español ARG\": voseo y vocabulario de acá. El español de siempre queda igual.",
+  argBefore:"¿Quieres jugar? Haz un kickflip, colega.",argAfter:"¿Querés jugar? Hacé un kickflip, loco.",
+  uiLang:"Idioma de esta ventana",
+  repair:"Reparar",repaird:"Revisa los archivos del juego y arregla lo roto con las copias de seguridad.",
+  diag:"Diagnóstico",diagd:"Arma un reporte en el escritorio para pedir ayuda.",
+  folders:"Carpetas",fGame:"Juego",fSaves:"Partidas",fData:"Datos",chg:"Cambiar carpeta del juego",
+  update:"Actualización",updated:"Buscar versión nueva y actualizar sola.",check:"Buscar",
+  hom:"Zona Hall of Meat",uninst:"Desinstalar todo",uninstd:"Deja el juego exactamente como estaba antes de los mods.",
+  sure:"¿Seguro?",uninstQ:"Se sacan todos los mods, se restauran los archivos y la configuración, y se borra el acceso directo.",
+  cancel:"Cancelar",yes:"Sí, sacar todo",ok:"Dale",
+  looking:"Buscando el juego…",lookingd:"Revisando tu PC para encontrar la carpeta de skate3recomp. Solo pasa la primera vez.",
+  notfound:"No encontré el juego",notfoundd:"Elegí la carpeta de skate3recomp, la que tiene skate3.exe.",pick:"Elegir carpeta",
+  newver:"Versión nueva",newverd:"Hay una versión nueva ({v}). Se baja, se reemplaza sola y se vuelve a abrir.",updNow:"Actualizar",
+  noupd:"Estás en la última versión.",working:"Laburando…",err:"Uh, algo falló",
+  play:"Abriendo el juego",radioHint:"Tocá ▶ para la radio",
+  tips:["<b>Tip:</b> Ctrl+Alt+R reinicia el juego si se traba (con el ayudante).","<b>Tip:</b> en la intro, Enter o A la saltean.",
+   "<b>Tip:</b> todo lo que actives se puede deshacer desde acá.","<b>Tip:</b> si actualizás el recomp, tus mods se vuelven a poner solos al jugar.",
+   "<b>Tip:</b> el acceso directo del escritorio abre el juego con el ayudante.","<b>Tip:</b> Español ARG aparece en la pantalla de idiomas del juego, en lugar de Nederlands.",
+   "<b>Tip:</b> Alt+F4 cierra el juego como la X de la ventana."]},
+ en:{foot:"Modular mod pack · everything can be undone",drop:"Drop in",dropsub:"PLAY WITH MODS",folder:"GAME",original:"own beats",
+  t_buttons:"Buttons",t_gfx:"Graphics",t_session:"Session",t_lang:"Language",t_shop:"The shop",
+  s_buttons:"Pick how the buttons look in the game. Swaps instantly and goes back to Xbox whenever you want.",
+  s_gfx:"One-tap presets, field of view and ultrawide. You can keep tweaking in the game's Settings.",
+  s_session:"Things the helper does while you play. They work when you start the game with DROP IN or the shortcut.",
+  s_lang:"Español ARG on the game's language screen, and this window's language.",
+  s_shop:"Maintenance: repair, folders, diagnostics, updates and uninstall.",
+  installed:"on",ps3d:"Classic PS3, with the usual colors.",ps4d:"Share / Options, PS4 style.",ps5d:"Clean white, Create / Options.",xbd:"The game's originals.",
+  presets:"Graphics presets",restore:"Restore my previous settings",fov:"Field of view",fovd:"Default is 60°. Higher = you see more of the street.",
+  apply:"Apply",uw:"Ultrawide (21:9 or wider)",uwd:"For wide monitors: no black bars on the sides.",
+  helper:"The helper",shortcut:"\"Skate 3\" desktop shortcut",shortcutd:"Starts the game with every mod and the helper.",
+  argT:"Español ARG",argd:"Turns \"Nederlands\" on the game's language screen into \"Español ARG\" (Rioplatense Spanish). Regular Spanish stays as is.",
+  argBefore:"¿Quieres jugar? Haz un kickflip, colega.",argAfter:"¿Querés jugar? Hacé un kickflip, loco.",
+  uiLang:"This window's language",
+  repair:"Repair",repaird:"Checks the game files and fixes broken ones from the backups.",
+  diag:"Diagnostics",diagd:"Writes a report to your desktop to ask for help.",
+  folders:"Folders",fGame:"Game",fSaves:"Saves",fData:"Data",chg:"Change game folder",
+  update:"Update",updated:"Look for a new version and update by itself.",check:"Check",
+  hom:"Hall of Meat zone",uninst:"Uninstall everything",uninstd:"Leaves the game exactly as it was before the mods.",
+  sure:"Sure?",uninstQ:"Every mod comes off, files and settings are restored and the shortcut is deleted.",
+  cancel:"Cancel",yes:"Yes, remove it all",ok:"OK",
+  looking:"Looking for the game…",lookingd:"Searching your PC for the skate3recomp folder. Only the first time.",
+  notfound:"Game not found",notfoundd:"Pick the skate3recomp folder, the one with skate3.exe.",pick:"Pick folder",
+  newver:"New version",newverd:"Version {v} is out. It downloads, replaces itself and reopens.",updNow:"Update",
+  noupd:"You're on the latest version.",working:"Working…",err:"Bail! Something failed",
+  play:"Starting the game",radioHint:"Tap ▶ for the radio",
+  tips:["<b>Tip:</b> Ctrl+Alt+R restarts the game if it hangs (with the helper).","<b>Tip:</b> Enter or A skips the intro.",
+   "<b>Tip:</b> everything you turn on can be undone from here.","<b>Tip:</b> if you update the recomp, your mods come back by themselves when you play.",
+   "<b>Tip:</b> the desktop shortcut starts the game with the helper.","<b>Tip:</b> Español ARG shows up on the game's language screen instead of Nederlands.",
+   "<b>Tip:</b> Alt+F4 closes the game like the window's X."]}
+};
+let S = {en:false}, page = "buttons";
+const t = k => (S.en ? L.en : L.es)[k] ?? k;
+const $ = id => document.getElementById(id);
+const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+
+// ------------------------------------------------------------------ bridge
+let seq = 0; const waiting = {};
+window.s3done = (id, res) => { const w = waiting[id]; delete waiting[id]; if (w) w(res); };
+function call(cmd, arg = "") {
+  return new Promise(res => { const id = ++seq; waiting[id] = res;
+    if (window.s3do) window.s3do(id, cmd, String(arg)); else setTimeout(() => window.s3done(id, {msg: "demo"}), 300); });
+}
+async function refresh() {
+  if (window.s3state) S = await window.s3state();
+  render();
+}
+async function act(cmd, arg = "", title) {
+  document.body.classList.add("busy");
+  sfx.pop();
+  const r = await call(cmd, arg);
+  document.body.classList.remove("busy");
+  if (r.err) { sfx.bail(); toast(t("err"), r.err, true); }
+  else { sfx.land(); if (r.msg || title) toast(title || trickName(), r.msg || ""); }
+  await refresh();
+  return r;
+}
+const TRICKS = ["Kickflip!","Heelflip!","Darkslide!","Hardflip!","Nollie 360!","Casper!","Primo!","Smith grind!","Late flip!","Hubba!"];
+const trickName = () => TRICKS[Math.floor(Math.random() * TRICKS.length)];
+
+// ------------------------------------------------------------------ ui bits
+function toast(title, m, bad) {
+  const el = document.createElement("div");
+  el.className = "toast" + (bad ? " bad" : "");
+  el.innerHTML = `<div class="h">${esc(title)}</div>${m ? `<div class="m">${esc(m)}</div>` : ""}`;
+  $("toasts").appendChild(el);
+  setTimeout(() => { el.classList.add("out"); setTimeout(() => el.remove(), 450); }, bad ? 7000 : 3600);
+}
+function modal(title, text, buttons) {
+  $("mt").textContent = title; $("mp").textContent = text; $("ma").innerHTML = "";
+  buttons.forEach(([label, cls, fn]) => { const b = document.createElement("button");
+    b.className = "btn " + cls; b.textContent = label; b.onclick = () => { $("modal").classList.remove("on"); fn && fn(); };
+    $("ma").appendChild(b); });
+  $("modal").classList.add("on");
+}
+const sw = (on, onclick) => `<button class="sw ${on ? "on" : ""}" onclick="${onclick}"><span class="board"></span></button>`;
+const row = (ic, name, desc, ctl) => `<div class="row"><div class="ic">${ic}</div><div class="tx"><b>${esc(name)}</b><span>${esc(desc)}</span></div>${ctl}</div>`;
+
+const PAGES = [["buttons","🎮"],["gfx","🖼️"],["session","🛹"],["lang","🧉"],["shop","🔧"]];
+function render() {
+  document.documentElement.lang = S.en ? "en" : "es";
+  document.querySelectorAll("[data-t]").forEach(e => e.textContent = t(e.dataset.t));
+  $("ver").textContent = "v" + (S.version || "");
+  $("rootp").textContent = S.root || "—";
+  $("nav").innerHTML = PAGES.map(([k, i]) => `<button class="${k === page ? "on" : ""}" onclick="go('${k}')"><i>${i}</i>${t("t_" + k)}</button>`).join("");
+  $("ptitle").textContent = t("t_" + page);
+  const sum = [];
+  if (S.root) {
+    sum.push(S.icons === "xbox" ? "Xbox" : (S.icons || "").toUpperCase());
+    const p = (S.presets || []).find(p => p.key === S.preset); if (p) sum.push(p.name.split(" (")[0]);
+    if (+S.fov && +S.fov !== 60) sum.push("FOV " + Math.round(S.fov));
+    if (S.ultrawide) sum.push("21:9");
+    if (S.arg) sum.push("ARG 🧉");
+    const on = (S.features || []).filter(f => f.on).length; if (on) sum.push(on + (S.en ? " helpers" : " ayudas"));
+  }
+  $("sum").innerHTML = sum.map(x => `<span>${esc(x)}</span>`).join("");
+  $("psub").textContent = t("s_" + page);
+  if (!S.root) return;
+  $("pages").innerHTML = `<div class="page on">${({buttons, gfx, session, lang, shop})[page]()}</div>`;
+}
+function go(p) { page = p; sfx.tick(); render(); $("pages").scrollTop = 0; }
+
+function buttons() {
+  const card = (k, cls, glyphs, name, desc) => `<div class="card pick ${cls} ${S.icons === k ? "sel" : ""}" data-tag="${t("installed")}" onclick="act('icons','${k}')">
+    <div class="btns">${glyphs}</div><h3 class="h">${name}</h3><div class="sub">${desc}</div></div>`;
+  const ps = (c) => [["✕", c[0]], ["○", c[1]], ["□", c[2]], ["△", c[3]]].map(([g, col]) => `<span class="gl" style="color:${col}">${g}</span>`).join("");
+  const xb = [["A","#5fd35f"],["B","#ff4d4d"],["X","#3f8cff"],["Y","#ffd23f"]].map(([g, col]) => `<span class="gl" style="background:${col}">${g}</span>`).join("");
+  return `<div class="grid g4">
+    ${card("ps3", "ps3", ps(["#7fb2ff","#ff5c5c","#ff7ad9","#38d6a0"]), "PS3", t("ps3d"))}
+    ${card("ps4", "ps4", ps(["#7fb2ff","#ff5c5c","#ff7ad9","#38d6a0"]), "PS4", t("ps4d"))}
+    ${card("ps5", "ps5", ps(["#222","#222","#222","#222"]), "PS5", t("ps5d"))}
+    ${card("xbox", "xb", xb, "Xbox", t("xbd"))}</div>`;
+}
+function gfx() {
+  const bars = {max: 5, balanced: 3, perf: 1};
+  const pc = S.presets.map(p => `<div class="card pick ${S.preset === p.key ? "sel" : ""}" data-tag="${t("installed")}" onclick="act('preset','${p.key}')">
+     <h3 class="h" style="margin-top:0">${esc(p.name.split(" (")[0])}</h3><div class="sub">${esc((p.name.match(/\((.*)\)/) || ["", ""])[1])}</div>
+     <div class="meter">${[1,2,3,4,5].map(i => `<i class="${i <= bars[p.key] ? "f" : ""}"></i>`).join("")}</div></div>`).join("");
+  return `<div class="sec"><h2 class="h">${t("presets")}</h2><div class="grid g3">${pc}</div>
+      ${S.tomlBackup ? `<p style="margin-top:12px"><button class="btn" onclick="act('preset','restore')">↩ ${t("restore")}</button></p>` : ""}</div>
+    <div class="sec grid g2">
+      <div class="ramp"><div class="h" style="font-size:20px">${t("fov")}</div>
+        <div class="val h"><span id="fovv">${Math.round(S.fov)}</span><small>°</small></div>
+        <input type="range" min="40" max="120" step="1" value="${S.fov}" oninput="$('fovv').textContent=this.value" onchange="act('fov',this.value)">
+        <div class="sub" style="color:var(--dim);font-size:12.5px">${t("fovd")}</div></div>
+      <div>${row("🖥️", t("uw"), t("uwd"), sw(S.ultrawide, `act('ultrawide','${S.ultrawide ? "off" : "on"}')`))}</div>
+    </div>`;
+}
+const FICON = {altf4:"⌨️",restart:"🔁",priority:"⚡",awake:"☀️",cursor:"🖱️",winkey:"🪟",window:"🗔",dnd:"🔕"};
+function session() {
+  return `<div class="sec"><h2 class="h">${t("helper")}</h2>
+     ${S.features.map(f => row(FICON[f.key] || "•", f.name, f.desc, sw(f.on, `act('feature','${f.key}=${f.on ? "off" : "on"}')`))).join("")}</div>
+    <div class="sec">${row("🖱️", t("shortcut"), t("shortcutd"), sw(S.shortcut, `act('shortcut','${S.shortcut ? "off" : "on"}')`))}</div>`;
+}
+function lang() {
+  return `<div class="sec"><div class="card"><div style="display:flex;align-items:center;gap:16px">
+      <div style="font-size:42px">🧉</div><div style="flex:1"><h3 class="h" style="margin:0">${t("argT")}</h3><div class="sub">${t("argd")}</div></div>
+      ${sw(S.arg, `act('arg','${S.arg ? "off" : "on"}')`)}</div>
+      <div class="ba"><div>${esc(t("argBefore"))}</div><div style="font-size:22px">➜</div><div class="new">${esc(t("argAfter"))}</div></div></div></div>
+    <div class="sec"><h2 class="h">${t("uiLang")}</h2><div class="grid g4">
+      <div class="card pick ${S.en ? "" : "sel"}" data-tag="✓" onclick="setUi('es')"><h3 class="h" style="margin:0">Español</h3></div>
+      <div class="card pick ${S.en ? "sel" : ""}" data-tag="✓" onclick="setUi('en')"><h3 class="h" style="margin:0">English</h3></div></div></div>`;
+}
+function shop() {
+  return `<div class="sec">
+      ${row("🩹", t("repair"), t("repaird"), `<button class="btn hot" onclick="act('repair','', '${t("repair")}')">${t("repair")}</button>`)}
+      ${row("🩺", t("diag"), t("diagd"), `<button class="btn" onclick="act('diagnose','', '${t("diag")}')">${t("diag")}</button>`)}
+      ${row("⬇️", t("update") + " · v" + S.version, t("updated"), `<button class="btn" onclick="checkUpdate(true)">${t("check")}</button>`)}
+      ${row("📁", t("folders"), S.root, `<div style="display:flex;gap:8px">
+         <button class="btn" onclick="act('folder','game','${t("fGame")}')">${t("fGame")}</button>
+         <button class="btn" onclick="act('folder','saves','${t("fSaves")}')">${t("fSaves")}</button>
+         <button class="btn" onclick="act('folder','data','${t("fData")}')">${t("fData")}</button></div>`)}
+      ${row("🔀", t("chg"), "", `<button class="btn" onclick="pickFolder()">${t("pick")}</button>`)}</div>
+    <div class="sec"><h2 class="h" style="color:#ff8a8a">💀 ${t("hom")}</h2>
+      ${row("🧨", t("uninst"), t("uninstd"), `<button class="btn danger" onclick="askUninstall()">${t("uninst")}</button>`)}</div>`;
+}
+async function setUi(l) { await call("uilang", l); sfx.tick(); await refresh(); }
+function askUninstall() {
+  sfx.bail();
+  modal(t("sure"), t("uninstQ"), [[t("cancel"), "", null], [t("yes"), "danger", () => act("uninstall", "", t("uninst"))]]);
+}
+async function pickFolder() {
+  const r = await call("pickfolder");
+  if (r.err) toast(t("err"), r.err, true);
+  await refresh();
+  if (S.root) { $("setup").classList.remove("on"); render(); }
+}
+let newVer = "";
+async function checkUpdate(manual) {
+  const r = await call("checkupdate");
+  newVer = r.msg || "";
+  $("upd").style.display = newVer ? "inline-block" : "none";
+  $("upd").textContent = "⬆ v" + newVer;
+  if (manual) newVer ? doUpdate() : toast(t("update"), t("noupd"));
+}
+function doUpdate() {
+  modal(t("newver"), t("newverd").replace("{v}", newVer), [[t("cancel"), "", null], [t("updNow"), "hot", () => act("update")]]);
+}
+
+// rotating loading-screen tips
+let tipN = 0;
+setInterval(() => { const tips = t("tips"); $("tip").innerHTML = tips[tipN++ % tips.length]; }, 7000);
+
+// ------------------------------------------------------------------ sound fx (synth, no files)
+let AC = null;
+function ac() { if (!AC) AC = new (window.AudioContext || window.webkitAudioContext)(); if (AC.state === "suspended") AC.resume(); return AC; }
+function noiseBuf(a, secs) { const b = a.createBuffer(1, a.sampleRate * secs, a.sampleRate), d = b.getChannelData(0);
+  for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1; return b; }
+const sfx = {
+  on: true,
+  hit(freq, dur, type, vol, slide) { if (!this.on) return; const a = ac(), o = a.createOscillator(), g = a.createGain();
+    o.type = type; o.frequency.setValueAtTime(freq, a.currentTime); if (slide) o.frequency.exponentialRampToValueAtTime(slide, a.currentTime + dur);
+    g.gain.setValueAtTime(vol, a.currentTime); g.gain.exponentialRampToValueAtTime(.0001, a.currentTime + dur);
+    o.connect(g).connect(a.destination); o.start(); o.stop(a.currentTime + dur); },
+  snap(dur, f, vol) { if (!this.on) return; const a = ac(), s = a.createBufferSource(), fl = a.createBiquadFilter(), g = a.createGain();
+    s.buffer = noiseBuf(a, dur); fl.type = "bandpass"; fl.frequency.value = f; g.gain.setValueAtTime(vol, a.currentTime);
+    g.gain.exponentialRampToValueAtTime(.0001, a.currentTime + dur); s.connect(fl).connect(g).connect(a.destination); s.start(); },
+  pop() { this.snap(.07, 2400, .5); this.hit(180, .09, "sine", .4, 60); },          // ollie pop
+  land() { setTimeout(() => { this.snap(.12, 900, .35); this.hit(90, .14, "sine", .5, 40); }, 160); },
+  bail() { this.hit(220, .35, "sawtooth", .12, 70); this.snap(.25, 500, .3); },
+  tick() { this.snap(.03, 5000, .18); }
+};
+
+// ------------------------------------------------------------------ Radio Carverton
+// Original beats made on the fly with Web Audio: boom bap and skate punk,
+// a new pattern per track. No music files, nothing copyrighted.
+const radio = (() => {
+  const NAMES = ["Parque Patricios Session","Kickflip en la 9 de Julio","Port Carverton Drop","Bombeando el Hubba",
+    "Grind en Plaza Moreno","Ledge de Puerto Madero","Sesión de Madrugada","Bowl del Conurbano","Tiburón de Asfalto",
+    "Wallride en Constitución","Late Flip Tango","Coach Frank No Duerme","Hall of Meat Blues","Ruedas Blandas","Bajada de Caminito"];
+  let a, out, comp, an, playing = false, timer = null, step = 0, nextT = 0, tr = null, n = 0, vol = .45, nb;
+  function rng(seed) { return () => { seed = (seed * 1664525 + 1013904223) >>> 0; return seed / 4294967296; }; }
+  function make(i) {
+    const r = rng(i * 7919 + 13), punk = i % 3 === 2;
+    const scales = [[0,3,5,7,10],[0,2,3,7,8],[0,3,5,6,7,10]];
+    const sc = scales[Math.floor(r() * scales.length)], root = 36 + Math.floor(r() * 7);
+    const prog = [0, 3, 4, 2].map(() => sc[Math.floor(r() * sc.length)]);
+    const kick = punk ? [1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0] : [1,0,0,0,0,0,0,1,0,0,1,0,0,0,0,0].map((v, k) => v || (r() < .12 && k % 2 === 0) ? 1 : 0);
+    const snare = punk ? [0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0] : [0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,r() < .4 ? 1 : 0];
+    const hat = Array.from({length: 16}, (_, k) => punk ? 1 : (k % 2 === 0 ? 1 : (r() < .35 ? .6 : 0)));
+    const bass = Array.from({length: 16}, (_, k) => (kick[k] || r() < (punk ? .9 : .2)) ? sc[Math.floor(r() * 3)] : null);
+    return {punk, bpm: punk ? 168 + Math.floor(r() * 18) : 84 + Math.floor(r() * 12), root, prog, kick, snare, hat, bass,
+      name: NAMES[i % NAMES.length], swing: punk ? 0 : .12 + r() * .08};
+  }
+  const hz = m => 440 * Math.pow(2, (m - 69) / 12);
+  function env(g, t0, v, d) { g.gain.setValueAtTime(v, t0); g.gain.exponentialRampToValueAtTime(.0001, t0 + d); }
+  function kick(t0) { const o = a.createOscillator(), g = a.createGain(); o.frequency.setValueAtTime(140, t0);
+    o.frequency.exponentialRampToValueAtTime(42, t0 + .12); env(g, t0, 1, .32); o.connect(g).connect(out); o.start(t0); o.stop(t0 + .35); }
+  function noise(t0, f, type, v, d) { const s = a.createBufferSource(), fl = a.createBiquadFilter(), g = a.createGain();
+    s.buffer = nb; fl.type = type; fl.frequency.value = f; env(g, t0, v, d); s.connect(fl).connect(g).connect(out); s.start(t0, Math.random()); s.stop(t0 + d + .02); }
+  function snare(t0) { noise(t0, 1800, "bandpass", .7, .2); const o = a.createOscillator(), g = a.createGain();
+    o.frequency.value = 190; env(g, t0, .35, .1); o.connect(g).connect(out); o.start(t0); o.stop(t0 + .12); }
+  function tone(t0, f, type, v, d, cut, dist) { const o = a.createOscillator(), fl = a.createBiquadFilter(), g = a.createGain();
+    o.type = type; o.frequency.value = f; fl.type = "lowpass"; fl.frequency.value = cut; env(g, t0, v, d);
+    let node = o.connect(fl); if (dist) { const ws = a.createWaveShaper(), c = new Float32Array(256);
+      for (let k = 0; k < 256; k++) { const x = k / 128 - 1; c[k] = Math.tanh(x * 6); } ws.curve = c; node = node.connect(ws); }
+    node.connect(g).connect(out); o.start(t0); o.stop(t0 + d + .05); }
+  function chord(t0, base, d) { (tr.punk ? [0, 7, 12] : [0, 3, 7, 10]).forEach((iv, k) => {
+      tone(t0 + (tr.punk ? 0 : k * .012), hz(base + 24 + iv), tr.punk ? "sawtooth" : "triangle", tr.punk ? .07 : .06, d, tr.punk ? 2600 : 1400, tr.punk); }); }
+  function crackle(t0, d) { if (tr.punk) return; for (let k = 0; k < 3; k++) if (Math.random() < .5) noise(t0 + Math.random() * d, 6000, "highpass", .05, .01); }
+  function schedule() {
+    const spb = 60 / tr.bpm / 4;
+    while (nextT < a.currentTime + .12) {
+      const s = step % 16, bar = Math.floor(step / 16) % 4, t0 = nextT + (s % 2 ? tr.swing * spb : 0);
+      const base = tr.root + tr.prog[bar];
+      if (tr.kick[s]) kick(t0);
+      if (tr.snare[s]) snare(t0);
+      if (tr.hat[s]) noise(t0, 8000, "highpass", .16 * tr.hat[s], tr.punk ? .04 : .05);
+      if (tr.bass[s] !== null) tone(t0, hz(base + tr.bass[s]), tr.punk ? "sawtooth" : "sine", tr.punk ? .32 : .5, spb * (tr.punk ? .9 : 1.8), tr.punk ? 900 : 500, tr.punk);
+      if (s === 0 || (tr.punk && s === 8)) chord(t0, base, spb * (tr.punk ? 7.5 : 15));
+      if (s % 4 === 0) crackle(t0, spb * 4);
+      nextT += spb; step++;
+    }
+  }
+  function setup() {
+    a = ac(); comp = a.createDynamicsCompressor(); out = a.createGain(); an = a.createAnalyser(); an.fftSize = 128;
+    out.gain.value = vol; out.connect(comp).connect(an).connect(a.destination); nb = noiseBuf(a, 2);
+    draw();
+  }
+  function load(i) { n = (i + 1000) % 1000; tr = make(n); step = 0; $("track").textContent = tr.name + (tr.punk ? " · punk" : " · boom bap"); save(); }
+  function start() { if (!a) setup(); if (!tr) load(n); playing = true; nextT = a.currentTime + .05;
+    timer = setInterval(schedule, 25); $("rplay").textContent = "❚❚"; $("radio").classList.add("play"); save(); }
+  function stop() { playing = false; clearInterval(timer); $("rplay").textContent = "▶"; $("radio").classList.remove("play"); save(); }
+  // the page has no fixed origin, so the radio settings live in skate3-mods.ini
+  let saveT = null;
+  function save() { clearTimeout(saveT); saveT = setTimeout(() => { if (S.root) call("radio", JSON.stringify({on: playing, n, vol})); }, 800); }
+  function draw() {
+    const c = $("viz"), x = c.getContext("2d"), d = new Uint8Array(an.frequencyBinCount);
+    (function f() { requestAnimationFrame(f); an.getByteFrequencyData(d); x.clearRect(0, 0, c.width, c.height);
+      const w = c.width / 48; for (let i = 0; i < 48; i++) { const v = d[i] / 255, h = Math.max(3, v * c.height);
+        x.fillStyle = i % 6 === 0 ? "#c6ff3d" : `rgba(255,${90 + i * 2},31,${.35 + v * .65})`; x.fillRect(i * w + 1, (c.height - h) / 2, w - 3, h); } })();
+  }
+  const saved = {on: true, n: Math.floor(Math.random() * 1000), vol: .45};
+  function show() { $("vol").value = Math.round(vol * 100); tr = make(n); $("track").textContent = tr.name + (tr.punk ? " · punk" : " · boom bap"); }
+  n = saved.n; vol = saved.vol; show();
+  return {
+    get wantsAutoplay() { return saved.on; },
+    restore(json) { try { const o = JSON.parse(json); if (typeof o.n === "number") n = o.n; if (typeof o.vol === "number") vol = o.vol;
+      if (o.on === false) saved.on = false; if (out) out.gain.value = vol; if (!playing) show(); } catch (e) {} },
+    toggle() { playing ? stop() : start(); },
+    next() { load(n + 1); if (!playing) start(); },
+    prev() { load(n - 1); if (!playing) start(); },
+    volume(v) { vol = v; if (out) out.gain.value = v; save(); },
+    get playing() { return playing; }
+  };
+})();
+// browsers start audio only after a click: the radio starts on the first one
+document.addEventListener("pointerdown", () => { if (radio.wantsAutoplay && !radio.playing && !window._radioTried) { window._radioTried = true; radio.toggle(); } }, {once: true, capture: true});
+
+// ------------------------------------------------------------------ boot
+(async function boot() {
+  await refresh();
+  if (S.radio) radio.restore(S.radio);
+  if (!S.root) {
+    $("setup").classList.add("on"); $("stitle").textContent = t("looking"); $("stext").textContent = t("lookingd");
+    const r = await call("locate");
+    await refresh();
+    if (!S.root) {
+      $("swheel").classList.add("stop"); $("stitle").textContent = t("notfound"); $("stext").textContent = t("notfoundd");
+      $("spick").textContent = t("pick"); $("spick").style.display = "inline-block";
+    } else {
+      $("setup").classList.remove("on");
+      if (S.radio) radio.restore(S.radio);
+      if (r.msg) toast(t("repair"), r.msg);
+    }
+  }
+  render();
+  $("tip").innerHTML = t("tips")[0];
+  setTimeout(() => toast("Skate 3 Recomp Mods", radio.wantsAutoplay ? t("radioHint") : ""), 600);
+  checkUpdate(false);
+})();
+</script>
+</body>
+</html>

@@ -396,6 +396,7 @@ func installIcons(style, game string) error {
 	if err := os.WriteFile(state, []byte(style), 0o644); err != nil {
 		return err
 	}
+	recordStamp(archive, "icons")
 	fmt.Printf(T("Listo: iconos de %s instalados.\n", "Done: %s icons installed.\n"), styleNames[style])
 	return nil
 }

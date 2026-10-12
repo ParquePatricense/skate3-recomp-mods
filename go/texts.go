@@ -353,6 +353,7 @@ func installTexts(root, game string) error {
 	if err := os.WriteFile(archive+textsState, []byte("1"), 0o644); err != nil {
 		return err
 	}
+	recordStamp(archive, "texts")
 	c := loadConfig(root)
 	c["texts"] = "1"
 	if err := c.save(root); err != nil {
