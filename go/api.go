@@ -276,7 +276,6 @@ func useRoot(root *string, d string) (string, error) {
 			c.save(r)
 		}
 	}
-	steamArtRefresh(r)
 	msgs := checkMods(r)
 	return strings.Join(msgs, "\n"), nil
 }

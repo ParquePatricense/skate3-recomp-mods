@@ -13,7 +13,7 @@ Pack de mods **modular** para [skate3recomp](https://github.com/mchughalex/skate
 | 🔭 **FOV y ultrawide** | Campo de visión (40–120) y modo 21:9 |
 | 🛹 **Ayudante en sesión** | Alt+F4, reinicio rápido (Ctrl+Alt+R), prioridad alta, pantalla siempre encendida, cursor oculto, tecla Windows bloqueada, ventana recordada y no molestar |
 | 🖥️ **Accesos directos** | "Skate 3 Mods" (el modeador), "Skate 3 (directo)" y "Skate 3 (normal)" en el escritorio y el menú Inicio, y uno por idioma si querés |
-| 🚂 **Skate 3 en Steam** | Lo suma a tu biblioteca como juego externo, con portada propia, para Big Picture, Steam Input y la captura de Steam |
+| 🚂 **Skate 3 en Steam** | Lo suma a tu biblioteca como juego externo, para Big Picture, Steam Input y la captura de Steam |
 | 🧉 **Español ARG** | Agrega el idioma "Español ARG" (voseo y vocabulario rioplatense) en lugar del neerlandés; el español original queda igual |
 
 🔧 **El taller:** aviso cuando sale una versión nueva de skate3recomp, reparar archivos, reaplicar los mods solo si actualizás el recomp, diagnóstico, carpetas a mano, actualización en un toque y desinstalar todo.

@@ -290,6 +290,7 @@ const L = {
   spotT:"Arrancás en",spotD:"Dónde te deja la carga directa. Fuera de \"Donde dejaste\", el recomp maneja el menú del mapa por vos mientras la pantalla de carga sigue puesta.",
   langLnk:"Crear acceso directo para este idioma",
   uiMonT:"Pantalla del modeador",uiMonD:"En qué monitor abre esta ventana.",
+  eqT:"Graves y agudos de la radio",eqD:"Para Radio Carverton. En el medio queda como viene.",eqB:"Graves",eqH:"Agudos",
   wizT:"Asistente",wizD:"Tres preguntas y queda todo configurado.",wizGo:"Empezar",
   wiz1:"¿Con qué jugás?",wizPS:"Joystick de PlayStation",wizXB:"Joystick de Xbox",wizKB:"Teclado y mouse",
   wiz2:"¿Qué tan potente es tu PC?",wizMax:"Potente",wizBal:"Normal",wizPerf:"Justa",wizUltra:"Muy justa",
@@ -354,6 +355,7 @@ const L = {
   spotT:"You start at",spotD:"Where the direct load drops you. Other than \"Where you left off\", the recomp drives the map menu for you while the loading screen stays up.",
   langLnk:"Create a shortcut for this language",
   uiMonT:"Modder screen",uiMonD:"Which monitor this window opens on.",
+  eqT:"Radio bass and treble",eqD:"For Radio Carverton. In the middle it sounds as it comes.",eqB:"Bass",eqH:"Treble",
   wizT:"Setup assistant",wizD:"Three questions and everything is set.",wizGo:"Start",
   wiz1:"What do you play with?",wizPS:"PlayStation controller",wizXB:"Xbox controller",wizKB:"Keyboard and mouse",
   wiz2:"How powerful is your PC?",wizMax:"Powerful",wizBal:"Normal",wizPerf:"Modest",wizUltra:"Very modest",
@@ -603,9 +605,12 @@ function shop() {
       ${row("📜", t("logT"), t("logD"), `<button class="btn" onclick="act('gamelog')">${t("open")}</button>`)}
       ${row("🧭", t("wizT"), t("wizD"), `<button class="btn" onclick="wizard()">${t("wizGo")}</button>`)}</div>
     <div class="sec"><h2 class="h">${t("modder")}</h2><div class="grid g2" style="gap:8px">
-      <div class="card"><b>${t("deckT")}</b><div class="decks" style="margin-top:10px">${Object.keys(DECKS).map(k => `<div class="d ${deckKey() === k ? "sel" : ""}" tabindex="0" style="background:${DECKS[k]}" onclick="setPref('deck','${k}')"></div>`).join("")}</div></div>
-      <div class="stack">${row("🔊", t("sfxT"), t("sfxD"), sw(sfx.on, `setPref('sfx','${sfx.on ? "0" : "1"}')`))}
-      ${row("🔍", t("zoomT") + " · " + Math.round(zoomPref() * 100) + "%", t("zoomD"), `<input type="range" min="70" max="150" step="5" value="${Math.round(zoomPref() * 100)}" style="width:220px;margin:0" onchange="setZoom(this.value/100)">`)}
+      <div class="stack"><div class="card"><b>${t("deckT")}</b><div class="decks" style="margin-top:10px">${Object.keys(DECKS).map(k => `<div class="d ${deckKey() === k ? "sel" : ""}" tabindex="0" style="background:${DECKS[k]}" onclick="setPref('deck','${k}')"></div>`).join("")}</div></div>
+      ${row("🔊", t("sfxT"), t("sfxD"), sw(sfx.on, `setPref('sfx','${sfx.on ? "0" : "1"}')`))}</div>
+      <div class="stack">${row("🔍", t("zoomT") + " · " + Math.round(zoomPref() * 100) + "%", t("zoomD"), `<input type="range" min="70" max="150" step="5" value="${Math.round(zoomPref() * 100)}" style="width:220px;margin:0" onchange="setZoom(this.value/100)">`)}
+      ${row("🎚️", t("eqT"), t("eqD"), `<div style="display:flex;gap:14px;align-items:center;font-size:12.5px;color:var(--dim)">
+        ${t("eqB")}<input type="range" min="-12" max="12" step="1" value="${radio.bass}" style="width:120px;margin:0" oninput="radio.eq('bass',this.value)">
+        ${t("eqH")}<input type="range" min="-12" max="12" step="1" value="${radio.treble}" style="width:120px;margin:0" oninput="radio.eq('treble',this.value)"></div>`)}
       ${row("🛋️", t("sofaT"), t("sofaD"), sw(S.prefs?.sofa === "1", `setPref('sofa','${S.prefs?.sofa === "1" ? "0" : "1"}')`))}
       ${(S.ctl.monitors || []).length > 1 ? row("🖥️", t("uiMonT"), t("uiMonD"), `<div style="display:flex;gap:6px">${[{n: 0}].concat(S.ctl.monitors).map(m => `<button class="btn ${(S.uiMonitor || 0) === m.n ? "hot" : ""}" onclick="uiMonitor(${m.n})">${m.n || t("auto")}</button>`).join("")}</div>`) : ""}
 </div></div>
@@ -705,12 +710,12 @@ const CHANGES = {
       "Todas las pestañas entran en la pantalla sin alejar, y la radio se corta apenas tocás Drop in.",
       "Carga directa: el juego queda mudo mientras carga, con consejos y una barra que aprende cuánto tarda. Podés elegir dónde arrancás.",
       "Accesos directos también en el menú Inicio, y uno por idioma.",
-      "Steam con portada propia, aviso si el juego se cierra solo, revisión antes de jugar, pantalla del modeador y asistente."],
+      "Graves y agudos de la radio, aviso si el juego se cierra solo, revisión antes de jugar, pantalla del modeador y asistente."],
     en: ["The modder shows its own icon on the taskbar.",
       "Every tab fits on screen without zooming out, and the radio cuts the moment you hit Drop in.",
       "Direct load: the game stays muted while it loads, with tips and a bar that learns how long it takes. You can pick where you start.",
       "Shortcuts in the Start menu too, and one per language.",
-      "Steam with its own artwork, a notice when the game crashes, a check before playing, modder screen and setup assistant."]},
+      "Radio bass and treble, a notice when the game crashes, a check before playing, modder screen and setup assistant."]},
   "3.4.0": {es: ["Directo a tu partida ahora es carga directa: una pantalla de carga tapa los menús y aparecés en tu carrera.",
       "El modeador se adapta solo a tu pantalla, con tamaño a gusto y modo sofá para la tele.",
       "Radio: arranca sola al abrir, Mix y aleatorio de entrada, temas que cambian solos y la tecla M para pausar. Se sacó el DJ.",
@@ -834,7 +839,7 @@ const radio = (() => {
     rock: ["Port Carverton Drop","Bombeando el Hubba","Wallride en Constitución","Rampa Prohibida","Seguridad a los Gritos","Tabla Rota"],
     electro: ["Neón en la Costanera","Manual Infinito","Late Flip Tango","Distrito Industrial","Bajada de Caminito","Cámara Lenta"],
     cumbia: ["Cumbia del Half Pipe","La Rampa de Lanús","Ollie Sabrosón","Pibes del Skatepark","Cumbia del Grind","El Baile del Manual"]};
-  let a, out, comp, an, playing = false, timer = null, step = 0, nextT = 0, tr = null, n = 0, vol = .45, nb, genre = "mix", shuf = true, hist = [];
+  let a, out, comp, an, playing = false, timer = null, step = 0, nextT = 0, tr = null, n = 0, vol = .45, nb, genre = "mix", shuf = true, hist = [], lo, hi, bass = 0, treble = 0;
   function rng(seed) { return () => { seed = (seed * 1664525 + 1013904223) >>> 0; return seed / 4294967296; }; }
   const pick = (r, arr) => arr[Math.floor(r() * arr.length)];
   const steps = f => Array.from({length: 16}, (_, k) => f(k));
@@ -913,7 +918,9 @@ const radio = (() => {
   }
   function setup() {
     a = ac(); comp = a.createDynamicsCompressor(); out = a.createGain(); an = a.createAnalyser(); an.fftSize = 128;
-    out.gain.value = vol; out.connect(comp).connect(an).connect(a.destination); nb = noiseBuf(a, 2);
+    lo = a.createBiquadFilter(); lo.type = "lowshelf"; lo.frequency.value = 180; lo.gain.value = bass;
+    hi = a.createBiquadFilter(); hi.type = "highshelf"; hi.frequency.value = 3500; hi.gain.value = treble;
+    out.gain.value = vol; out.connect(comp).connect(lo).connect(hi).connect(an).connect(a.destination); nb = noiseBuf(a, 2);
     draw();
   }
   const label = () => tr.name + " · " + GENRES.find(x => x[0] === tr.g)[1].toLowerCase();
@@ -943,7 +950,7 @@ const radio = (() => {
     if (out) { out.disconnect(); out = a.createGain(); out.gain.value = vol; out.connect(comp); } $("rplay").textContent = "▶"; $("radio").classList.remove("play"); save(); }
   // the page has no fixed origin, so the radio settings live in skate3-mods.ini
   let saveT = null;
-  function save() { clearTimeout(saveT); saveT = setTimeout(() => { if (S.root) call("radio", JSON.stringify({on: playing, n, vol, genre, favs, shuffle: shuf})); }, 800); }
+  function save() { clearTimeout(saveT); saveT = setTimeout(() => { if (S.root) call("radio", JSON.stringify({on: playing, n, vol, genre, favs, shuffle: shuf, bass, treble})); }, 800); }
   function draw() {
     const c = $("viz"), x = c.getContext("2d"), d = new Uint8Array(an.frequencyBinCount);
     (function f() { requestAnimationFrame(f); an.getByteFrequencyData(d); x.clearRect(0, 0, c.width, c.height);
@@ -958,6 +965,7 @@ const radio = (() => {
     restore(json) { try { const o = JSON.parse(json); if (typeof o.n === "number") n = o.n; if (typeof o.vol === "number") vol = o.vol;
       if (Array.isArray(o.favs)) favs = o.favs.filter(f => typeof f.n === "number" && GENRES.some(x => x[0] === f.g));
       if (o.genre === "mix" || (o.genre === "fav" && favs.length) || GENRES.some(x => x[0] === o.genre)) genre = o.genre;
+      if (typeof o.bass === "number") bass = o.bass; if (typeof o.treble === "number") treble = o.treble;
       if (typeof o.shuffle === "boolean") shuf = o.shuffle; else { shuf = true; genre = "mix"; } // v3.4: Mix + shuffle by default
       if (out) out.gain.value = vol; if (!playing) show(); } catch (e) {} },
     toggle() { playing ? stop() : start(); },
@@ -966,6 +974,9 @@ const radio = (() => {
     shuffle() { shuf = !shuf; hist = []; sfx.tick(); showGenre(); save(); },
     fav() { if (!tr) return; if (isFav()) favs = favs.filter(f => !(f.n === n && f.g === tr.g)); else favs.push({n, g: tr.g});
       sfx.tick(); showTrack(); save(); },
+    // bass and treble in dB (-12 to 12)
+    eq(kind, db) { db = Math.max(-12, Math.min(12, +db)); if (kind === "bass") { bass = db; if (lo) lo.gain.value = db; } else { treble = db; if (hi) hi.gain.value = db; } save(); },
+    get bass() { return bass; }, get treble() { return treble; },
     volume(v) { vol = v; if (out) out.gain.value = v; save(); },
     setGenre(g) { if (g === "fav" && !favs.length) { toast("★", t("noFavs"), true); return; } genre = g; fi = -1; showGenre(); $("gmenu").classList.remove("on"); sfx.tick(); advance(); if (!playing) start(); },
     menu() { $("gmenu").innerHTML = [["mix","Mix"]].concat(GENRES, favs.length ? [["fav","★ " + t("favs")]] : []).map(([k, l]) => `<button class="${k === genre ? "on" : ""}" onclick="radio.setGenre('${k}')">${l}</button>`).join("");

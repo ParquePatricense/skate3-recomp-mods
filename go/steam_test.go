@@ -46,14 +46,6 @@ func TestSteamShortcuts(t *testing.T) {
 	if b, _ := os.ReadFile(p); !bytes.Equal(b, orig) {
 		t.Fatal("remove did not give the original file back")
 	}
-	steamArtwork(p, `C:\S3\Skate3-Mods.exe`, true)
-	if ents, _ := os.ReadDir(filepath.Join(dir, "config", "grid")); len(ents) != 4 {
-		t.Fatalf("artwork: %d files", len(ents))
-	}
-	steamArtwork(p, `C:\S3\Skate3-Mods.exe`, false)
-	if ents, _ := os.ReadDir(filepath.Join(dir, "config", "grid")); len(ents) != 0 {
-		t.Fatalf("artwork left: %d files", len(ents))
-	}
 	// no file yet (a profile that never had non-Steam games)
 	p2 := filepath.Join(dir, "x", "config", "shortcuts.vdf")
 	if changed, err := steamShortcuts(p2, `C:\S3\Skate3-Mods.exe`, "", `C:\S3`, true); !changed || err != nil {
