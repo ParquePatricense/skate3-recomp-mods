@@ -105,6 +105,8 @@ nav button.on i{filter:none;opacity:1}
 .row+.row{margin-top:8px}
 .rows{display:grid;grid-template-columns:repeat(auto-fit,minmax(480px,1fr));gap:8px}
 .rows .row+.row{margin-top:0}
+.stack{display:flex;flex-direction:column;gap:8px;min-width:0}
+.stack .scr{display:flex;flex-wrap:wrap;gap:10px}
 body.sofa :focus-visible{outline:5px solid var(--lime);outline-offset:4px;box-shadow:0 0 0 10px rgba(198,255,61,.18)}
 .row .tx{flex:1;min-width:0}
 .row .tx b{display:block;font-size:15.5px}
@@ -182,7 +184,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:30px;heigh
 #modal .box{width:540px;background:#1b1b1b;border:2px solid #333;border-radius:16px;padding:24px;box-shadow:8px 8px 0 #000}
 #modal h3{margin:0 0 8px;font-size:28px}
 #modal p{color:var(--dim);white-space:pre-line}
-#modal .act{display:flex;justify-content:flex-end;gap:10px;margin-top:18px}
+#modal .act{display:flex;justify-content:flex-end;flex-wrap:wrap;gap:10px;margin-top:18px}
 #modal .act .btn{white-space:nowrap}
 /* busy */
 body.busy #pages{pointer-events:none;opacity:.6;transition:opacity .2s}
@@ -279,12 +281,20 @@ const L = {
   installed:"puesto",ps3d:"Clásicos de PS3, con los colores de siempre.",ps4d:"Share / Options, estilo PS4.",ps5d:"Blancos y limpios, Create / Options.",xbd:"Los originales del juego.",
   presets:"Presets gráficos",restore:"Volver a mi configuración de antes",fov:"Campo de visión",fovd:"El original es 60°. Más alto = ves más de la calle.",
   apply:"Aplicar",uw:"Ultrawide (21:9 o más)",uwd:"Para monitores anchos: sin bandas negras a los costados.",
-  helper:"El ayudante",shortcut:"Accesos directos en el escritorio",shortcutd:"Skate 3 Mods abre este modeador; Skate 3 (directo) y Skate 3 (normal) abren el juego con los mods y eligen cómo arranca.",
+  helper:"El ayudante",shortcut:"Accesos directos (escritorio y menú Inicio)",shortcutd:"Skate 3 Mods abre este modeador; Skate 3 (directo) y Skate 3 (normal) abren el juego con los mods y eligen cómo arranca.",
   steamT:"Skate 3 en Steam",steamD:"Lo suma a tu biblioteca como juego externo: Big Picture, Steam Input y la captura de Steam. Hacelo con Steam cerrado.",
   logT:"Registro del juego",logD:"El log de la última vez que abriste el juego, por si algo falló. También va dentro del reporte.",open:"Abrir",
   zoomT:"Tamaño del modeador",zoomD:"Se adapta solo a tu pantalla. Movelo si lo querés más grande o más chico (también con Ctrl + rueda del mouse).",
   sofaT:"Modo sofá",sofaD:"Todo más grande y el foco bien marcado, para usarlo desde la tele con el joystick.",
   shuffle:"Aleatorio",
+  spotT:"Arrancás en",spotD:"Dónde te deja la carga directa. Fuera de \"Donde dejaste\", el recomp maneja el menú del mapa por vos mientras la pantalla de carga sigue puesta.",
+  langLnk:"Crear acceso directo para este idioma",
+  uiMonT:"Pantalla del modeador",uiMonD:"En qué monitor abre esta ventana.",
+  wizT:"Asistente",wizD:"Tres preguntas y queda todo configurado.",wizGo:"Empezar",
+  wiz1:"¿Con qué jugás?",wizPS:"Joystick de PlayStation",wizXB:"Joystick de Xbox",wizKB:"Teclado y mouse",
+  wiz2:"¿Qué tan potente es tu PC?",wizMax:"Potente",wizBal:"Normal",wizPerf:"Justa",wizUltra:"Muy justa",
+  wiz3:"¿Cómo querés arrancar el juego?",wizDirect:"Directo a mi partida",wizNormal:"Normal, con los menús",wizDone:"Listo, todo configurado. Tocá Drop in.",
+  crashT:"El juego se cerró solo",crashD:"Se cerró con el error {c}. ¿Armo el reporte con el registro del juego para mandármelo?",crashGo:"Armar reporte",crashTxt:"El juego se cerró solo (error {c}).",
   argT:"Español ARG",argd:"Reemplaza \"Nederlands\" en la pantalla de idiomas por \"Español ARG\": voseo y vocabulario de acá. El español de siempre queda igual.",
   argBefore:"¿Quieres jugar? Haz un kickflip, colega.",argAfter:"¿Querés jugar? Hacé un kickflip, loco.",
   uiLang:"Idioma de esta ventana",
@@ -335,12 +345,20 @@ const L = {
   installed:"on",ps3d:"Classic PS3, with the usual colors.",ps4d:"Share / Options, PS4 style.",ps5d:"Clean white, Create / Options.",xbd:"The game's originals.",
   presets:"Graphics presets",restore:"Restore my previous settings",fov:"Field of view",fovd:"Default is 60°. Higher = you see more of the street.",
   apply:"Apply",uw:"Ultrawide (21:9 or wider)",uwd:"For wide monitors: no black bars on the sides.",
-  helper:"The helper",shortcut:"Desktop shortcuts",shortcutd:"Skate 3 Mods opens this modder; Skate 3 (directo) and Skate 3 (normal) start the game with the mods and pick how it boots.",
+  helper:"The helper",shortcut:"Shortcuts (desktop and Start menu)",shortcutd:"Skate 3 Mods opens this modder; Skate 3 (directo) and Skate 3 (normal) start the game with the mods and pick how it boots.",
   steamT:"Skate 3 in Steam",steamD:"Adds it to your library as a non-Steam game: Big Picture, Steam Input and Steam's capture. Do it with Steam closed.",
   logT:"Game log",logD:"The log from the last time you played, in case something failed. It also goes in the report.",open:"Open",
   zoomT:"Modder size",zoomD:"Fits your screen by itself. Move it if you want it bigger or smaller (Ctrl + mouse wheel works too).",
   sofaT:"Couch mode",sofaD:"Everything bigger and a clear focus ring, to use it from the TV with a gamepad.",
   shuffle:"Shuffle",
+  spotT:"You start at",spotD:"Where the direct load drops you. Other than \"Where you left off\", the recomp drives the map menu for you while the loading screen stays up.",
+  langLnk:"Create a shortcut for this language",
+  uiMonT:"Modder screen",uiMonD:"Which monitor this window opens on.",
+  wizT:"Setup assistant",wizD:"Three questions and everything is set.",wizGo:"Start",
+  wiz1:"What do you play with?",wizPS:"PlayStation controller",wizXB:"Xbox controller",wizKB:"Keyboard and mouse",
+  wiz2:"How powerful is your PC?",wizMax:"Powerful",wizBal:"Normal",wizPerf:"Modest",wizUltra:"Very modest",
+  wiz3:"How do you want the game to start?",wizDirect:"Straight to my save",wizNormal:"Normal, with the menus",wizDone:"Done, everything is set. Hit Drop in.",
+  crashT:"The game closed by itself",crashD:"It closed with error {c}. Build the report with the game log so you can send it to me?",crashGo:"Build report",crashTxt:"The game closed by itself (error {c}).",
   argT:"Español ARG",argd:"Turns \"Nederlands\" on the game's language screen into \"Español ARG\" (Rioplatense Spanish). Regular Spanish stays as is.",
   argBefore:"¿Quieres jugar? Haz un kickflip, colega.",argAfter:"¿Querés jugar? Hacé un kickflip, loco.",
   uiLang:"This window's language",
@@ -482,18 +500,17 @@ function gfx() {
         <div class="val h"><span id="fovv">${Math.round(S.fov)}</span><small>°</small></div>
         <input type="range" min="40" max="120" step="1" value="${S.fov}" oninput="$('fovv').textContent=this.value" onchange="act('fov',this.value)">
         <div class="sub" style="color:var(--dim);font-size:12.5px">${t("fovd")}</div></div>
-      <div>${row("🖥️", t("uw"), t("uwd"), sw(S.ultrawide, `act('ultrawide','${S.ultrawide ? "off" : "on"}')`))}</div>
+      <div class="stack">${row("🖥️", t("uw"), t("uwd"), sw(S.ultrawide, `act('ultrawide','${S.ultrawide ? "off" : "on"}')`))}
+        ${mons.length ? `<div class="card"><b>${t("whereT")}</b><div class="sub" style="margin:2px 0 10px">${t("whered")}</div><div class="scr">
+        ${[{n: 0}].concat(mons).map(m => `<div class="card pick ${c.monitor === m.n || (m.n === 0 && !mons.some(x => x.n === c.monitor)) ? "sel" : ""}" data-tag="✓" onclick="act('monitor','${m.n}')">
+          <div class="mon">${m.n || "A"}</div><b>${m.n ? (m.primary ? t("main") : t("scr") + " " + m.n) : t("auto")}</b>
+          <div class="sub">${m.n ? m.w + "×" + m.h : t("main")}</div></div>`).join("")}</div></div>` : ""}</div>
     </div>
-    <div class="sec"><h2 class="h">${t("screen")}</h2>
+    <div class="sec"><h2 class="h">${t("screen")}</h2><div class="rows">
       ${row("🌀", t("vsync"), t("vsyncd"), sw(c.vsync, `act('vsync','${c.vsync ? "off" : "on"}')`))}
-      ${row("⛶", t("fs"), t("fsd"), sw(c.fullscreen, `act('fullscreen','${c.fullscreen ? "off" : "on"}')`))}</div>
-    <div class="sec"><h2 class="h">${t("imgT")}</h2>
+      ${row("⛶", t("fs"), t("fsd"), sw(c.fullscreen, `act('fullscreen','${c.fullscreen ? "off" : "on"}')`))}
       ${row("▭", t("lbox"), t("lboxD"), sw(c.letterbox, `act('letterbox','${c.letterbox ? "off" : "on"}')`))}
-      ${row("💧", t("ssr"), t("ssrD"), sw(c.ssr, `act('ssr','${c.ssr ? "off" : "on"}')`))}</div>
-    ${mons.length ? `<div class="sec"><h2 class="h">${t("whereT")}</h2><p>${t("whered")}</p><div class="scr">
-      ${[{n: 0}].concat(mons).map(m => `<div class="card pick ${c.monitor === m.n || (m.n === 0 && !mons.some(x => x.n === c.monitor)) ? "sel" : ""}" data-tag="✓" onclick="act('monitor','${m.n}')">
-        <div class="mon">${m.n || "A"}</div><b>${m.n ? (m.primary ? t("main") : t("scr") + " " + m.n) : t("auto")}</b>
-        <div class="sub">${m.n ? m.w + "×" + m.h : t("main")}</div></div>`).join("")}</div></div>` : ""}`;
+      ${row("💧", t("ssr"), t("ssrD"), sw(c.ssr, `act('ssr','${c.ssr ? "off" : "on"}')`))}</div></div>`;
 }
 // ------------------------------------------------------------------ controls
 const KNAME = {LMB:["Click izq.","Left click"],RMB:["Click der.","Right click"],MMB:["Rueda","Wheel"],Return:["Enter","Enter"],
@@ -551,13 +568,16 @@ function session() {
   const ap = S.afterPlay || "min", opt = (k, n, d) => `<div class="card pick ${ap === k ? "sel" : ""}" data-tag="✓" onclick="act('afterplay','${k}')"><b>${n}</b><span>${d}</span></div>`;
   return `<div class="sec"><h2 class="h">${t("bootT")}</h2>
      ${row("⏩", t("direct"), t("directD"), sw(S.ctl.direct, `act('direct','${S.ctl.direct ? "off" : "on"}')`))}
-     ${S.ctl.direct ? `<div class="card" style="margin-top:8px"><b>${t("bootLangT")}</b><div class="sub" style="color:var(--dim);font-size:12.5px;margin:2px 0 12px">${t("bootLangD")}</div>
-       <div class="langs">${S.ctl.bootLangs.map(l => `<button class="btn ${S.ctl.bootLang === l.key ? "hot" : ""}" onclick="act('bootlang','${l.key}')">${esc(l.name)}</button>`).join("")}</div></div>` : ""}</div>
+     ${S.ctl.direct ? `<div class="card grid g2" style="margin-top:8px;gap:24px"><div><b>${t("bootLangT")}</b><div class="sub" style="color:var(--dim);font-size:12.5px;margin:2px 0 12px">${t("bootLangD")}</div>
+       <div class="langs">${S.ctl.bootLangs.map(l => `<button class="btn ${S.ctl.bootLang === l.key ? "hot" : ""}" onclick="act('bootlang','${l.key}')">${esc(l.name)}</button>`).join("")}
+       <button class="btn" onclick="act('langshortcut','${S.ctl.bootLang}')">🖱️ ${t("langLnk")}</button></div></div>
+       <div><b>${t("spotT")}</b><div class="sub" style="color:var(--dim);font-size:12.5px;margin:2px 0 10px">${t("spotD")}</div>
+       <div class="langs">${(S.ctl.spots || []).map(p => `<button class="btn ${(S.ctl.spot || "here") === p.key ? "hot" : ""}" onclick="act('spot','${p.key}')">${esc(p.name)}</button>`).join("")}</div></div></div>` : ""}</div>
     <div class="sec"><h2 class="h">${t("afterT")}</h2><div class="opts">${opt("min", t("aMin"), t("aMinD"))}${opt("close", t("aClose"), t("aCloseD"))}${opt("stay", t("aStay"), t("aStayD"))}</div></div>
     <div class="sec"><h2 class="h">${t("helper")}</h2><div class="rows">
-     ${S.features.map(f => row(FICON[f.key] || "•", f.name, f.desc, sw(f.on, `act('feature','${f.key}=${f.on ? "off" : "on"}')`))).join("")}</div></div>
-    <div class="sec rows">${row("🖱️", t("shortcut"), t("shortcutd"), sw(S.shortcut, `act('shortcut','${S.shortcut ? "off" : "on"}')`))}
-     ${S.hasSteam || S.steam ? row("🚂", t("steamT"), t("steamD"), sw(S.steam, `act('steam','${S.steam ? "off" : "on"}')`)) : ""}</div>`;
+     ${S.features.map(f => row(FICON[f.key] || "•", f.name, f.desc, sw(f.on, `act('feature','${f.key}=${f.on ? "off" : "on"}')`))).join("")}
+     ${row("🖱️", t("shortcut"), t("shortcutd"), sw(S.shortcut, `act('shortcut','${S.shortcut ? "off" : "on"}')`))}
+     ${S.hasSteam || S.steam ? row("🚂", t("steamT"), t("steamD"), sw(S.steam, `act('steam','${S.steam ? "off" : "on"}')`)) : ""}</div></div>`;
 }
 function lang() {
   return `<div class="sec"><div class="card"><div style="display:flex;align-items:center;gap:16px">
@@ -569,7 +589,7 @@ function lang() {
       <div class="card pick ${S.en ? "sel" : ""}" data-tag="✓" onclick="setUi('en')"><h3 class="h" style="margin:0">English</h3></div></div></div>`;
 }
 function shop() {
-  return `<div class="sec">
+  return `<div class="sec rows">
       ${row("🩹", t("repair"), t("repaird"), `<button class="btn hot" onclick="act('repair','', '${t("repair")}')">${t("repair")}</button>`)}
       ${row("🩺", t("diag"), t("diagd"), `<button class="btn" onclick="act('diagnose','', '${t("diag")}')">${t("diag")}</button>`)}
       ${row("⬇️", t("update") + " · v" + S.version, t("updated"), `<button class="btn" onclick="checkUpdate(true)">${t("check")}</button>`)}
@@ -580,16 +600,35 @@ function shop() {
          <button class="btn" onclick="act('folder','data','${t("fData")}')">${t("fData")}</button></div>`)}
       ${row("🔀", t("chg"), "", `<button class="btn" onclick="pickFolder()">${t("pick")}</button>`)}
       ${row("📣", t("report"), t("reportD"), `<button class="btn" onclick="askReport()">${t("report")}</button>`)}
-      ${row("📜", t("logT"), t("logD"), `<button class="btn" onclick="act('gamelog')">${t("open")}</button>`)}</div>
-    <div class="sec"><h2 class="h">${t("modder")}</h2>
+      ${row("📜", t("logT"), t("logD"), `<button class="btn" onclick="act('gamelog')">${t("open")}</button>`)}
+      ${row("🧭", t("wizT"), t("wizD"), `<button class="btn" onclick="wizard()">${t("wizGo")}</button>`)}</div>
+    <div class="sec"><h2 class="h">${t("modder")}</h2><div class="grid g2" style="gap:8px">
       <div class="card"><b>${t("deckT")}</b><div class="decks" style="margin-top:10px">${Object.keys(DECKS).map(k => `<div class="d ${deckKey() === k ? "sel" : ""}" tabindex="0" style="background:${DECKS[k]}" onclick="setPref('deck','${k}')"></div>`).join("")}</div></div>
-      <div style="height:8px"></div>
-      ${row("🔊", t("sfxT"), t("sfxD"), sw(sfx.on, `setPref('sfx','${sfx.on ? "0" : "1"}')`))}
+      <div class="stack">${row("🔊", t("sfxT"), t("sfxD"), sw(sfx.on, `setPref('sfx','${sfx.on ? "0" : "1"}')`))}
       ${row("🔍", t("zoomT") + " · " + Math.round(zoomPref() * 100) + "%", t("zoomD"), `<input type="range" min="70" max="150" step="5" value="${Math.round(zoomPref() * 100)}" style="width:220px;margin:0" onchange="setZoom(this.value/100)">`)}
       ${row("🛋️", t("sofaT"), t("sofaD"), sw(S.prefs?.sofa === "1", `setPref('sofa','${S.prefs?.sofa === "1" ? "0" : "1"}')`))}
+      ${(S.ctl.monitors || []).length > 1 ? row("🖥️", t("uiMonT"), t("uiMonD"), `<div style="display:flex;gap:6px">${[{n: 0}].concat(S.ctl.monitors).map(m => `<button class="btn ${(S.uiMonitor || 0) === m.n ? "hot" : ""}" onclick="uiMonitor(${m.n})">${m.n || t("auto")}</button>`).join("")}</div>`) : ""}
+</div></div>
       <p style="color:var(--mute);font-size:12.5px;margin-top:12px">${t("keysHelp")}</p></div>
     <div class="sec"><h2 class="h" style="color:#ff8a8a">💀 ${t("hom")}</h2>
       ${row("🧨", t("uninst"), t("uninstd"), `<button class="btn danger" onclick="askUninstall()">${t("uninst")}</button>`)}</div>`;
+}
+async function uiMonitor(n) { if (window.s3win) await window.s3win("mon:" + n); sfx.tick(); await refresh(); }
+// first-run assistant: three questions, each answer applied right away
+function wizard() {
+  const ask = (q, opts, next) => modal(t("wizT"), q, opts.map(([l, fn]) => [l, "", async () => { await fn(); next(); }]));
+  ask(t("wiz1"), [[t("wizPS"), () => act("icons", "ps4")], [t("wizXB"), () => act("icons", "xbox")], [t("wizKB"), () => act("mnk", "on")]], () =>
+    ask(t("wiz2"), [[t("wizMax"), () => act("preset", "max")], [t("wizBal"), () => act("preset", "balanced")], [t("wizPerf"), () => act("preset", "perf")], [t("wizUltra"), () => act("preset", "ultra")]], () =>
+      ask(t("wiz3"), [[t("wizDirect"), () => act("direct", "on")], [t("wizNormal"), () => act("direct", "off")]], () =>
+        modal(t("wizT"), t("wizDone"), [[t("ok"), "hot", null]]))));
+}
+// the helper noted that the game crashed: offer the report
+function crashCheck() {
+  if (!S.crash) return false;
+  const c = S.crash.split(" ")[0];
+  call("crashseen");
+  modal(t("crashT"), t("crashD").replace("{c}", c), [[t("cancel"), "", null], [t("crashGo"), "hot", () => act("report", t("crashTxt").replace("{c}", c), t("report"))]]);
+  return true;
 }
 async function setUi(l) { await call("uilang", l); sfx.tick(); await refresh(); }
 function askUninstall() {
@@ -637,7 +676,7 @@ function applyPrefs() {
 }
 // size: WebView2's zoom fitted to the screen (s3zoom), times the user's size
 // and couch mode. Ctrl + wheel / Ctrl +, -, 0 change the user's size.
-const zoomPref = () => { const z = +(S.prefs?.zoom || 1); return z >= .5 && z <= 2 ? z : 1; };
+const zoomPref = () => { const z = +(S.prefs?.size || 1); return z >= .5 && z <= 2 ? z : 1; };
 let lastZoom = 0;
 function fitZoom() {
   const m = zoomPref() * (S.prefs?.sofa === "1" ? 1.3 : 1);
@@ -646,8 +685,8 @@ function fitZoom() {
 let zoomT = null;
 function setZoom(z) {
   z = Math.max(.7, Math.min(1.5, Math.round(z * 20) / 20));
-  S.prefs = Object.assign({}, S.prefs, {zoom: String(z)}); fitZoom();
-  clearTimeout(zoomT); zoomT = setTimeout(async () => { await call("pref", "zoom=" + z); await refresh(); }, 500);
+  S.prefs = Object.assign({}, S.prefs, {size: String(z)}); fitZoom();
+  clearTimeout(zoomT); zoomT = setTimeout(async () => { await call("pref", "size=" + z); await refresh(); }, 500);
 }
 addEventListener("resize", () => { clearTimeout(window._rz); window._rz = setTimeout(() => { lastZoom = 0; fitZoom(); }, 200); });
 addEventListener("wheel", e => { if (e.ctrlKey) { e.preventDefault(); setZoom(zoomPref() + (e.deltaY < 0 ? .05 : -.05)); } }, {passive: false});
@@ -662,6 +701,16 @@ function askReport() {
   setTimeout(() => $("rtext").focus(), 50);
 }
 const CHANGES = {
+  "3.5.0": {es: ["El modeador aparece con su propio ícono en la barra de tareas.",
+      "Todas las pestañas entran en la pantalla sin alejar, y la radio se corta apenas tocás Drop in.",
+      "Carga directa: el juego queda mudo mientras carga, con consejos y una barra que aprende cuánto tarda. Podés elegir dónde arrancás.",
+      "Accesos directos también en el menú Inicio, y uno por idioma.",
+      "Steam con portada propia, aviso si el juego se cierra solo, revisión antes de jugar, pantalla del modeador y asistente."],
+    en: ["The modder shows its own icon on the taskbar.",
+      "Every tab fits on screen without zooming out, and the radio cuts the moment you hit Drop in.",
+      "Direct load: the game stays muted while it loads, with tips and a bar that learns how long it takes. You can pick where you start.",
+      "Shortcuts in the Start menu too, and one per language.",
+      "Steam with its own artwork, a notice when the game crashes, a check before playing, modder screen and setup assistant."]},
   "3.4.0": {es: ["Directo a tu partida ahora es carga directa: una pantalla de carga tapa los menús y aparecés en tu carrera.",
       "El modeador se adapta solo a tu pantalla, con tamaño a gusto y modo sofá para la tele.",
       "Radio: arranca sola al abrir, Mix y aleatorio de entrada, temas que cambian solos y la tecla M para pausar. Se sacó el DJ.",
@@ -738,7 +787,7 @@ async function dropIn() {
   if (ap === "close") setTimeout(() => win("close"), 1200);
   else if (ap === "min") setTimeout(() => win("min"), 900);
 }
-window.s3back = () => { toast(t("back"), t("backD")); if (radioWasOn && !radio.playing) radio.toggle(); refresh(); };
+window.s3back = async () => { if (radioWasOn && !radio.playing) radio.toggle(); await refresh(); if (!crashCheck()) toast(t("back"), t("backD")); };
 async function win(mode) {
   if (!window.s3win) return;
   const m = await window.s3win(mode);
@@ -888,7 +937,10 @@ const radio = (() => {
   function showTrack() { $("track").textContent = label(); $("rfav").textContent = isFav() ? "★" : "☆"; }
   function start() { if (!a) setup(); if (!tr) load(n); playing = true; nextT = a.currentTime + .05;
     timer = setInterval(schedule, 25); $("rplay").textContent = "❚❚"; $("radio").classList.add("play"); save(); }
-  function stop() { playing = false; clearInterval(timer); $("rplay").textContent = "▶"; $("radio").classList.remove("play"); save(); }
+  // stop cuts the sound at once: notes already scheduled (and long chord
+  // tails) hang off the old output, which is unplugged
+  function stop() { playing = false; clearInterval(timer);
+    if (out) { out.disconnect(); out = a.createGain(); out.gain.value = vol; out.connect(comp); } $("rplay").textContent = "▶"; $("radio").classList.remove("play"); save(); }
   // the page has no fixed origin, so the radio settings live in skate3-mods.ini
   let saveT = null;
   function save() { clearTimeout(saveT); saveT = setTimeout(() => { if (S.root) call("radio", JSON.stringify({on: playing, n, vol, genre, favs, shuffle: shuf})); }, 800); }
@@ -947,6 +999,7 @@ document.addEventListener("pointerdown", () => { if (AC && AC.state === "suspend
   render();
   $("tip").innerHTML = t("tips")[0];
   if (!radio.playing) radio.toggle();
+  if (S.root && !S.prefs?.seen) setTimeout(wizard, 400); else crashCheck();
   showNews();
   await checkUpdate(false);
   if (S.root && !newVer) checkRecomp(false);

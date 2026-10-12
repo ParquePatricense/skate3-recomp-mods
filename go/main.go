@@ -23,7 +23,7 @@ import (
 	"time"
 )
 
-const version = "3.4.0"
+const version = "3.5.0"
 
 var stdin = newStdin()
 
@@ -356,9 +356,16 @@ func run(args []string) int {
 				fmt.Println(onOff(textsOn(root)))
 			}
 		case "play":
-			// the "directo" and "normal" desktop shortcuts pick the startup
-			if want := arg == "direct"; (arg == "direct" || arg == "normal") && want != directOn(root) {
+			// the "directo" and "normal" shortcuts pick the startup, and
+			// "directo, English" and the like the language too
+			mode, lang, _ := strings.Cut(arg, ":")
+			if want := mode == "direct"; (mode == "direct" || mode == "normal") && want != directOn(root) {
 				if _, err = setDirect(root, want); err != nil {
+					break
+				}
+			}
+			if mode == "direct" && lang != "" && lang != loadConfig(root)["boot_lang"] {
+				if _, err = setBootLang(root, lang); err != nil {
 					break
 				}
 			}

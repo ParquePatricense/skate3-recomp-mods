@@ -55,10 +55,12 @@ func apiState(root string) map[string]any {
 	st["radio"] = c["radio"]
 	st["ctl"] = controlsState(root)
 	st["afterPlay"] = c["after_play"]
-	st["prefs"] = map[string]string{"deck": c["ui_deck"], "sfx": c["ui_sfx"], "seen": c["ui_seen"], "zoom": c["ui_zoom"], "sofa": c["ui_sofa"]}
+	st["prefs"] = map[string]string{"deck": c["ui_deck"], "sfx": c["ui_sfx"], "seen": c["ui_seen"], "size": c["ui_size"], "sofa": c["ui_sofa"]}
 	st["steam"] = c.on("steam")
+	st["crash"] = c["crash"]
 	st["hasSteam"] = steamDir() != ""
 	st["uiWindow"] = c["ui_window"]
+	st["uiMonitor"] = uiMonitorSetting()
 	st["recomp"] = c["recomp_version"]
 	return st
 }
@@ -194,7 +196,7 @@ func apiDo(root *string, cmd, arg string) (string, error) {
 		return T("Reflejos ", "Reflections ") + onOff(onArg(arg)), setBool(r, "skate3_native_render_scene_ssr", onArg(arg))
 	case "pref":
 		key, val, _ := strings.Cut(arg, "=")
-		if key != "deck" && key != "sfx" && key != "seen" && key != "zoom" && key != "sofa" {
+		if key != "deck" && key != "sfx" && key != "seen" && key != "size" && key != "sofa" {
 			return "", errors.New("?")
 		}
 		c := loadConfig(r)
@@ -202,6 +204,17 @@ func apiDo(root *string, cmd, arg string) (string, error) {
 		return "", c.save(r)
 	case "steam":
 		return setSteam(r, onArg(arg))
+	case "spot":
+		return setSpot(r, arg)
+	case "langshortcut":
+		if bootLangSrc(arg) == "" {
+			return "", errors.New("?")
+		}
+		return T("Acceso creado: Skate 3 (directo, ", "Shortcut created: Skate 3 (directo, ") + bootLangName(arg) + ")", createLangShortcut(r, arg, bootLangName(arg))
+	case "crashseen":
+		c := loadConfig(r)
+		delete(c, "crash")
+		return "", c.save(r)
 	case "gamelog":
 		return "", openLog(r)
 	case "bootlang":
@@ -237,6 +250,13 @@ func apiDo(root *string, cmd, arg string) (string, error) {
 	case "checkupdate":
 		return newerVersion(), nil
 	case "play":
+		warn, err := preflight(r)
+		if err != nil {
+			return "", err
+		}
+		if warn != "" {
+			return warn, startPlay(r)
+		}
 		return T("¡Drop in!", "Drop in!"), startPlay(r)
 	}
 	return "", fmt.Errorf("unknown action %q", cmd)
@@ -250,6 +270,13 @@ func useRoot(root *string, d string) (string, error) {
 	*root = r
 	setLang(loadConfig(r))
 	settleIn(r)
+	if c := loadConfig(r); c.on("shortcut") && c["shortcut_set"] != "3.5" { // older versions made only "Skate 3"
+		if createShortcut(r) == nil {
+			c["shortcut_set"] = "3.5"
+			c.save(r)
+		}
+	}
+	steamArtRefresh(r)
 	msgs := checkMods(r)
 	return strings.Join(msgs, "\n"), nil
 }

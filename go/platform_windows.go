@@ -368,6 +368,10 @@ func play(root string) error {
 	hc = loadConfig(root)
 	setLang(hc)
 	checkMods(root) // put the mods back if a recomp update replaced the files
+	if _, err := preflight(root); err != nil {
+		msgBox(err.Error())
+		return nil
+	}
 	runtime.LockOSThread()
 	pid, running := findGamePID()
 	direct := !running && directOn(root)
@@ -412,6 +416,9 @@ func play(root string) error {
 		}
 	}
 	finish := func() {
+		if coverMuted {
+			muteGame(gamePID, false)
+		}
 		if cursorHidden {
 			restoreCursor()
 		}
@@ -435,6 +442,7 @@ func play(root string) error {
 				coverTick()
 				if watch.reached() {
 					watch = nil
+					recordBoot(root, time.Since(coverStart))
 					hideCover()
 				}
 			}
@@ -471,6 +479,7 @@ func play(root string) error {
 				continue
 			}
 			if w, _, _ := pWaitForSingleObject.Call(uintptr(proc), 0); w == 0 {
+				noteCrash(root, proc)
 				if hc.feature("window") {
 					saveWindowState(root, lastWin)
 				}
@@ -487,6 +496,18 @@ func play(root string) error {
 	}
 	finish()
 	return nil
+}
+
+// noteCrash remembers an unexpected exit (an NTSTATUS error code such as
+// 0xC0000005) so the modder can offer the problem report.
+func noteCrash(root string, proc syscall.Handle) {
+	var code uint32
+	if windows.GetExitCodeProcess(windows.Handle(proc), &code) != nil || code < 0xC0000000 {
+		return
+	}
+	c := loadConfig(root)
+	c["crash"] = fmt.Sprintf("0x%08X %s", code, time.Now().Format("2006-01-02 15:04"))
+	c.save(root)
 }
 
 // Do not disturb: Windows' own "notifications" switch (ToastEnabled), turned
@@ -562,38 +583,68 @@ func copyToClipboard(path string) error {
 	return powershell("Get-Content -Raw -Encoding UTF8 -LiteralPath " + psQuote(path) + " | Set-Clipboard")
 }
 
-func desktopShortcut(name string) string {
-	return "(Join-Path ([Environment]::GetFolderPath('Desktop')) " + psQuote(name) + ")"
+// Shortcuts go on the desktop and in the Start menu ("Skate 3 Mods" folder,
+// so typing "Skate" finds them).
+var shortcutDirs = []string{
+	"[Environment]::GetFolderPath('Desktop')",
+	"(Join-Path ([Environment]::GetFolderPath('Programs')) 'Skate 3 Mods')",
 }
 
-func createShortcut(root string) error {
+func shortcutScript(root string, links []struct{ name, args string }) (string, error) {
 	exe := filepath.Join(root, modsExe)
 	if !exists(exe) {
 		var err error
 		if exe, err = os.Executable(); err != nil {
-			return err
+			return "", err
 		}
 	}
-	ps := "$p=" + desktopShortcut(oldShortcutName) + ";if(Test-Path -LiteralPath $p){Remove-Item -LiteralPath $p};"
-	for _, sc := range shortcuts {
-		icon, style, desc := filepath.Join(root, gameExe), "7", "Skate 3 Recomp (mods)"
-		if sc.args == "" {
-			icon, style, desc = exe, "1", "Skate 3 Recomp Mods"
+	ps := ""
+	for _, dir := range shortcutDirs {
+		ps += "$d=" + dir + ";New-Item -ItemType Directory -Force -Path $d | Out-Null;"
+		for _, sc := range links {
+			icon, style, desc := filepath.Join(root, gameExe), "7", "Skate 3 Recomp (mods)"
+			if sc.args == "" {
+				icon, style, desc = exe, "1", "Skate 3 Recomp Mods"
+			}
+			ps += "$s=(New-Object -ComObject WScript.Shell).CreateShortcut((Join-Path $d " + psQuote(sc.name) + "));" +
+				"$s.TargetPath=" + psQuote(exe) + ";$s.Arguments=" + psQuote(sc.args) + ";" +
+				"$s.WorkingDirectory=" + psQuote(root) + ";" +
+				"$s.IconLocation=" + psQuote(icon+",0") + ";" +
+				"$s.WindowStyle=" + style + ";$s.Description=" + psQuote(desc) + ";$s.Save();"
 		}
-		ps += "$s=(New-Object -ComObject WScript.Shell).CreateShortcut(" + desktopShortcut(sc.name) + ");" +
-			"$s.TargetPath=" + psQuote(exe) + ";$s.Arguments=" + psQuote(sc.args) + ";" +
-			"$s.WorkingDirectory=" + psQuote(root) + ";" +
-			"$s.IconLocation=" + psQuote(icon+",0") + ";" +
-			"$s.WindowStyle=" + style + ";$s.Description=" + psQuote(desc) + ";$s.Save();"
+	}
+	return ps, nil
+}
+
+func createShortcut(root string) error {
+	ps, err := shortcutScript(root, shortcuts)
+	if err != nil {
+		return err
+	}
+	return powershell("$p=(Join-Path ([Environment]::GetFolderPath('Desktop')) " + psQuote(oldShortcutName) + ");" +
+		"if(Test-Path -LiteralPath $p){Remove-Item -LiteralPath $p};" + ps)
+}
+
+// createLangShortcut adds "Skate 3 (directo, English)" and the like.
+func createLangShortcut(root, key, name string) error {
+	ps, err := shortcutScript(root, []struct{ name, args string }{{"Skate 3 (directo, " + name + ").lnk", "play direct:" + key}})
+	if err != nil {
+		return err
 	}
 	return powershell(ps)
 }
 
 func removeShortcut() error {
-	ps := ""
-	for _, n := range []string{oldShortcutName, shortcuts[0].name, shortcuts[1].name, shortcuts[2].name} {
-		ps += "$p=" + desktopShortcut(n) + ";if(Test-Path -LiteralPath $p){Remove-Item -LiteralPath $p};"
+	ps := "$p=(Join-Path ([Environment]::GetFolderPath('Desktop')) " + psQuote(oldShortcutName) + ");if(Test-Path -LiteralPath $p){Remove-Item -LiteralPath $p};"
+	for _, dir := range shortcutDirs {
+		ps += "$d=" + dir + ";"
+		for _, sc := range shortcuts {
+			ps += "$p=(Join-Path $d " + psQuote(sc.name) + ");if(Test-Path -LiteralPath $p){Remove-Item -LiteralPath $p};"
+		}
+		ps += "Get-ChildItem -LiteralPath $d -Filter 'Skate 3 (directo, *).lnk' -ErrorAction SilentlyContinue | Remove-Item;"
 	}
+	ps += "$d=(Join-Path ([Environment]::GetFolderPath('Programs')) 'Skate 3 Mods');" +
+		"if((Test-Path -LiteralPath $d) -and -not (Get-ChildItem -LiteralPath $d)){Remove-Item -LiteralPath $d};"
 	return powershell(ps)
 }
 
@@ -723,4 +774,16 @@ func steamRunning() bool {
 		}
 	}
 	return false
+}
+
+func freeSpace(path string) (uint64, bool) {
+	p, err := syscall.UTF16PtrFromString(path)
+	if err != nil {
+		return 0, false
+	}
+	var free uint64
+	if windows.GetDiskFreeSpaceEx(p, &free, nil, nil) != nil {
+		return 0, false
+	}
+	return free, true
 }

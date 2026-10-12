@@ -12,8 +12,8 @@ Pack de mods **modular** para [skate3recomp](https://github.com/mchughalex/skate
 | ⌨️ **Teclado y mouse** | Activa el modo teclado+mouse del recomp, sensibilidad y remapeo de cada botón tocando la tecla |
 | 🔭 **FOV y ultrawide** | Campo de visión (40–120) y modo 21:9 |
 | 🛹 **Ayudante en sesión** | Alt+F4, reinicio rápido (Ctrl+Alt+R), prioridad alta, pantalla siempre encendida, cursor oculto, tecla Windows bloqueada, ventana recordada y no molestar |
-| 🖥️ **Accesos directos** | "Skate 3 Mods" (el modeador), "Skate 3 (directo)" y "Skate 3 (normal)" en el escritorio |
-| 🚂 **Skate 3 en Steam** | Lo suma a tu biblioteca como juego externo, para Big Picture, Steam Input y la captura de Steam |
+| 🖥️ **Accesos directos** | "Skate 3 Mods" (el modeador), "Skate 3 (directo)" y "Skate 3 (normal)" en el escritorio y el menú Inicio, y uno por idioma si querés |
+| 🚂 **Skate 3 en Steam** | Lo suma a tu biblioteca como juego externo, con portada propia, para Big Picture, Steam Input y la captura de Steam |
 | 🧉 **Español ARG** | Agrega el idioma "Español ARG" (voseo y vocabulario rioplatense) en lugar del neerlandés; el español original queda igual |
 
 🔧 **El taller:** aviso cuando sale una versión nueva de skate3recomp, reparar archivos, reaplicar los mods solo si actualizás el recomp, diagnóstico, carpetas a mano, actualización en un toque y desinstalar todo.
@@ -63,7 +63,7 @@ Activa `mnk_mode` del recomp: el mouse mueve la cámara (stick derecho) y cada b
 
 ## ⏩ Directo a tu partida
 
-Usa la automatización de arranque del propio recomp (`skate3_demo_path` con `skate3_demo_path_signed_in`, así conserva tu perfil y tu partida): saltea la intro, acepta la pantalla de idioma, el Press Start y los avisos de arranque, y deja de tocar los controles en cuanto empezás a patinar. Mientras tanto, el ayudante tapa el monitor del juego con una pantalla de carga y la saca cuando el registro del juego (`logs/`, que con esta opción se escribe cada segundo) dice que ya estás patinando; si algo sale raro, se va sola a los 2 minutos. Esa automatización siempre acepta inglés, así que el idioma que elegís en el modeador (Español, Español ARG, Français, Deutsch, Italiano) se pone en el lugar del inglés dentro de `miscboot.big` mientras la opción está activa; al apagarla vuelve el original.
+Usa la automatización de arranque del propio recomp (`skate3_demo_path` con `skate3_demo_path_signed_in`, así conserva tu perfil y tu partida): saltea la intro, acepta la pantalla de idioma, el Press Start y los avisos de arranque, y deja de tocar los controles en cuanto empezás a patinar. Mientras tanto, el ayudante tapa el monitor del juego con una pantalla de carga y la saca cuando el registro del juego (`logs/`, que con esta opción se escribe cada segundo) dice que ya estás patinando; si algo sale raro, se va sola a los 2 minutos. Mientras está puesta, el juego queda muteado en el mezclador de volumen de Windows, muestra un consejo con los botones de tu estilo y una barra que aprende cuánto tarda tu carga. En "Arrancás en" podés elegir aparecer en la Biblioteca de la PCU (experimental: el recomp maneja el menú del mapa por vos). Esa automatización siempre acepta inglés, así que el idioma que elegís en el modeador (Español, Español ARG, Français, Deutsch, Italiano) se pone en el lugar del inglés dentro de `miscboot.big` mientras la opción está activa; al apagarla vuelve el original.
 
 ## 🧉 Español ARG
 
@@ -91,6 +91,8 @@ Corre en segundo plano mientras jugás y se cierra con el juego. Cada cosa se pr
 - 🩹 **Reparar:** revisa `fedynamic.big` y `miscboot.big`; si alguno está roto, vuelve desde la copia y se reaplica el mod.
 - 🔄 **Después de actualizar el recomp:** al jugar o abrir el modeador, si un archivo cambió, se toma como nuevo original y se vuelven a poner tus mods.
 - 📜 **Registro del juego:** abre el log de la última sesión; el reporte de problemas incluye su final.
+- 🧭 **Asistente:** tres preguntas (mando, PC y arranque) y queda todo configurado; aparece solo la primera vez.
+- 💥 **Cierre inesperado:** si el juego se cierra con un error, el modeador ofrece armar el reporte.
 - 🩺 **Diagnóstico:** deja `Skate3-Mods-diagnostico.txt` en el escritorio para pedir ayuda.
 - 📁 **Carpetas:** juego, partidas y datos, a un toque.
 - ⬇️ **Actualizar:** baja la versión nueva de Releases y se reemplaza solo.

@@ -8,6 +8,7 @@ package main
 
 import (
 	"bytes"
+	"embed"
 	"encoding/binary"
 	"errors"
 	"hash/crc32"
@@ -187,6 +188,30 @@ func steamShortcuts(path, modsExePath, gameExePath, root string, add bool) (bool
 	return true, os.WriteFile(path, vdfBytes(doc), 0o644)
 }
 
+//go:embed steamart
+var steamArt embed.FS
+
+// steamArtwork puts (or removes) our own library artwork next to a profile's
+// shortcuts.vdf, so the entry isn't a grey box: cover, wide capsule, hero
+// banner and logo, named after the entry's id.
+func steamArtwork(vdfPath, modsExePath string, add bool) {
+	grid := filepath.Join(filepath.Dir(vdfPath), "grid")
+	id := strconv.FormatUint(uint64(steamAppID(`"`+modsExePath+`"`, "Skate 3")), 10)
+	files := map[string]string{"p.jpg": id + "p.jpg", "wide.jpg": id + ".jpg", "hero.jpg": id + "_hero.jpg", "logo.png": id + "_logo.png"}
+	if add {
+		os.MkdirAll(grid, 0o755)
+	}
+	for src, dst := range files {
+		if !add {
+			os.Remove(filepath.Join(grid, dst))
+			continue
+		}
+		if b, err := steamArt.ReadFile("steamart/" + src); err == nil {
+			os.WriteFile(filepath.Join(grid, dst), b, 0o644)
+		}
+	}
+}
+
 // steamProfiles lists every userdata/<id>/config/shortcuts.vdf of a Steam
 // install (the file may not exist yet).
 func steamProfiles(steamDir string) []string {
@@ -226,9 +251,11 @@ func setSteam(root string, add bool) (string, error) {
 		if _, err := steamShortcuts(p, exe, recompExe(root), root, add); err != nil {
 			return "", err
 		}
+		steamArtwork(p, exe, add)
 	}
 	c := loadConfig(root)
 	c["steam"] = map[bool]string{true: "1", false: "0"}[add]
+	c["steam_art"] = c["steam"]
 	if err := c.save(root); err != nil {
 		return "", err
 	}
@@ -236,4 +263,21 @@ func setSteam(root string, add bool) (string, error) {
 		return T("Skate 3 quedó en tu biblioteca de Steam. Abrí Steam y buscalo en la lista", "Skate 3 is in your Steam library. Open Steam and look for it in the list"), nil
 	}
 	return T("Skate 3 salió de Steam", "Skate 3 was removed from Steam"), nil
+}
+
+// steamArtRefresh adds the artwork to an entry made before v3.5 (the art
+// doesn't need Steam closed).
+func steamArtRefresh(root string) {
+	c := loadConfig(root)
+	if !c.on("steam") || c["steam_art"] == "1" {
+		return
+	}
+	exe := filepath.Join(root, modsExe)
+	if dir := steamDir(); dir != "" && exists(exe) {
+		for _, p := range steamProfiles(dir) {
+			steamArtwork(p, exe, true)
+		}
+		c["steam_art"] = "1"
+		c.save(root)
+	}
 }

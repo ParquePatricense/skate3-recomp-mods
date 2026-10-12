@@ -7,6 +7,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"syscall"
 )
 
 // play just launches the game on other platforms (Alt+F4 is Windows-only).
@@ -22,7 +23,9 @@ func systemSpanish() bool { return envSpanish() }
 
 func createShortcut(string) error { return errors.New("only on Windows") }
 func removeShortcut() error       { return nil }
-func openLog(string) error        { return errors.New("only on Windows") }
+
+func createLangShortcut(string, string, string) error { return errors.New("only on Windows") }
+func openLog(string) error                            { return errors.New("only on Windows") }
 
 func dndOff(string) {}
 
@@ -60,3 +63,11 @@ func copyToClipboard(string) error { return errors.New("only on Windows") }
 
 func steamDir() string   { return "" }
 func steamRunning() bool { return false }
+
+func freeSpace(path string) (uint64, bool) {
+	var st syscall.Statfs_t
+	if syscall.Statfs(path, &st) != nil {
+		return 0, false
+	}
+	return st.Bavail * uint64(st.Bsize), true
+}

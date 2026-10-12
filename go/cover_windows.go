@@ -13,6 +13,7 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"syscall"
 	"time"
@@ -93,6 +94,9 @@ var (
 	coverFade    int // 0 = showing, 1..n = fading out
 	coverClassOK bool
 	coverText    string
+	coverTipText string
+	coverExpect  time.Duration // how long the last loads took (0 = unknown)
+	coverMuted   bool
 	coverProc    = syscall.NewCallback(coverWndProc)
 )
 
@@ -115,6 +119,11 @@ func showCover(root string) {
 	}
 	r := coverRect(root)
 	coverText = T("CARGANDO TU PARTIDA", "LOADING YOUR SAVE")
+	coverTipText = loadingTip(iconsKey(root))
+	coverExpect = 0
+	if ms, err := strconv.Atoi(loadConfig(root)["boot_ms"]); err == nil && ms > 3000 {
+		coverExpect = time.Duration(ms) * time.Millisecond
+	}
 	h, _, _ := pCreateWindowExW.Call(wsExTopmost|wsExToolWindow|wsExLayered|wsExTransparent|wsExNoActivate,
 		uintptr(unsafe.Pointer(utf16("Skate3ModsCover"))), uintptr(unsafe.Pointer(utf16("Skate 3"))), wsPopup,
 		uintptr(r.L), uintptr(r.T), uintptr(r.R-r.L), uintptr(r.B-r.T), 0, 0, inst, 0)
@@ -158,11 +167,27 @@ func coverRect(root string) rect {
 	return fallback
 }
 
-// hideCover fades the loading screen out.
+// hideCover fades the loading screen out and gives the game its sound back.
 func hideCover() {
 	if coverHwnd != 0 && coverFade == 0 {
 		coverFade = 1
 	}
+	if coverMuted {
+		muteGame(gamePID, false)
+		coverMuted = false
+	}
+}
+
+// recordBoot keeps a running average of how long the direct load takes, for
+// the loading bar.
+func recordBoot(root string, d time.Duration) {
+	c := loadConfig(root)
+	ms := int(d / time.Millisecond)
+	if old, err := strconv.Atoi(c["boot_ms"]); err == nil && old > 0 {
+		ms = (old + ms) / 2
+	}
+	c["boot_ms"] = strconv.Itoa(ms)
+	c.save(root)
 }
 
 // coverTick keeps the cover above the game and follows the game window to
@@ -173,6 +198,9 @@ func coverTick() {
 	}
 	if time.Since(coverStart) > 2*time.Minute {
 		hideCover()
+	}
+	if coverFade == 0 && muteGame(gamePID, true) {
+		coverMuted = true
 	}
 	if gw := gameWindow(); gw != 0 && coverFade == 0 {
 		mon, _, _ := pMonitorFromWindow.Call(gw, 2)
@@ -253,12 +281,22 @@ func paintCover(h uintptr) {
 	fill(rect{(w - sw) / 2, cy + ht/40, (w + sw) / 2, cy + ht/40 + sh}, rgb(255, 90, 31))
 	dots := strings.Repeat(".", int(time.Since(coverStart)/(400*time.Millisecond))%4)
 	text(coverText+dots, rect{(w - sw) / 2, cy + ht/40, (w + sw) / 2, cy + ht/40 + sh}, sh*6/10, "Impact", true, rgb(17, 17, 17))
-	// lime bar sweeping like a board rolling by
+	// lime bar: how much is left, from how long the last loads took; the
+	// first time it just sweeps like a board rolling by
 	bw, by := w/3, cy+ht/40+sh+ht/18
 	fill(rect{(w - bw) / 2, by, (w + bw) / 2, by + 4}, rgb(40, 40, 40))
-	pos := int32(time.Since(coverStart)/(16*time.Millisecond)) % (bw + bw/4)
-	x0 := (w-bw)/2 + pos - bw/4
-	x1 := x0 + bw/4
+	var x0, x1 int32
+	if el := time.Since(coverStart); coverExpect > 0 {
+		f := float64(el) / float64(coverExpect)
+		if f > .97 {
+			f = .97
+		}
+		x0, x1 = (w-bw)/2, (w-bw)/2+int32(f*float64(bw))
+	} else {
+		pos := int32(el/(16*time.Millisecond)) % (bw + bw/4)
+		x0 = (w-bw)/2 + pos - bw/4
+		x1 = x0 + bw/4
+	}
 	if x0 < (w-bw)/2 {
 		x0 = (w - bw) / 2
 	}
@@ -267,6 +305,9 @@ func paintCover(h uintptr) {
 	}
 	if x1 > x0 {
 		fill(rect{x0, by, x1, by + 4}, rgb(198, 255, 61))
+	}
+	if coverTipText != "" {
+		text(coverTipText, rect{w / 10, by + ht/14, w - w/10, by + ht/14 + ht/30}, ht/48, "Segoe UI", false, rgb(200, 200, 200))
 	}
 	text("Skate 3 Recomp Mods", rect{0, ht - ht/12, w, ht - ht/24}, ht/60, "Segoe UI", false, rgb(110, 110, 110))
 
@@ -284,15 +325,22 @@ type gameplayWatch struct {
 	path  string
 	off   int64
 	tail  []byte
+	marks [][]byte
 }
 
-var gameplayMarks = [][]byte{
-	[]byte("gameplay reached"),
-	[]byte("context=0x8001, value=0x1)"),
-}
+var (
+	gameplayMarks = [][]byte{[]byte("gameplay reached"), []byte("context=0x8001, value=0x1)")}
+	spotMarks     = [][]byte{[]byte("gameplay input sequence complete")}
+)
 
+// newGameplayWatch waits for gameplay, or with a starting spot for the
+// inputs that take you there to finish.
 func newGameplayWatch(root string) *gameplayWatch {
-	return &gameplayWatch{dir: filepath.Join(root, "logs"), since: time.Now().Add(-3 * time.Second)}
+	g := &gameplayWatch{dir: filepath.Join(root, "logs"), since: time.Now().Add(-3 * time.Second), marks: gameplayMarks}
+	if spotOn(root) {
+		g.marks = spotMarks
+	}
+	return g
 }
 
 func (g *gameplayWatch) reached() bool {
@@ -313,7 +361,7 @@ func (g *gameplayWatch) reached() bool {
 	b, _ := io.ReadAll(io.LimitReader(f, 4<<20))
 	g.off += int64(len(b))
 	buf := append(g.tail, b...)
-	for _, m := range gameplayMarks {
+	for _, m := range g.marks {
 		if bytes.Contains(buf, m) {
 			return true
 		}
