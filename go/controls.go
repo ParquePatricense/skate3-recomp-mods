@@ -219,6 +219,7 @@ func setDirect(root string, on bool) (string, error) {
 	c := loadConfig(root)
 	if on {
 		vals = append(vals, [2]string{"skate3_demo_path_gameplay_inputs", strconv.Quote(spotInputs(c["spot"]))})
+		vals = append(vals, spotPace...)
 		if _, set := c["boot_prev_language"]; !set {
 			prev, ok := readToml(root)["user_language"]
 			if !ok {
@@ -231,8 +232,8 @@ func setDirect(root string, on bool) (string, error) {
 			switch {
 			case c["texts"] == "1":
 				c["boot_lang"] = "arg"
-			case systemSpanish():
-				c["boot_lang"] = "es"
+			case bootLangSrc(systemLang()) != "":
+				c["boot_lang"] = systemLang() // the game has it (zh and ja it doesn't)
 			default:
 				c["boot_lang"] = "en"
 			}

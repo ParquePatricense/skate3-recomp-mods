@@ -24,7 +24,7 @@ func iconsKey(root string) string {
 
 // apiState is everything the window shows.
 func apiState(root string) map[string]any {
-	st := map[string]any{"version": version, "root": root, "en": langEN, "os": goos()}
+	st := map[string]any{"version": version, "root": root, "en": langEN, "lang": lang, "os": goos()}
 	if root == "" {
 		return st
 	}
@@ -55,7 +55,9 @@ func apiState(root string) map[string]any {
 	st["radio"] = c["radio"]
 	st["ctl"] = controlsState(root)
 	st["afterPlay"] = c["after_play"]
-	st["prefs"] = map[string]string{"deck": c["ui_deck"], "sfx": c["ui_sfx"], "seen": c["ui_seen"], "size": c["ui_size"], "sofa": c["ui_sofa"]}
+	st["prefs"] = map[string]string{"deck": c["ui_deck"], "sfx": c["ui_sfx"], "seen": c["ui_seen"], "size": c["ui_size"], "sofa": c["ui_sofa"], "ollie": c["ui_ollie"]}
+	st["bootHist"] = bootHistory(root)
+	st["langPref"] = c["lang"]
 	st["steam"] = c.on("steam")
 	st["crash"] = c["crash"]
 	st["hasSteam"] = steamDir() != ""
@@ -104,7 +106,7 @@ func apiDo(root *string, cmd, arg string) (string, error) {
 				return "", err
 			}
 		}
-		langEN = arg == "en"
+		setLang(config{"lang": arg})
 		return "", nil
 	case "icons":
 		if arg == "xbox" {
@@ -196,7 +198,7 @@ func apiDo(root *string, cmd, arg string) (string, error) {
 		return T("Reflejos ", "Reflections ") + onOff(onArg(arg)), setBool(r, "skate3_native_render_scene_ssr", onArg(arg))
 	case "pref":
 		key, val, _ := strings.Cut(arg, "=")
-		if key != "deck" && key != "sfx" && key != "seen" && key != "size" && key != "sofa" {
+		if key != "deck" && key != "sfx" && key != "seen" && key != "size" && key != "sofa" && key != "ollie" {
 			return "", errors.New("?")
 		}
 		c := loadConfig(r)
@@ -277,5 +279,6 @@ func useRoot(root *string, d string) (string, error) {
 		}
 	}
 	msgs := checkMods(r)
+	warmGameFiles(r)
 	return strings.Join(msgs, "\n"), nil
 }

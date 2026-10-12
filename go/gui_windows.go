@@ -27,6 +27,11 @@ import (
 //go:embed ui/index.html
 var indexHTML string
 
+// The French, Italian, German, Chinese and Japanese texts of the page.
+//
+//go:embed ui/i18n.json
+var uiI18nJSON string
+
 func runGUI() error {
 	if webview2Version() == "" {
 		return errors.New("WebView2 runtime not installed")
@@ -127,7 +132,7 @@ func runGUI() error {
 	}
 	moveToMonitor(hwnd, uiMonitorSetting())
 	setFullscreen(hwnd, windowModeSetting() != "window")
-	w.SetHtml(indexHTML)
+	w.SetHtml(strings.Replace(indexHTML, "/*I18N*/{}", uiI18nJSON, 1))
 	w.Run()
 	return nil
 }

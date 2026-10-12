@@ -62,32 +62,33 @@ var (
 )
 
 const (
-	processTerminate  = 0x0001
-	processSetInfo    = 0x0200
-	synchronize       = 0x00100000
-	whKeyboardLL      = 13
-	wmKeyDown         = 0x0100
-	wmKeyUp           = 0x0101
-	wmSysKeyDown      = 0x0104
-	wmSysKeyUp        = 0x0105
-	wmClose           = 0x0010
-	wmTimer           = 0x0113
-	vkF4              = 0x73
-	vkR               = 0x52
-	vkControl         = 0x11
-	vkLWin            = 0x5B
-	vkRWin            = 0x5C
-	llkhfAltDown      = 0x20
-	gameExe           = "skate3.exe"
-	highPriorityClass = 0x80
-	esContinuous      = 0x80000000
-	esSystemRequired  = 0x1
-	esDisplayRequired = 0x2
-	ocrNormal         = 32512
-	spiSetCursors     = 0x57
-	wsCaption         = 0x00C00000
-	gwlStyle          = ^uintptr(15) // -16
-	gwOwner           = 4
+	processTerminate    = 0x0001
+	processSetInfo      = 0x0200
+	synchronize         = 0x00100000
+	whKeyboardLL        = 13
+	wmKeyDown           = 0x0100
+	wmKeyUp             = 0x0101
+	wmSysKeyDown        = 0x0104
+	wmSysKeyUp          = 0x0105
+	wmClose             = 0x0010
+	wmTimer             = 0x0113
+	vkF4                = 0x73
+	vkR                 = 0x52
+	vkControl           = 0x11
+	vkLWin              = 0x5B
+	vkRWin              = 0x5C
+	llkhfAltDown        = 0x20
+	gameExe             = "skate3.exe"
+	highPriorityClass   = 0x80
+	normalPriorityClass = 0x20
+	esContinuous        = 0x80000000
+	esSystemRequired    = 0x1
+	esDisplayRequired   = 0x2
+	ocrNormal           = 32512
+	spiSetCursors       = 0x57
+	wsCaption           = 0x00C00000
+	gwlStyle            = ^uintptr(15) // -16
+	gwOwner             = 4
 )
 
 type point struct{ X, Y int32 }
@@ -358,11 +359,16 @@ func watchGame(pid uint32) (syscall.Handle, error) {
 	if err != nil {
 		proc, err = syscall.OpenProcess(synchronize|processTerminate, false, pid)
 	}
-	if err == nil && hc.feature("priority") {
+	if err == nil && (hc.feature("priority") || loadBoost) {
 		pSetPriorityClass.Call(uintptr(proc), highPriorityClass)
 	}
 	return proc, err
 }
+
+// loadBoost: the game runs at high priority while the direct load is up,
+// so other programs don't slow the load down. Back to normal once you're
+// skating (unless the "priority" helper keeps it high).
+var loadBoost bool
 
 func play(root string) error {
 	hc = loadConfig(root)
@@ -383,6 +389,7 @@ func play(root string) error {
 		}
 		showCover(root)
 		watch = newGameplayWatch(root)
+		loadBoost = true
 	}
 	if !running {
 		var err error
@@ -429,7 +436,7 @@ func play(root string) error {
 	}
 	var lastWin windowState
 	tick := 0
-	pSetTimer.Call(0, 0, 250, 0)
+	pSetTimer.Call(0, 0, 100, 0) // fast, so the loading screen goes the moment you can play
 	var m msg
 	for {
 		r, _, _ := pGetMessageW.Call(uintptr(unsafe.Pointer(&m)), 0, 0, 0)
@@ -441,12 +448,20 @@ func play(root string) error {
 			if watch != nil {
 				coverTick()
 				if watch.reached() {
-					watch = nil
-					recordBoot(root, time.Since(coverStart))
+					took := time.Since(coverStart)
 					hideCover()
+					if coverOllie {
+						playOllie()
+					}
+					if loadBoost && !hc.feature("priority") {
+						pSetPriorityClass.Call(uintptr(proc), normalPriorityClass)
+					}
+					recordBoot(root, took)
+					addBootHistory(root, time.Now(), readBootPhases(watch.path, coverStart, took))
+					watch = nil
 				}
 			}
-			if hc.feature("window") && tick%4 == 0 {
+			if hc.feature("window") && tick%10 == 0 {
 				if st := readWindowState(gameWindow()); st.ok {
 					lastWin = st
 				}
@@ -550,9 +565,24 @@ func dndOff(root string) {
 
 var pGetUserDefaultUILanguage = kernel32.NewProc("GetUserDefaultUILanguage")
 
-func systemSpanish() bool {
+// systemLang is Windows' display language, as one of the seven.
+func systemLang() string {
 	l, _, _ := pGetUserDefaultUILanguage.Call()
-	return l&0x3FF == 0x0A // LANG_SPANISH
+	switch l & 0x3FF { // primary language id
+	case 0x0A:
+		return "es"
+	case 0x0C:
+		return "fr"
+	case 0x10:
+		return "it"
+	case 0x07:
+		return "de"
+	case 0x04:
+		return "zh"
+	case 0x11:
+		return "ja"
+	}
+	return "en"
 }
 
 // Desktop shortcuts: the modder itself (its own icon), and the game straight

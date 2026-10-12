@@ -19,7 +19,7 @@ func play(root string) error {
 	return cmd.Run()
 }
 
-func systemSpanish() bool { return envSpanish() }
+func systemLang() string { return envLang() }
 
 func createShortcut(string) error { return errors.New("only on Windows") }
 func removeShortcut() error       { return nil }
@@ -71,3 +71,5 @@ func freeSpace(path string) (uint64, bool) {
 	}
 	return st.Bavail * uint64(st.Bsize), true
 }
+
+func warmGameFiles(string) {}

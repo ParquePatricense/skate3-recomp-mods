@@ -23,7 +23,7 @@ import (
 	"time"
 )
 
-const version = "3.5.0"
+const version = "3.6.0"
 
 var stdin = newStdin()
 
@@ -180,7 +180,7 @@ func menuShop(root string) {
 		}
 		os.Exit(0)
 	case "4":
-		if strings.ToLower(ask(T("¿Seguro? Escribí SI para confirmar: ", "Sure? Type YES to confirm: "))) == T("si", "yes") {
+		if a := strings.ToLower(ask(T("¿Seguro? Escribí SI para confirmar: ", "Sure? Type YES to confirm: "))); a == T("si", "yes") || a == "yes" {
 			fmt.Println(strings.Join(uninstallAll(root), "\n"))
 		}
 	}
@@ -209,11 +209,13 @@ func toggleShortcut(root string) {
 
 func toggleLang(root string) {
 	c := loadConfig(root)
-	if langEN {
-		c["lang"] = "es"
-	} else {
-		c["lang"] = "en"
+	next := langs[0].code // the next of the seven languages
+	for i, l := range langs {
+		if l.code == lang {
+			next = langs[(i+1)%len(langs)].code
+		}
 	}
+	c["lang"] = next
 	setLang(c)
 	report(c.save(root))
 }

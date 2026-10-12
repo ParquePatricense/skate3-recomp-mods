@@ -7,18 +7,17 @@ Pack de mods **modular** para [skate3recomp](https://github.com/mchughalex/skate
 | 🎮 **Iconos PlayStation** | Cambia los iconos de Xbox por PS3, PS4 o PS5 |
 | 🖼️ **Presets gráficos** | Máxima calidad, Equilibrado, Rendimiento o Ultra liviano, con un clic |
 | 🖥️ **Pantalla** | VSync, pantalla completa y en qué monitor abre el juego (ideal con dos monitores) |
-| ⏩ **Directo a tu partida** | Carga directa: una pantalla de carga tapa la intro y los menús, y aparecés en tu carrera, en el idioma que elijas |
+| ⏩ **Directo a tu partida** | Carga directa: una pantalla de carga con fotos del propio juego tapa la intro y los menús, aparecés en tu carrera en el idioma que elijas y termina con un ollie |
 | 🎮 **Modeador con joystick** | Se maneja con el mando (cruz, A, LB/RB, Start) o con atajos de teclado; se adapta solo a tu pantalla (tamaño a gusto y modo sofá); radio con favoritos, Mix y aleatorio; reportar un problema en un toque |
 | ⌨️ **Teclado y mouse** | Activa el modo teclado+mouse del recomp, sensibilidad y remapeo de cada botón tocando la tecla |
 | 🔭 **FOV y ultrawide** | Campo de visión (40–120) y modo 21:9 |
 | 🛹 **Ayudante en sesión** | Alt+F4, reinicio rápido (Ctrl+Alt+R), prioridad alta, pantalla siempre encendida, cursor oculto, tecla Windows bloqueada, ventana recordada y no molestar |
-| 🖥️ **Accesos directos** | "Skate 3 Mods" (el modeador), "Skate 3 (directo)" y "Skate 3 (normal)" en el escritorio y el menú Inicio, y uno por idioma si querés |
-| 🚂 **Skate 3 en Steam** | Lo suma a tu biblioteca como juego externo, para Big Picture, Steam Input y la captura de Steam |
+| 🔗 **Accesos** | Con un botón: "Skate 3 Mods" (el modeador), "Skate 3 (directo)" y "Skate 3 (normal)" en el escritorio y el menú Inicio, uno por idioma, Skate 3 en Steam (Big Picture, Steam Input) e historial de cargas con cuánto tardó cada parte |
 | 🧉 **Español ARG** | Agrega el idioma "Español ARG" (voseo y vocabulario rioplatense) en lugar del neerlandés; el español original queda igual |
 
 🔧 **El taller:** aviso cuando sale una versión nueva de skate3recomp, reparar archivos, reaplicar los mods solo si actualizás el recomp, diagnóstico, carpetas a mano, actualización en un toque y desinstalar todo.
 
-➕ Sale en español o en inglés según el idioma de Windows.
+🌍 En English, Español, Français, Italiano, Deutsch, 中文 y 日本語: elige solo el idioma de Windows y se cambia en **Idioma**.
 
 ![modeador](preview/modeador.png)
 
@@ -63,7 +62,9 @@ Activa `mnk_mode` del recomp: el mouse mueve la cámara (stick derecho) y cada b
 
 ## ⏩ Directo a tu partida
 
-Usa la automatización de arranque del propio recomp (`skate3_demo_path` con `skate3_demo_path_signed_in`, así conserva tu perfil y tu partida): saltea la intro, acepta la pantalla de idioma, el Press Start y los avisos de arranque, y deja de tocar los controles en cuanto empezás a patinar. Mientras tanto, el ayudante tapa el monitor del juego con una pantalla de carga y la saca cuando el registro del juego (`logs/`, que con esta opción se escribe cada segundo) dice que ya estás patinando; si algo sale raro, se va sola a los 2 minutos. Mientras está puesta, el juego queda muteado en el mezclador de volumen de Windows, muestra un consejo con los botones de tu estilo y una barra que aprende cuánto tarda tu carga. En "Arrancás en" podés elegir aparecer en la Biblioteca de la PCU (experimental: el recomp maneja el menú del mapa por vos). Esa automatización siempre acepta inglés, así que el idioma que elegís en el modeador (Español, Español ARG, Français, Deutsch, Italiano) se pone en el lugar del inglés dentro de `miscboot.big` mientras la opción está activa; al apagarla vuelve el original.
+Usa la automatización de arranque del propio recomp (`skate3_demo_path` con `skate3_demo_path_signed_in`, así conserva tu perfil y tu partida): saltea la intro, acepta la pantalla de idioma, el Press Start y los avisos de arranque, y deja de tocar los controles en cuanto empezás a patinar. Mientras tanto, el ayudante tapa el monitor del juego con una pantalla de carga y la saca cuando el registro del juego (`logs/`, que con esta opción se escribe cada segundo) dice que ya estás patinando; si algo sale raro, se va sola a los 2 minutos. Mientras está puesta, el juego queda muteado en el mezclador de volumen de Windows, de fondo hay una foto distinta cada vez (las fotos de los lugares de Port Carverton que trae el propio juego, leídas de `fedynamic.big` en tu PC), un consejo con los botones de tu estilo y una barra que aprende cuánto tarda tu carga. Al terminar suena un ollie (se apaga en En sesión).
+
+Para que tarde lo menos posible: el juego carga con prioridad alta, el modeador deja los archivos del juego en la memoria de Windows mientras está abierto (lectura de fondo con prioridad baja, hasta 1,5 GB y nunca más de un cuarto de la memoria libre), la pantalla de carga se va apenas el registro dice que ya podés jugar, y el viaje a un spot espera 1 s en vez de 2,5 s. En **Accesos → Historial de cargas** ves cuánto tardó cada parte: abrir el juego, logos y menús, tu partida y el mapa, e ir al spot. En "Arrancás en" podés elegir aparecer en la Biblioteca de la PCU (experimental: el recomp maneja el menú del mapa por vos). Esa automatización siempre acepta inglés, así que el idioma que elegís en el modeador (Español, Español ARG, Français, Deutsch, Italiano) se pone en el lugar del inglés dentro de `miscboot.big` mientras la opción está activa; al apagarla vuelve el original.
 
 ## 🧉 Español ARG
 

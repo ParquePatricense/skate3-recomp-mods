@@ -1,0 +1,996 @@
+{
+"\n  1) Button icons (PS3 / PS4 / PS5 / Xbox)\n  2) Graphics preset\n  3) Field of view / ultrawide\n  4) In-game helper (Alt+F4, quick restart, etc.)\n  5) \"Skate 3\" desktop shortcut (create/remove)\n  6) \"Español ARG\" language (Rioplatense) instead of Dutch (on/off)\n  7) Shop: repair, diagnostics, update, uninstall everything\n  C) Change the game folder\n  L) Idioma: español\n  0) Exit\n\n": {
+"fr": "\n  1) Icônes des boutons (PS3 / PS4 / PS5 / Xbox)\n  2) Préréglage graphique\n  3) Champ de vision / ultrawide\n  4) Assistant en jeu (Alt+F4, relance rapide, etc.)\n  5) Raccourci bureau \"Skate 3\" (créer/supprimer)\n  6) Langue \"Español ARG\" (rioplatense) à la place du néerlandais (on/off)\n  7) Atelier : réparer, diagnostic, mise à jour, tout désinstaller\n  C) Changer le dossier du jeu\n  L) Idioma: español\n  0) Quitter\n\n",
+"it": "\n  1) Icone dei tasti (PS3 / PS4 / PS5 / Xbox)\n  2) Preset grafico\n  3) Campo visivo / ultrawide\n  4) Aiutante in gioco (Alt+F4, riavvio rapido, ecc.)\n  5) Collegamento \"Skate 3\" sul desktop (crea/rimuovi)\n  6) Lingua \"Español ARG\" (rioplatense) al posto dell'olandese (on/off)\n  7) Officina: ripara, diagnostica, aggiorna, disinstalla tutto\n  C) Cambia la cartella del gioco\n  L) Idioma: español\n  0) Esci\n\n",
+"de": "\n  1) Tasten-Icons (PS3 / PS4 / PS5 / Xbox)\n  2) Grafik-Preset\n  3) Sichtfeld / Ultrawide\n  4) Helfer im Spiel (Alt+F4, Schnell-Neustart usw.)\n  5) \"Skate 3\"-Desktopverknüpfung (erstellen/entfernen)\n  6) Sprache \"Español ARG\" (Rioplatense) statt Niederländisch (an/aus)\n  7) Werkstatt: Reparatur, Diagnose, Update, alles deinstallieren\n  C) Spielordner ändern\n  L) Idioma: español\n  0) Beenden\n\n",
+"zh": "\n  1) 按键图标（PS3 / PS4 / PS5 / Xbox）\n  2) 画质预设\n  3) 视野 / 超宽屏\n  4) 游戏内助手（Alt+F4、快速重启等）\n  5) “Skate 3”桌面快捷方式（创建/删除）\n  6) 用“Español ARG”（拉普拉塔西语）替换荷兰语（开/关）\n  7) 商店：修复、诊断、更新、全部卸载\n  C) 更换游戏文件夹\n  L) Idioma: español\n  0) 退出\n\n",
+"ja": "\n  1) ボタンアイコン（PS3 / PS4 / PS5 / Xbox）\n  2) グラフィックプリセット\n  3) 視野角 / ウルトラワイド\n  4) ゲーム内ヘルパー（Alt+F4、クイック再起動など）\n  5) 「Skate 3」デスクトップショートカット（作成/削除）\n  6) オランダ語の代わりに「Español ARG」（ラプラタ地方のスペイン語）（オン/オフ）\n  7) ショップ：修復、診断、アップデート、全部アンインストール\n  C) ゲームフォルダを変更\n  L) Idioma: español\n  0) 終了\n\n"
+},
+"\nButton icons:\n": {
+"fr": "\nIcônes des boutons :\n",
+"it": "\nIcone dei tasti:\n",
+"de": "\nTasten-Icons:\n",
+"zh": "\n按键图标：\n",
+"ja": "\nボタンアイコン：\n"
+},
+"\nCould not find skate3recomp. Drag the game folder (the one with skate3.exe) onto this window and press Enter.": {
+"fr": "\nskate3recomp introuvable. Glisse le dossier du jeu (celui avec skate3.exe) sur cette fenêtre et appuie sur Enter.",
+"it": "\nNon trovo skate3recomp. Trascina la cartella del gioco (quella con skate3.exe) su questa finestra e premi Enter.",
+"de": "\nskate3recomp nicht gefunden. Zieh den Spielordner (den mit skate3.exe) in dieses Fenster und drück Enter.",
+"zh": "\n没找到 skate3recomp。把游戏文件夹（有 skate3.exe 的那个）拖到这个窗口里，然后按 Enter。",
+"ja": "\nskate3recompが見つかりませんでした。ゲームフォルダ（skate3.exeがあるフォルダ）をこのウィンドウにドラッグしてEnterを押してください。"
+},
+"\nDrag the game folder (the one with skate3.exe) onto this window and press Enter (empty Enter to cancel).": {
+"fr": "\nGlisse le dossier du jeu (celui avec skate3.exe) sur cette fenêtre et appuie sur Enter (Enter à vide pour annuler).",
+"it": "\nTrascina la cartella del gioco (quella con skate3.exe) su questa finestra e premi Enter (Enter a vuoto per annullare).",
+"de": "\nZieh den Spielordner (den mit skate3.exe) in dieses Fenster und drück Enter (leeres Enter bricht ab).",
+"zh": "\n把游戏文件夹（有 skate3.exe 的那个）拖到这个窗口里，然后按 Enter（直接按 Enter 取消）。",
+"ja": "\nゲームフォルダ（skate3.exeがあるフォルダ）をこのウィンドウにドラッグしてEnterを押してください（何も入れずにEnterでキャンセル）。"
+},
+"\nField of view and ultrawide:\n  1) Change field of view (FOV)\n  2) Toggle ultrawide (21:9 or wider)\n  0) Back\n": {
+"fr": "\nChamp de vision et ultrawide :\n  1) Changer le champ de vision (FOV)\n  2) Activer/désactiver l'ultrawide (21:9 ou plus large)\n  0) Retour\n",
+"it": "\nCampo visivo e ultrawide:\n  1) Cambia campo visivo (FOV)\n  2) Attiva/disattiva ultrawide (21:9 o più)\n  0) Indietro\n",
+"de": "\nSichtfeld und Ultrawide:\n  1) Sichtfeld (FOV) ändern\n  2) Ultrawide an/aus (21:9 oder breiter)\n  0) Zurück\n",
+"zh": "\n视野和超宽屏：\n  1) 修改视野（FOV）\n  2) 开关超宽屏（21:9 或更宽）\n  0) 返回\n",
+"ja": "\n視野角とウルトラワイド：\n  1) 視野角（FOV）を変更\n  2) ウルトラワイド（21:9以上）を切り替え\n  0) 戻る\n"
+},
+"\nGraphics preset (you can keep tweaking it in the game's Settings > Video):": {
+"fr": "\nPréréglage graphique (tu peux peaufiner dans Options > Vidéo du jeu) :",
+"it": "\nPreset grafico (puoi ritoccarlo nelle Impostazioni > Video del gioco):",
+"de": "\nGrafik-Preset (Feinschliff geht weiter in den Spiel-Einstellungen > Video):",
+"zh": "\n画质预设（之后还能在游戏的 设置 > 视频 里继续调）：",
+"ja": "\nグラフィックプリセット（ゲームの設定 > ビデオでさらに調整できます）："
+},
+"\nIn-game helper (start the game with the shortcut or the .bat):": {
+"fr": "\nAssistant en jeu (lance le jeu avec le raccourci ou le .bat) :",
+"it": "\nAiutante in gioco (avvia il gioco col collegamento o col .bat):",
+"de": "\nHelfer im Spiel (starte das Spiel mit der Verknüpfung oder der .bat):",
+"zh": "\n游戏内助手（用快捷方式或 .bat 启动游戏才生效）：",
+"ja": "\nゲーム内ヘルパー（ショートカットか.batでゲームを起動してください）："
+},
+"\nPress Enter to continue...": {
+"fr": "\nAppuie sur Enter pour continuer...",
+"it": "\nPremi Enter per continuare...",
+"de": "\nDrück Enter, um weiterzumachen...",
+"zh": "\n按 Enter 继续...",
+"ja": "\nEnterを押して続行..."
+},
+"\nShop:\n  1) Repair game files\n  2) Diagnostics (report on the desktop)\n  3) Update to the latest version\n  4) Uninstall everything\n  0) Back\n": {
+"fr": "\nAtelier :\n  1) Réparer les fichiers du jeu\n  2) Diagnostic (rapport sur le bureau)\n  3) Mettre à jour vers la dernière version\n  4) Tout désinstaller\n  0) Retour\n",
+"it": "\nOfficina:\n  1) Ripara i file del gioco\n  2) Diagnostica (report sul desktop)\n  3) Aggiorna all'ultima versione\n  4) Disinstalla tutto\n  0) Indietro\n",
+"de": "\nWerkstatt:\n  1) Spieldateien reparieren\n  2) Diagnose (Bericht auf dem Desktop)\n  3) Auf neueste Version updaten\n  4) Alles deinstallieren\n  0) Zurück\n",
+"zh": "\n商店：\n  1) 修复游戏文件\n  2) 诊断（报告放在桌面）\n  3) 更新到最新版\n  4) 全部卸载\n  0) 返回\n",
+"ja": "\nショップ：\n  1) ゲームファイルを修復\n  2) 診断（デスクトップにレポート）\n  3) 最新バージョンにアップデート\n  4) 全部アンインストール\n  0) 戻る\n"
+},
+"  %d) Restore my previous settings\n  0) Back\n": {
+"fr": "  %d) Remettre mes anciens réglages\n  0) Retour\n",
+"it": "  %d) Ripristina le mie impostazioni\n  0) Indietro\n",
+"de": "  %d) Meine alten Einstellungen zurück\n  0) Zurück\n",
+"zh": "  %d) 恢复我之前的设置\n  0) 返回\n",
+"ja": "  %d) 前の設定に戻す\n  0) 戻る\n"
+},
+"  0) Back\n": {
+"fr": "  0) Retour\n",
+"it": "  0) Indietro\n",
+"de": "  0) Zurück\n",
+"zh": "  0) 返回\n",
+"ja": "  0) 戻る\n"
+},
+"  >> A new version is available (%s): %s\n\n": {
+"fr": "  >> Une nouvelle version est dispo (%s) : %s\n\n",
+"it": "  >> È disponibile una nuova versione (%s): %s\n\n",
+"de": "  >> Eine neue Version ist da (%s): %s\n\n",
+"zh": "  >> 有新版本了（%s）：%s\n\n",
+"ja": "  >> 新しいバージョンがあります（%s）：%s\n\n"
+},
+"  Alt+F4 to quit    : %s\n": {
+"fr": "  Alt+F4 pour quitter : %s\n",
+"it": "  Alt+F4 per uscire : %s\n",
+"de": "  Alt+F4 beendet    : %s\n",
+"zh": "  Alt+F4 退出       : %s\n",
+"ja": "  Alt+F4で終了      : %s\n"
+},
+"  Button icons      : %s\n": {
+"fr": "  Icônes des boutons  : %s\n",
+"it": "  Icone dei tasti   : %s\n",
+"de": "  Tasten-Icons      : %s\n",
+"zh": "  按键图标          : %s\n",
+"ja": "  ボタンアイコン    : %s\n"
+},
+"  Desktop shortcut  : %s\n": {
+"fr": "  Raccourci bureau    : %s\n",
+"it": "  Collegamento      : %s\n",
+"de": "  Desktop-Verkn.    : %s\n",
+"zh": "  桌面快捷方式      : %s\n",
+"ja": "  デスクトップショートカット: %s\n"
+},
+"  Español ARG       : %s\n": {
+"fr": "  Español ARG         : %s\n",
+"it": "  Español ARG       : %s\n",
+"de": "  Español ARG       : %s\n",
+"zh": "  Español ARG       : %s\n",
+"ja": "  Español ARG       : %s\n"
+},
+"  Field of view     : %s\n": {
+"fr": "  Champ de vision     : %s\n",
+"it": "  Campo visivo      : %s\n",
+"de": "  Sichtfeld         : %s\n",
+"zh": "  视野              : %s\n",
+"ja": "  視野角            : %s\n"
+},
+"  Game folder: %s\n\n": {
+"fr": "  Dossier du jeu : %s\n\n",
+"it": "  Cartella del gioco: %s\n\n",
+"de": "  Spielordner: %s\n\n",
+"zh": "  游戏文件夹：%s\n\n",
+"ja": "  ゲームフォルダ：%s\n\n"
+},
+"  Graphics preset   : %s\n": {
+"fr": "  Préréglage graphique: %s\n",
+"it": "  Preset grafico    : %s\n",
+"de": "  Grafik-Preset     : %s\n",
+"zh": "  画质预设          : %s\n",
+"ja": "  グラフィックプリセット: %s\n"
+},
+" has an unexpected format; this game version is not supported": {
+"fr": " a un format inattendu ; cette version du jeu n'est pas prise en charge",
+"it": " ha un formato inatteso; questa versione del gioco non è supportata",
+"de": " hat ein unerwartetes Format; diese Spielversion wird nicht unterstützt",
+"zh": " 格式不对，不支持这个游戏版本",
+"ja": " の形式が想定外です。このゲームバージョンには対応していません"
+},
+" has an unexpected texture layout": {
+"fr": " a une disposition de textures inattendue",
+"it": " ha una disposizione delle texture inattesa",
+"de": " hat ein unerwartetes Textur-Layout",
+"zh": " 的贴图布局不对",
+"ja": " のテクスチャ配置が想定外です"
+},
+"\"Skate 3\" desktop shortcut: %s\n": {
+"fr": "Raccourci bureau \"Skate 3\" : %s\n",
+"it": "Collegamento \"Skate 3\" sul desktop: %s\n",
+"de": "\"Skate 3\"-Desktopverknüpfung: %s\n",
+"zh": "“Skate 3”桌面快捷方式：%s\n",
+"ja": "「Skate 3」デスクトップショートカット：%s\n"
+},
+"%s changed (did you update the recomp?): it is the new original now.": {
+"fr": "%s a changé (tu as mis à jour le recomp ?) : c'est le nouvel original maintenant.",
+"it": "%s è cambiato (hai aggiornato il recomp?): ora è il nuovo originale.",
+"de": "%s hat sich geändert (Recomp geupdatet?): Das ist jetzt das neue Original.",
+"zh": "%s 变了（你更新了 recomp 吗？）：现在它就是新的原版。",
+"ja": "%sが変わりました（recompをアップデートしましたか？）：これを新しいオリジナルとして扱います。"
+},
+"%s doesn't exist yet (it is created when you play)": {
+"fr": "%s n'existe pas encore (il est créé quand tu joues)",
+"it": "%s non esiste ancora (si crea quando giochi)",
+"de": "%s gibt's noch nicht (wird beim Zocken erstellt)",
+"zh": "%s 还不存在（玩游戏时会自动生成）",
+"ja": "%sはまだありません（プレイすると作成されます）"
+},
+"%s icons installed": {
+"fr": "Icônes %s installées",
+"it": "Icone %s installate",
+"de": "%s-Icons installiert",
+"zh": "%s 图标已安装",
+"ja": "%sアイコンをインストール済み"
+},
+"%s is broken and there is no healthy backup: reinstall the game from the ISO (Select ISO).": {
+"fr": "%s est cassé et il n'y a pas de sauvegarde saine : réinstalle le jeu depuis l'ISO (Select ISO).",
+"it": "%s è rotto e non c'è un backup sano: reinstalla il gioco dalla ISO (Select ISO).",
+"de": "%s ist kaputt und es gibt kein heiles Backup: Installier das Spiel neu von der ISO (Select ISO).",
+"zh": "%s 坏了，而且没有完好的备份：用 ISO 重装游戏吧（Select ISO）。",
+"ja": "%sが壊れていて、正常なバックアップもありません：ISOからゲームを再インストールしてください（Select ISO）。"
+},
+"%s was broken: restored it from the backup.": {
+"fr": "%s était cassé : restauré depuis la sauvegarde.",
+"it": "%s era rotto: ripristinato dal backup.",
+"de": "%s war kaputt: aus dem Backup wiederhergestellt.",
+"zh": "%s 坏了：已从备份恢复。",
+"ja": "%sが壊れていました：バックアップから復元しました。"
+},
+"%s was broken: restored it.": {
+"fr": "%s était cassé : restauré.",
+"it": "%s era rotto: ripristinato.",
+"de": "%s war kaputt: wiederhergestellt.",
+"zh": "%s 坏了：已恢复。",
+"ja": "%sが壊れていました：復元しました。"
+},
+"%s: mod applied again.": {
+"fr": "%s : mod réappliqué.",
+"it": "%s: mod riapplicata.",
+"de": "%s: Mod wieder angewendet.",
+"zh": "%s：mod 已重新应用。",
+"ja": "%s：Modを再適用しました。"
+},
+"All good: the game files are healthy.": {
+"fr": "Tout est bon : les fichiers du jeu sont sains.",
+"it": "Tutto ok: i file del gioco sono sani.",
+"de": "Alles gut: Die Spieldateien sind heil.",
+"zh": "一切正常：游戏文件都没问题。",
+"ja": "問題なし：ゲームファイルは正常です。"
+},
+"Alt+F4 closes the game like the window's X.": {
+"fr": "Alt+F4 ferme le jeu comme le X de la fenêtre.",
+"it": "Alt+F4 chiude il gioco come la X della finestra.",
+"de": "Alt+F4 schließt das Spiel wie das X am Fenster.",
+"zh": "Alt+F4 关闭游戏，跟点窗口的 X 一样。",
+"ja": "Alt+F4でウィンドウの×と同じようにゲームを閉じます。"
+},
+"Alt+F4 to quit": {
+"fr": "Alt+F4 pour quitter",
+"it": "Alt+F4 per uscire",
+"de": "Alt+F4 zum Beenden",
+"zh": "Alt+F4 退出",
+"ja": "Alt+F4で終了"
+},
+"Backing up the original %s...\n": {
+"fr": "Sauvegarde de l'original %s...\n",
+"it": "Backup dell'originale %s...\n",
+"de": "Sichere das Original %s...\n",
+"zh": "正在备份原版 %s...\n",
+"ja": "オリジナルの%sをバックアップ中...\n"
+},
+"Balanced (recomp defaults)": {
+"fr": "Équilibré (réglages du recomp)",
+"it": "Bilanciato (default del recomp)",
+"de": "Ausgewogen (Recomp-Standard)",
+"zh": "均衡（recomp 默认）",
+"ja": "バランス（recompのデフォルト）"
+},
+"Black bars ": {
+"fr": "Bandes noires ",
+"it": "Bande nere ",
+"de": "Schwarze Balken ",
+"zh": "黑边 ",
+"ja": "黒帯 "
+},
+"Block the Windows key": {
+"fr": "Bloquer la touche Windows",
+"it": "Blocca il tasto Windows",
+"de": "Windows-Taste sperren",
+"zh": "屏蔽 Windows 键",
+"ja": "Windowsキーを無効化"
+},
+"Building the \"Español ARG\" language...": {
+"fr": "Création de la langue \"Español ARG\"...",
+"it": "Creo la lingua \"Español ARG\"...",
+"de": "Baue die Sprache \"Español ARG\"...",
+"zh": "正在生成“Español ARG”语言...",
+"ja": "「Español ARG」言語を作成中..."
+},
+"Choose an option: ": {
+"fr": "Choisis une option : ",
+"it": "Scegli un'opzione: ",
+"de": "Wähl eine Option: ",
+"zh": "选一个：",
+"ja": "オプションを選択："
+},
+"Choose: ": {
+"fr": "Choisis : ",
+"it": "Scegli: ",
+"de": "Wähl: ",
+"zh": "选择：",
+"ja": "選択："
+},
+"Closes the game with Alt+F4, like the window's X.": {
+"fr": "Ferme le jeu avec Alt+F4, comme le X de la fenêtre.",
+"it": "Chiude il gioco con Alt+F4, come la X della finestra.",
+"de": "Schließt das Spiel mit Alt+F4, wie das X am Fenster.",
+"zh": "用 Alt+F4 关闭游戏，跟点窗口的 X 一样。",
+"ja": "ウィンドウの×と同じように、Alt+F4でゲームを閉じます。"
+},
+"Copied myself to %s: from now on open me from there or from the shortcut.\n": {
+"fr": "Je me suis copié dans %s : à partir de maintenant, ouvre-moi depuis là ou depuis le raccourci.\n",
+"it": "Mi sono copiato in %s: d'ora in poi aprimi da lì o dal collegamento.\n",
+"de": "Hab mich nach %s kopiert: Öffne mich ab jetzt von dort oder über die Verknüpfung.\n",
+"zh": "已把自己复制到 %s：以后从那里或快捷方式打开我。\n",
+"ja": "%sに自分をコピーしました：これからはそこかショートカットから開いてください。\n"
+},
+"Could not enable the keyboard shortcuts: ": {
+"fr": "Impossible d'activer les raccourcis clavier : ",
+"it": "Impossibile attivare le scorciatoie da tastiera: ",
+"de": "Tastenkürzel konnten nicht aktiviert werden: ",
+"zh": "没法启用快捷键：",
+"ja": "キーボードショートカットを有効にできませんでした："
+},
+"Could not watch the game: ": {
+"fr": "Impossible de surveiller le jeu : ",
+"it": "Impossibile tenere d'occhio il gioco: ",
+"de": "Spiel konnte nicht überwacht werden: ",
+"zh": "没法监视游戏：",
+"ja": "ゲームを監視できませんでした："
+},
+"Default keys": {
+"fr": "Touches par défaut",
+"it": "Tasti di base",
+"de": "Standardtasten",
+"zh": "默认按键",
+"ja": "デフォルトのキー"
+},
+"Do not disturb": {
+"fr": "Ne pas déranger",
+"it": "Non disturbare",
+"de": "Nicht stören",
+"zh": "免打扰",
+"ja": "おやすみモード"
+},
+"Done.": {
+"fr": "C'est fait.",
+"it": "Fatto.",
+"de": "Fertig.",
+"zh": "搞定。",
+"ja": "完了。"
+},
+"Done: %d texts in Rioplatense. Pick \"Español ARG\" on the game's language screen.\n": {
+"fr": "C'est fait : %d textes en rioplatense. Choisis \"Español ARG\" sur l'écran des langues du jeu.\n",
+"it": "Fatto: %d testi in rioplatense. Scegli \"Español ARG\" nella schermata lingua del gioco.\n",
+"de": "Fertig: %d Texte auf Rioplatense. Wähl \"Español ARG\" im Sprachmenü des Spiels.\n",
+"zh": "搞定：%d 条文本已换成拉普拉塔西语。在游戏的语言界面选“Español ARG”。\n",
+"ja": "完了：ラプラタ方言のテキスト%d件。ゲームの言語選択画面で「Español ARG」を選んでください。\n"
+},
+"Done: %s icons installed.\n": {
+"fr": "C'est fait : icônes %s installées.\n",
+"it": "Fatto: icone %s installate.\n",
+"de": "Fertig: %s-Icons installiert.\n",
+"zh": "搞定：%s 图标已安装。\n",
+"ja": "完了：%sアイコンをインストールしました。\n"
+},
+"Done: original Xbox icons restored.": {
+"fr": "C'est fait : icônes Xbox d'origine restaurées.",
+"it": "Fatto: icone Xbox originali ripristinate.",
+"de": "Fertig: Original-Xbox-Icons wiederhergestellt.",
+"zh": "搞定：已恢复 Xbox 原版图标。",
+"ja": "完了：オリジナルのXboxアイコンに戻しました。"
+},
+"Done: original languages restored (Dutch is back).": {
+"fr": "C'est fait : langues d'origine restaurées (le néerlandais est de retour).",
+"it": "Fatto: lingue originali ripristinate (l'olandese è tornato).",
+"de": "Fertig: Originalsprachen wiederhergestellt (Niederländisch ist zurück).",
+"zh": "搞定：已恢复原版语言（荷兰语回来了）。",
+"ja": "完了：元の言語に戻しました（オランダ語が復活）。"
+},
+"Done: the game is back to how it was before the mods. You can delete Skate3-Mods.exe and the .bat.": {
+"fr": "C'est fait : le jeu est comme avant les mods. Tu peux supprimer Skate3-Mods.exe et le .bat.",
+"it": "Fatto: il gioco è tornato com'era prima delle mod. Puoi cancellare Skate3-Mods.exe e il .bat.",
+"de": "Fertig: Das Spiel ist wieder wie vor den Mods. Du kannst Skate3-Mods.exe und die .bat löschen.",
+"zh": "搞定：游戏已恢复到装 mod 之前的样子。可以删掉 Skate3-Mods.exe 和 .bat 了。",
+"ja": "完了：ゲームはMod導入前の状態に戻りました。Skate3-Mods.exeと.batは削除してOKです。"
+},
+"Drop in!": {
+"fr": "Drop in !",
+"it": "Drop in!",
+"de": "Drop in!",
+"zh": "Drop in！",
+"ja": "Drop in！"
+},
+"Dutch is back": {
+"fr": "Le néerlandais est de retour",
+"it": "L'olandese è tornato",
+"de": "Niederländisch ist zurück",
+"zh": "荷兰语回来了",
+"ja": "オランダ語が復活"
+},
+"Español ARG ready: pick it on the game's language screen": {
+"fr": "Español ARG prêt : choisis-le sur l'écran des langues du jeu",
+"it": "Español ARG pronto: sceglilo nella schermata lingua del gioco",
+"de": "Español ARG bereit: Wähl es im Sprachmenü des Spiels",
+"zh": "Español ARG 准备好了：在游戏的语言界面选它",
+"ja": "Español ARGの準備完了：ゲームの言語選択画面で選んでください"
+},
+"FOV in degrees (40-120, default 60): ": {
+"fr": "FOV en degrés (40-120, 60 par défaut) : ",
+"it": "FOV in gradi (40-120, di base 60): ",
+"de": "FOV in Grad (40-120, Standard 60): ",
+"zh": "视野角度（40-120，默认 60）：",
+"ja": "FOV（度、40〜120、デフォルト60）："
+},
+"For an ollie, pull the right stick down and flick it up.": {
+"fr": "Pour un ollie, tire le stick droit vers le bas puis envoie-le vers le haut.",
+"it": "Per un ollie, tira giù lo stick destro e spingilo su di scatto.",
+"de": "Für einen Ollie zieh den rechten Stick nach unten und schnipp ihn hoch.",
+"zh": "想 ollie 的话，把右摇杆往下拉再往上一甩。",
+"ja": "オーリーは右スティックを下に引いてから上に弾こう。"
+},
+"Found several copies of the game:": {
+"fr": "Plusieurs copies du jeu trouvées :",
+"it": "Ho trovato più copie del gioco:",
+"de": "Mehrere Kopien des Spiels gefunden:",
+"zh": "找到好几份游戏：",
+"ja": "ゲームが複数見つかりました："
+},
+"Fullscreen ": {
+"fr": "Plein écran ",
+"it": "Schermo intero ",
+"de": "Vollbild ",
+"zh": "全屏 ",
+"ja": "フルスクリーン "
+},
+"Game log": {
+"fr": "Journal du jeu",
+"it": "Log del gioco",
+"de": "Spiel-Log",
+"zh": "游戏日志",
+"ja": "ゲームログ"
+},
+"Heads up: only %d MB free on the game's drive. With little space your save may fail.": {
+"fr": "Attention : seulement %d Mo libres sur le disque du jeu. Avec peu de place, ta sauvegarde peut échouer.",
+"it": "Occhio: solo %d MB liberi sul disco del gioco. Con poco spazio il salvataggio può fallire.",
+"de": "Achtung: nur %d MB frei auf dem Spiel-Laufwerk. Bei wenig Platz kann das Speichern fehlschlagen.",
+"zh": "注意：游戏所在硬盘只剩 %d MB。空间太少可能存不了档。",
+"ja": "注意：ゲームのドライブの空きが%d MBしかありません。空きが少ないとセーブに失敗するかもしれません。"
+},
+"Hide the cursor": {
+"fr": "Masquer le curseur",
+"it": "Nascondi il cursore",
+"de": "Mauszeiger ausblenden",
+"zh": "隐藏光标",
+"ja": "カーソルを隠す"
+},
+"High priority": {
+"fr": "Priorité haute",
+"it": "Priorità alta",
+"de": "Hohe Priorität",
+"zh": "高优先级",
+"ja": "高優先度"
+},
+"If the game hangs, Ctrl+Alt+R closes and reopens it.": {
+"fr": "Si le jeu freeze, Ctrl+Alt+R le ferme et le relance.",
+"it": "Se il gioco si blocca, Ctrl+Alt+R lo chiude e lo riapre.",
+"de": "Wenn das Spiel hängt, schließt Ctrl+Alt+R es und startet es neu.",
+"zh": "游戏卡住的话，Ctrl+Alt+R 会关掉再重开。",
+"ja": "ゲームが固まったら、Ctrl+Alt+Rで閉じて再起動します。"
+},
+"In the air, grab the board with {LT} and {RT}.": {
+"fr": "En l'air, attrape la planche avec {LT} et {RT}.",
+"it": "In aria, afferra la tavola con {LT} e {RT}.",
+"de": "In der Luft greifst du das Board mit {LT} und {RT}.",
+"zh": "在空中用 {LT} 和 {RT} 抓板。",
+"ja": "空中で{LT}と{RT}でボードをグラブ。"
+},
+"Installing %s icons...\n": {
+"fr": "Installation des icônes %s...\n",
+"it": "Installo le icone %s...\n",
+"de": "Installiere %s-Icons...\n",
+"zh": "正在安装 %s 图标...\n",
+"ja": "%sアイコンをインストール中...\n"
+},
+"Invalid value.": {
+"fr": "Valeur invalide.",
+"it": "Valore non valido.",
+"de": "Ungültiger Wert.",
+"zh": "无效的值。",
+"ja": "無効な値です。"
+},
+"Keep the screen on": {
+"fr": "Garder l'écran allumé",
+"it": "Tieni lo schermo acceso",
+"de": "Bildschirm anlassen",
+"zh": "保持屏幕常亮",
+"ja": "画面をオンのままにする"
+},
+"Keyboard and mouse ": {
+"fr": "Clavier et souris ",
+"it": "Tastiera e mouse ",
+"de": "Tastatur und Maus ",
+"zh": "键鼠 ",
+"ja": "キーボードとマウス "
+},
+"LOADING YOUR SAVE": {
+"fr": "CHARGEMENT DE TA SAUVEGARDE",
+"it": "CARICO IL TUO SALVATAGGIO",
+"de": "LADE DEINEN SPIELSTAND",
+"zh": "正在载入存档",
+"ja": "セーブをロード中"
+},
+"Looking for the skate3recomp folder on this PC (first time only)...": {
+"fr": "Recherche du dossier skate3recomp sur ce PC (juste la première fois)...",
+"it": "Cerco la cartella skate3recomp su questo PC (solo la prima volta)...",
+"de": "Suche den skate3recomp-Ordner auf diesem PC (nur beim ersten Mal)...",
+"zh": "正在这台电脑上找 skate3recomp 文件夹（只有第一次）...",
+"ja": "このPCでskate3recompフォルダを探しています（初回のみ）..."
+},
+"Maximum quality": {
+"fr": "Qualité maximale",
+"it": "Qualità massima",
+"de": "Maximale Qualität",
+"zh": "最高画质",
+"ja": "最高画質"
+},
+"Mouse captured by the game ": {
+"fr": "Souris capturée par le jeu ",
+"it": "Mouse catturato dal gioco ",
+"de": "Maus im Spiel gefangen ",
+"zh": "鼠标锁定在游戏里 ",
+"ja": "マウスをゲームに固定 "
+},
+"Normal startup, with intro and language screen": {
+"fr": "Démarrage normal, avec l'intro et l'écran des langues",
+"it": "Avvio normale, con intro e schermata lingua",
+"de": "Normaler Start, mit Intro und Sprachmenü",
+"zh": "正常启动，有片头和语言界面",
+"ja": "通常起動（イントロと言語選択画面あり）"
+},
+"Nothing to uninstall: the original Xbox icons are already in place.": {
+"fr": "Rien à désinstaller : les icônes Xbox d'origine sont déjà en place.",
+"it": "Niente da disinstallare: le icone Xbox originali sono già al loro posto.",
+"de": "Nichts zu deinstallieren: Die Original-Xbox-Icons sind schon drin.",
+"zh": "没东西可卸载：Xbox 原版图标本来就在。",
+"ja": "アンインストールするものはありません：すでにオリジナルのXboxアイコンです。"
+},
+"ON": {
+"fr": "ACTIF",
+"it": "ON",
+"de": "AN",
+"zh": "开",
+"ja": "オン"
+},
+"Original Xbox icons": {
+"fr": "Icônes Xbox d'origine",
+"it": "Icone Xbox originali",
+"de": "Original-Xbox-Icons",
+"zh": "Xbox 原版图标",
+"ja": "オリジナルのXboxアイコン"
+},
+"PCU Library (experimental)": {
+"fr": "Bibliothèque PCU (expérimental)",
+"it": "Libreria PCU (sperimentale)",
+"de": "PCU-Bibliothek (experimentell)",
+"zh": "PCU 库（实验性）",
+"ja": "PCUライブラリ（実験的）"
+},
+"Performance (low-end PCs)": {
+"fr": "Performance (PC modestes)",
+"it": "Prestazioni (PC poco potenti)",
+"de": "Leistung (schwache PCs)",
+"zh": "性能（低配电脑）",
+"ja": "パフォーマンス（低スペックPC向け）"
+},
+"Pick the skate3recomp folder (the one with skate3.exe)": {
+"fr": "Choisis le dossier skate3recomp (celui avec skate3.exe)",
+"it": "Scegli la cartella skate3recomp (quella con skate3.exe)",
+"de": "Wähl den skate3recomp-Ordner (den mit skate3.exe)",
+"zh": "选择 skate3recomp 文件夹（有 skate3.exe 的那个）",
+"ja": "skate3recompフォルダ（skate3.exeがあるフォルダ）を選んでください"
+},
+"Press {Y} to step off the board and walk.": {
+"fr": "Appuie sur {Y} pour descendre de la planche et marcher.",
+"it": "Premi {Y} per scendere dalla tavola e camminare.",
+"de": "Drück {Y}, um vom Board zu steigen und zu laufen.",
+"zh": "按 {Y} 下板走路。",
+"ja": "{Y}でボードから降りて歩けます。"
+},
+"Push with {A} to pick up speed.": {
+"fr": "Pousse avec {A} pour prendre de la vitesse.",
+"it": "Spingi con {A} per prendere velocità.",
+"de": "Push mit {A}, um Speed aufzunehmen.",
+"zh": "按 {A} 蹬地加速。",
+"ja": "{A}でプッシュしてスピードアップ。"
+},
+"Quick restart (Ctrl+Alt+R)": {
+"fr": "Relance rapide (Ctrl+Alt+R)",
+"it": "Riavvio rapido (Ctrl+Alt+R)",
+"de": "Schnell-Neustart (Ctrl+Alt+R)",
+"zh": "快速重启（Ctrl+Alt+R）",
+"ja": "クイック再起動（Ctrl+Alt+R）"
+},
+"Reflections ": {
+"fr": "Reflets ",
+"it": "Riflessi ",
+"de": "Spiegelungen ",
+"zh": "反射 ",
+"ja": "反射 "
+},
+"Remember the window": {
+"fr": "Mémoriser la fenêtre",
+"it": "Ricorda la finestra",
+"de": "Fenster merken",
+"zh": "记住窗口",
+"ja": "ウィンドウを記憶"
+},
+"Report copied: paste it in the chat. It is also in ": {
+"fr": "Rapport copié : colle-le dans le chat. Il est aussi dans ",
+"it": "Report copiato: incollalo in chat. Lo trovi anche in ",
+"de": "Bericht kopiert: Füg ihn im Chat ein. Er liegt auch in ",
+"zh": "报告已复制：粘贴到聊天里就行。它也保存在 ",
+"ja": "レポートをコピーしました：チャットに貼ってください。保存場所："
+},
+"Report saved to ": {
+"fr": "Rapport enregistré dans ",
+"it": "Report salvato in ",
+"de": "Bericht gespeichert in ",
+"zh": "报告已保存到 ",
+"ja": "レポートの保存先："
+},
+"Sensitivity ": {
+"fr": "Sensibilité ",
+"it": "Sensibilità ",
+"de": "Empfindlichkeit ",
+"zh": "灵敏度 ",
+"ja": "感度 "
+},
+"Shortcut": {
+"fr": "Raccourci",
+"it": "Collegamento",
+"de": "Verknüpfung",
+"zh": "快捷方式",
+"ja": "ショートカット"
+},
+"Shortcut created: Skate 3 (directo, ": {
+"fr": "Raccourci créé : Skate 3 (directo, ",
+"it": "Collegamento creato: Skate 3 (directo, ",
+"de": "Verknüpfung erstellt: Skate 3 (directo, ",
+"zh": "快捷方式已创建：Skate 3 (directo, ",
+"ja": "ショートカットを作成しました：Skate 3 (directo, "
+},
+"Silences Windows notifications while you play.": {
+"fr": "Coupe les notifications de Windows pendant que tu joues.",
+"it": "Silenzia le notifiche di Windows mentre giochi.",
+"de": "Schaltet Windows-Benachrichtigungen stumm, während du zockst.",
+"zh": "玩的时候屏蔽 Windows 通知。",
+"ja": "プレイ中はWindowsの通知を止めます。"
+},
+"Skate 3 is in your Steam library. Open Steam and look for it in the list": {
+"fr": "Skate 3 est dans ta bibliothèque Steam. Ouvre Steam et cherche-le dans la liste",
+"it": "Skate 3 è nella tua libreria Steam. Apri Steam e cercalo nella lista",
+"de": "Skate 3 ist in deiner Steam-Bibliothek. Öffne Steam und such es in der Liste",
+"zh": "Skate 3 已加入你的 Steam 库。打开 Steam 在列表里找它",
+"ja": "Skate 3をSteamライブラリに追加しました。Steamを開いてリストから探してください"
+},
+"Skate 3 was removed from Steam": {
+"fr": "Skate 3 a été retiré de Steam",
+"it": "Skate 3 è stato tolto da Steam",
+"de": "Skate 3 wurde aus Steam entfernt",
+"zh": "Skate 3 已从 Steam 移除",
+"ja": "Skate 3をSteamから削除しました"
+},
+"Starts in ": {
+"fr": "Démarre en ",
+"it": "Parte in ",
+"de": "Startet in ",
+"zh": "启动语言：",
+"ja": "起動言語："
+},
+"Steam is not installed on this PC": {
+"fr": "Steam n'est pas installé sur ce PC",
+"it": "Steam non è installato su questo PC",
+"de": "Steam ist auf diesem PC nicht installiert",
+"zh": "这台电脑没装 Steam",
+"ja": "このPCにSteamがインストールされていません"
+},
+"Straight to your save in ": {
+"fr": "Direct à ta sauvegarde en ",
+"it": "Dritto al salvataggio in ",
+"de": "Direkt zu deinem Spielstand in ",
+"zh": "直达存档，语言：",
+"ja": "セーブに直行、言語："
+},
+"Sure? Type YES to confirm: ": {
+"fr": "Sûr ? Tape OUI pour confirmer : ",
+"it": "Sicuro? Scrivi SI per confermare: ",
+"de": "Sicher? Tipp YES zum Bestätigen: ",
+"zh": "确定吗？输入 YES 确认：",
+"ja": "本当に？確認のためYESと入力してください："
+},
+"That folder has no skate3.exe and game\\data\\big. Try again (empty Enter to quit).": {
+"fr": "Ce dossier n'a pas skate3.exe et game\\data\\big. Réessaie (Enter à vide pour quitter).",
+"it": "Quella cartella non ha skate3.exe e game\\data\\big. Riprova (Enter a vuoto per uscire).",
+"de": "In dem Ordner fehlen skate3.exe und game\\data\\big. Versuch's nochmal (leeres Enter beendet).",
+"zh": "那个文件夹里没有 skate3.exe 和 game\\data\\big。再试一次（直接按 Enter 退出）。",
+"ja": "そのフォルダにはskate3.exeとgame\\data\\bigがありません。もう一度やってください（何も入れずにEnterで終了）。"
+},
+"The PC won't sleep or turn the screen off while you play with a gamepad.": {
+"fr": "Le PC ne se met pas en veille et n'éteint pas l'écran pendant que tu joues à la manette.",
+"it": "Il PC non va in sospensione né spegne lo schermo mentre giochi col controller.",
+"de": "Der PC schläft nicht ein und schaltet den Bildschirm nicht aus, während du mit Gamepad zockst.",
+"zh": "用手柄玩的时候，电脑不会休眠也不会关屏幕。",
+"ja": "ゲームパッドでプレイ中、PCがスリープしたり画面が消えたりしません。"
+},
+"The Windows key won't kick you out while the game is in front.": {
+"fr": "La touche Windows ne te sortira pas du jeu tant qu'il est au premier plan.",
+"it": "Il tasto Windows non ti butta fuori mentre il gioco è in primo piano.",
+"de": "Die Windows-Taste wirft dich nicht raus, solange das Spiel vorne ist.",
+"zh": "游戏在前台时，按 Windows 键不会把你踢出去。",
+"ja": "ゲームが前面にある間、Windowsキーで画面から追い出されません。"
+},
+"The game opens on screen %d": {
+"fr": "Le jeu s'ouvre sur l'écran %d",
+"it": "Il gioco si apre sullo schermo %d",
+"de": "Das Spiel öffnet auf Bildschirm %d",
+"zh": "游戏在屏幕 %d 上打开",
+"ja": "ゲームは画面%dで開きます"
+},
+"The game opens on the main screen": {
+"fr": "Le jeu s'ouvre sur l'écran principal",
+"it": "Il gioco si apre sullo schermo principale",
+"de": "Das Spiel öffnet auf dem Hauptbildschirm",
+"zh": "游戏在主屏幕上打开",
+"ja": "ゲームはメイン画面で開きます"
+},
+"The game reopens on the same monitor, size and mode (window or fullscreen).": {
+"fr": "Le jeu se rouvre sur le même écran, à la même taille et dans le même mode (fenêtre ou plein écran).",
+"it": "Il gioco si riapre sullo stesso monitor, con stessa dimensione e modalità (finestra o schermo intero).",
+"de": "Das Spiel öffnet wieder auf demselben Monitor, in gleicher Größe und Modus (Fenster oder Vollbild).",
+"zh": "游戏会在同一个显示器上、以相同大小和模式（窗口或全屏）重新打开。",
+"ja": "ゲームが同じモニター、サイズ、モード（ウィンドウかフルスクリーン）で開き直します。"
+},
+"The pointer disappears over the game after 3 seconds without moving the mouse.": {
+"fr": "Le pointeur disparaît sur le jeu après 3 secondes sans bouger la souris.",
+"it": "Il puntatore sparisce sopra il gioco dopo 3 secondi di mouse fermo.",
+"de": "Der Zeiger verschwindet über dem Spiel nach 3 Sekunden ohne Mausbewegung.",
+"zh": "鼠标 3 秒不动，指针就会在游戏上隐藏。",
+"ja": "マウスを3秒動かさないと、ゲーム上のポインターが消えます。"
+},
+"Ultra light (very weak PCs)": {
+"fr": "Ultra léger (PC très faibles)",
+"it": "Ultra leggero (PC molto deboli)",
+"de": "Ultraleicht (sehr schwache PCs)",
+"zh": "超轻量（很弱的电脑）",
+"ja": "超軽量（かなり非力なPC向け）"
+},
+"Usage": {
+"fr": "Utilisation",
+"it": "Uso",
+"de": "Nutzung",
+"zh": "用法",
+"ja": "使い方"
+},
+"What happened": {
+"fr": "Ce qui s'est passé",
+"it": "Cos'è successo",
+"de": "Was passiert ist",
+"zh": "发生了什么",
+"ja": "何が起きたか"
+},
+"Where you left off": {
+"fr": "Là où tu t'es arrêté",
+"it": "Dove eri rimasto",
+"de": "Wo du aufgehört hast",
+"zh": "上次离开的地方",
+"ja": "前回の場所"
+},
+"Which one? ": {
+"fr": "Lequel ? ",
+"it": "Quale? ",
+"de": "Welche? ",
+"zh": "选哪个？",
+"ja": "どれにする？ "
+},
+"Windows gives the game more CPU than background apps.": {
+"fr": "Windows donne plus de CPU au jeu qu'aux applis en arrière-plan.",
+"it": "Windows dà al gioco più CPU rispetto alle app in background.",
+"de": "Windows gibt dem Spiel mehr CPU als Hintergrund-Apps.",
+"zh": "Windows 会把更多 CPU 分给游戏，而不是后台程序。",
+"ja": "Windowsがバックグラウンドのアプリよりゲームに多くCPUを割り当てます。"
+},
+"You start at: ": {
+"fr": "Tu commences à : ",
+"it": "Parti da: ",
+"de": "Du startest bei: ",
+"zh": "出生点：",
+"ja": "スタート地点："
+},
+"Your previous settings are back": {
+"fr": "Tes anciens réglages sont de retour",
+"it": "Le tue impostazioni precedenti sono tornate",
+"de": "Deine alten Einstellungen sind zurück",
+"zh": "之前的设置恢复了",
+"ja": "前の設定に戻しました"
+},
+"could not find %s": {
+"fr": "impossible de trouver %s",
+"it": "impossibile trovare %s",
+"de": "%s nicht gefunden",
+"zh": "找不到 %s",
+"ja": "%sが見つかりませんでした"
+},
+"could not find game\\data\\big\\%s.\nOpen Skate3-Mods.exe and drag the skate3recomp folder in when asked,\nor use --game \"<skate3recomp folder>\".\nThe game must have been installed at least once (Select ISO).": {
+"fr": "impossible de trouver game\\data\\big\\%s.\nOuvre Skate3-Mods.exe et glisse le dossier skate3recomp quand on te le demande,\nou utilise --game \"<skate3recomp folder>\".\nLe jeu doit avoir été installé au moins une fois (Select ISO).",
+"it": "impossibile trovare game\\data\\big\\%s.\nApri Skate3-Mods.exe e trascina dentro la cartella skate3recomp quando te lo chiede,\noppure usa --game \"<skate3recomp folder>\".\nIl gioco deve essere stato installato almeno una volta (Select ISO).",
+"de": "game\\data\\big\\%s nicht gefunden.\nÖffne Skate3-Mods.exe und zieh den skate3recomp-Ordner rein, wenn gefragt,\noder nutz --game \"<skate3recomp folder>\".\nDas Spiel muss mindestens einmal installiert worden sein (Select ISO).",
+"zh": "找不到 game\\data\\big\\%s。\n打开 Skate3-Mods.exe，按提示把 skate3recomp 文件夹拖进去，\n或者用 --game \"<skate3recomp folder>\"。\n游戏至少要安装过一次（Select ISO）。",
+"ja": "game\\data\\big\\%sが見つかりませんでした。\nSkate3-Mods.exeを開いて、聞かれたらskate3recompフォルダをドラッグするか、\n--game \"<skate3recomp folder>\"を使ってください。\nゲームを一度はインストールしておく必要があります（Select ISO）。"
+},
+"could not find skate3recomp on this PC": {
+"fr": "impossible de trouver skate3recomp sur ce PC",
+"it": "impossibile trovare skate3recomp su questo PC",
+"de": "skate3recomp auf diesem PC nicht gefunden",
+"zh": "这台电脑上找不到 skate3recomp",
+"ja": "このPCでskate3recompが見つかりませんでした"
+},
+"could not replace %s (is the game running?): %v": {
+"fr": "impossible de remplacer %s (le jeu est lancé ?) : %v",
+"it": "impossibile sostituire %s (il gioco è aperto?): %v",
+"de": "%s konnte nicht ersetzt werden (läuft das Spiel?): %v",
+"zh": "没法替换 %s（游戏是不是开着？）：%v",
+"ja": "%sを置き換えられませんでした（ゲームが起動中？）：%v"
+},
+"could not restore %s (is the game running?): %v": {
+"fr": "impossible de restaurer %s (le jeu est lancé ?) : %v",
+"it": "impossibile ripristinare %s (il gioco è aperto?): %v",
+"de": "%s konnte nicht wiederhergestellt werden (läuft das Spiel?): %v",
+"zh": "没法恢复 %s（游戏是不是开着？）：%v",
+"ja": "%sを復元できませんでした（ゲームが起動中？）：%v"
+},
+"could not start %s: %v": {
+"fr": "impossible de lancer %s : %v",
+"it": "impossibile avviare %s: %v",
+"de": "%s konnte nicht gestartet werden: %v",
+"zh": "没法启动 %s：%v",
+"ja": "%sを起動できませんでした：%v"
+},
+"icons": {
+"fr": "icônes",
+"it": "icone",
+"de": "Icons",
+"zh": "图标",
+"ja": "アイコン"
+},
+"invalid FOV": {
+"fr": "FOV invalide",
+"it": "FOV non valido",
+"de": "ungültiges FOV",
+"zh": "无效的 FOV",
+"ja": "無効なFOV"
+},
+"invalid key": {
+"fr": "touche invalide",
+"it": "tasto non valido",
+"de": "ungültige Taste",
+"zh": "无效的按键",
+"ja": "無効なキー"
+},
+"invalid screen": {
+"fr": "écran invalide",
+"it": "schermo non valido",
+"de": "ungültiger Bildschirm",
+"zh": "无效的屏幕",
+"ja": "無効な画面"
+},
+"invalid sensitivity": {
+"fr": "sensibilité invalide",
+"it": "sensibilità non valida",
+"de": "ungültige Empfindlichkeit",
+"zh": "无效的灵敏度",
+"ja": "無効な感度"
+},
+"language": {
+"fr": "langue",
+"it": "lingua",
+"de": "Sprache",
+"zh": "语言",
+"ja": "言語"
+},
+"no Steam account has signed in on this PC": {
+"fr": "aucun compte Steam ne s'est connecté sur ce PC",
+"it": "nessun account Steam ha fatto l'accesso su questo PC",
+"de": "auf diesem PC hat sich noch kein Steam-Konto angemeldet",
+"zh": "这台电脑上还没有登录过 Steam 账号",
+"ja": "このPCでSteamアカウントがサインインしたことがありません"
+},
+"no log yet: start the game once": {
+"fr": "pas encore de journal : lance le jeu une fois",
+"it": "ancora nessun log: avvia il gioco una volta",
+"de": "noch kein Log: Starte das Spiel einmal",
+"zh": "还没有日志：先启动一次游戏",
+"ja": "ログがまだありません：一度ゲームを起動してください"
+},
+"nothing": {
+"fr": "rien",
+"it": "niente",
+"de": "nichts",
+"zh": "无",
+"ja": "なし"
+},
+"off": {
+"fr": "désactivé",
+"it": "off",
+"de": "aus",
+"zh": "关",
+"ja": "オフ"
+},
+"pick the game folder first": {
+"fr": "choisis d'abord le dossier du jeu",
+"it": "prima scegli la cartella del gioco",
+"de": "wähl zuerst den Spielordner",
+"zh": "先选游戏文件夹",
+"ja": "先にゲームフォルダを選んでください"
+},
+"quit Steam (Steam > Exit) and try again: Steam overwrites its game list when it closes": {
+"fr": "quitte Steam (Steam > Quitter) et réessaie : Steam écrase sa liste de jeux en se fermant",
+"it": "chiudi Steam (Steam > Esci) e riprova: Steam sovrascrive la lista dei giochi quando si chiude",
+"de": "beende Steam (Steam > Beenden) und versuch's nochmal: Steam überschreibt seine Spieleliste beim Schließen",
+"zh": "退出 Steam（Steam > 退出）再试一次：Steam 关闭时会覆盖它的游戏列表",
+"ja": "Steamを終了して（Steam > 終了）もう一度やってください：Steamは閉じるときにゲームリストを上書きします"
+},
+"shortcut": {
+"fr": "raccourci",
+"it": "collegamento",
+"de": "Verknüpfung",
+"zh": "快捷方式",
+"ja": "ショートカット"
+},
+"skate3.exe is missing from the game folder: check the folder in The shop": {
+"fr": "skate3.exe manque dans le dossier du jeu : vérifie le dossier dans L'atelier",
+"it": "manca skate3.exe nella cartella del gioco: controlla la cartella in Officina",
+"de": "skate3.exe fehlt im Spielordner: Prüf den Ordner in der Werkstatt",
+"zh": "游戏文件夹里缺了 skate3.exe：去商店里检查文件夹",
+"ja": "ゲームフォルダにskate3.exeがありません：ショップでフォルダを確認してください"
+},
+"skate3recomp folder (default: the .exe's folder)": {
+"fr": "dossier skate3recomp (par défaut : celui du .exe)",
+"it": "cartella skate3recomp (di base: la cartella dell'.exe)",
+"de": "skate3recomp-Ordner (Standard: Ordner der .exe)",
+"zh": "skate3recomp 文件夹（默认：.exe 所在的文件夹）",
+"ja": "skate3recompフォルダ（デフォルト：.exeのあるフォルダ）"
+},
+"that folder has no skate3.exe and game\\data\\big": {
+"fr": "ce dossier n'a pas skate3.exe et game\\data\\big",
+"it": "quella cartella non ha skate3.exe e game\\data\\big",
+"de": "in dem Ordner fehlen skate3.exe und game\\data\\big",
+"zh": "那个文件夹里没有 skate3.exe 和 game\\data\\big",
+"ja": "そのフォルダにはskate3.exeとgame\\data\\bigがありません"
+},
+"the downloaded zip has no program in it": {
+"fr": "le zip téléchargé ne contient aucun programme",
+"it": "lo zip scaricato non contiene nessun programma",
+"de": "im heruntergeladenen Zip ist kein Programm",
+"zh": "下载的 zip 里没有程序",
+"ja": "ダウンロードしたzipにプログラムが入っていません"
+},
+"the game folder is read-only, so the game can't save: move it out of Program Files or clear read-only": {
+"fr": "le dossier du jeu est en lecture seule, le jeu ne peut pas sauvegarder : sors-le de Program Files ou retire la lecture seule",
+"it": "la cartella del gioco è in sola lettura, quindi il gioco non può salvare: spostala fuori da Programmi o togli la sola lettura",
+"de": "der Spielordner ist schreibgeschützt, also kann das Spiel nicht speichern: Verschieb ihn aus Program Files oder heb den Schreibschutz auf",
+"zh": "游戏文件夹是只读的，游戏没法存档：把它移出 Program Files，或者取消只读",
+"ja": "ゲームフォルダが読み取り専用なのでセーブできません：Program Filesの外に移すか、読み取り専用を解除してください"
+},
+"the new release has no Skate3-Mods.zip": {
+"fr": "la nouvelle version n'a pas de Skate3-Mods.zip",
+"it": "la nuova release non ha Skate3-Mods.zip",
+"de": "das neue Release hat keine Skate3-Mods.zip",
+"zh": "新版本里没有 Skate3-Mods.zip",
+"ja": "新しいリリースにSkate3-Mods.zipがありません"
+},
+"unexpected text table format": {
+"fr": "format de table de textes inattendu",
+"it": "formato della tabella dei testi inatteso",
+"de": "unerwartetes Format der Texttabelle",
+"zh": "文本表格式不对",
+"ja": "テキストテーブルの形式が想定外です"
+},
+"unknown preset %q (use max, balanced, perf or ultra)": {
+"fr": "préréglage inconnu %q (utilise max, balanced, perf ou ultra)",
+"it": "preset sconosciuto %q (usa max, balanced, perf o ultra)",
+"de": "unbekanntes Preset %q (nutz max, balanced, perf oder ultra)",
+"zh": "未知预设 %q（用 max、balanced、perf 或 ultra）",
+"ja": "不明なプリセット%q（max、balanced、perf、ultraのどれかを使ってください）"
+},
+"unknown style %q (use ps3, ps4 or ps5)": {
+"fr": "style inconnu %q (utilise ps3, ps4 ou ps5)",
+"it": "stile sconosciuto %q (usa ps3, ps4 o ps5)",
+"de": "unbekannter Stil %q (nutz ps3, ps4 oder ps5)",
+"zh": "未知样式 %q（用 ps3、ps4 或 ps5）",
+"ja": "不明なスタイル%q（ps3、ps4、ps5のどれかを使ってください）"
+},
+"yes": {
+"fr": "oui",
+"it": "si",
+"de": "ja",
+"zh": "是",
+"ja": "はい"
+},
+"you already have the latest version": {
+"fr": "tu as déjà la dernière version",
+"it": "hai già l'ultima versione",
+"de": "du hast schon die neueste Version",
+"zh": "你已经是最新版了",
+"ja": "すでに最新バージョンです"
+},
+"yours (no preset)": {
+"fr": "perso (sans préréglage)",
+"it": "tuo (nessun preset)",
+"de": "deine (kein Preset)",
+"zh": "你自己的（无预设）",
+"ja": "カスタム（プリセットなし）"
+}
+}

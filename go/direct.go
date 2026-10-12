@@ -21,6 +21,11 @@ var spots = []spot{
 		"start,a,rt:1500,rt:1500,down,down,a,down,down,down,down,down,a,a"},
 }
 
+// spotPace shortens the recomp's waits for the trip to a spot: it waits
+// 2.5 s after you're skating and 0.6 s between presses by default. The map
+// tabs keep their own slower timing inside the sequence.
+var spotPace = [][2]string{{"skate3_demo_path_input_settle_ms", "1000"}, {"skate3_demo_path_input_delay_ms", "450"}}
+
 func spotInputs(key string) string {
 	for _, s := range spots {
 		if s.key == key {
@@ -52,7 +57,7 @@ func setSpot(root, key string) (string, error) {
 			return "", err
 		}
 		if directOn(root) {
-			if err := setTomlValues(root, [][2]string{{"skate3_demo_path_gameplay_inputs", strconv.Quote(s.inputs)}}); err != nil {
+			if err := setTomlValues(root, append([][2]string{{"skate3_demo_path_gameplay_inputs", strconv.Quote(s.inputs)}}, spotPace...)); err != nil {
 				return "", err
 			}
 		}
@@ -64,18 +69,19 @@ func setSpot(root, key string) (string, error) {
 // loadingTip is one tip for the loading screen, with the buttons of the
 // icon style that is installed.
 func loadingTip(style string) string {
-	a, y, lt, rt := "A", "Y", "LT", "RT"
+	b := strings.NewReplacer("{A}", "A", "{Y}", "Y", "{LT}", "LT", "{RT}", "RT")
 	if strings.HasPrefix(style, "ps") {
-		a, y, lt, rt = "✕", "△", "L2", "R2"
+		b = strings.NewReplacer("{A}", "✕", "{Y}", "△", "{LT}", "L2", "{RT}", "R2")
 	}
-	tips := [][2]string{
-		{"Para un ollie, bajá el stick derecho y soltalo hacia arriba.", "For an ollie, pull the right stick down and flick it up."},
-		{"En el aire, agarrá la tabla con " + lt + " y " + rt + ".", "In the air, grab the board with " + lt + " and " + rt + "."},
-		{"Empujá con " + a + " para agarrar velocidad.", "Push with " + a + " to pick up speed."},
-		{"Con " + y + " te bajás de la tabla y caminás.", "Press " + y + " to step off the board and walk."},
-		{"Si el juego se traba, Ctrl+Alt+R lo cierra y lo vuelve a abrir.", "If the game hangs, Ctrl+Alt+R closes and reopens it."},
-		{"Alt+F4 cierra el juego como la X de la ventana.", "Alt+F4 closes the game like the window's X."},
-	}
-	t := tips[rand.Intn(len(tips))]
-	return T(t[0], t[1])
+	t := loadingTips[rand.Intn(len(loadingTips))]
+	return b.Replace(T(t[0], t[1]))
+}
+
+var loadingTips = [][2]string{
+	{"Para un ollie, bajá el stick derecho y soltalo hacia arriba.", "For an ollie, pull the right stick down and flick it up."},
+	{"En el aire, agarrá la tabla con {LT} y {RT}.", "In the air, grab the board with {LT} and {RT}."},
+	{"Empujá con {A} para agarrar velocidad.", "Push with {A} to pick up speed."},
+	{"Con {Y} te bajás de la tabla y caminás.", "Press {Y} to step off the board and walk."},
+	{"Si el juego se traba, Ctrl+Alt+R lo cierra y lo vuelve a abrir.", "If the game hangs, Ctrl+Alt+R closes and reopens it."},
+	{"Alt+F4 cierra el juego como la X de la ventana.", "Alt+F4 closes the game like the window's X."},
 }

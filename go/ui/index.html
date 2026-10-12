@@ -103,6 +103,15 @@ nav button.on i{filter:none;opacity:1}
 /* rows + skateboard toggles */
 .row{display:flex;align-items:center;gap:16px;padding:14px 16px;background:#191919;border:1px solid #262626;border-radius:12px}
 .row+.row{margin-top:8px}
+.hsum{display:flex;gap:22px;align-items:center;flex-wrap:wrap;margin-bottom:10px;color:var(--dim);font-size:13px}
+.hsum b{color:#eee;font-size:17px;margin-left:4px}
+.hkey{margin-left:auto;display:flex;gap:12px;align-items:center}
+.hkey i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:-6px}
+.hist{display:grid;gap:6px}
+.hrow{display:grid;grid-template-columns:110px 1fr 64px;gap:12px;align-items:center;font-size:13px;color:var(--dim)}
+.hrow b{color:#eee;text-align:right}
+.hbar{display:flex;height:14px;background:#1d1d1d;border-radius:5px;overflow:hidden}
+.hbar i{display:block;height:100%}
 .rows{display:grid;grid-template-columns:repeat(auto-fit,minmax(480px,1fr));gap:8px}
 .rows .row+.row{margin-top:0}
 .stack{display:flex;flex-direction:column;gap:8px;min-width:0}
@@ -271,7 +280,11 @@ textarea{width:100%;min-height:110px;background:#111;color:var(--ink);border:1px
 "use strict";
 // ------------------------------------------------------------------ texts
 const L = {
- es:{foot:"Mod pack modular · todo se puede deshacer",drop:"Drop in",dropsub:"JUGAR CON MODS",folder:"JUEGO",original:"música original",
+ es:{chg:["Carga directa más rápida: el juego carga con prioridad alta, el modeador deja los archivos del juego listos en memoria mientras está abierto, la pantalla de carga se va apenas podés jugar y el viaje al spot espera menos.",
+   "La pantalla de carga muestra una foto distinta del juego cada vez (más de 50 lugares de Port Carverton) y termina con un ollie.",
+   "Pestaña nueva, Accesos: accesos directos con un botón, Skate 3 en Steam e historial de cargas con cuánto tardó cada parte.",
+   "El modeador ahora está en English, Español, Français, Italiano, Deutsch, 中文 y 日本語. Elige solo el idioma de Windows y lo podés cambiar en Idioma."],
+  kLMB:"Click izq.",kRMB:"Click der.",kMMB:"Rueda",kSpace:"Espacio",foot:"Mod pack modular · todo se puede deshacer",drop:"Drop in",dropsub:"JUGAR CON MODS",folder:"JUEGO",original:"música original",
   t_buttons:"Botones",t_gfx:"Gráficos",t_session:"En sesión",t_lang:"Idioma",t_shop:"El taller",
   s_buttons:"Elegí cómo se ven los botones en el juego. Se cambian al toque y vuelven a Xbox cuando quieras.",
   s_gfx:"Presets de un toque, pantalla, campo de visión y ultrawide. Después podés seguir ajustando en Settings del juego.",
@@ -281,14 +294,22 @@ const L = {
   installed:"puesto",ps3d:"Clásicos de PS3, con los colores de siempre.",ps4d:"Share / Options, estilo PS4.",ps5d:"Blancos y limpios, Create / Options.",xbd:"Los originales del juego.",
   presets:"Presets gráficos",restore:"Volver a mi configuración de antes",fov:"Campo de visión",fovd:"El original es 60°. Más alto = ves más de la calle.",
   apply:"Aplicar",uw:"Ultrawide (21:9 o más)",uwd:"Para monitores anchos: sin bandas negras a los costados.",
-  helper:"El ayudante",shortcut:"Accesos directos (escritorio y menú Inicio)",shortcutd:"Skate 3 Mods abre este modeador; Skate 3 (directo) y Skate 3 (normal) abren el juego con los mods y eligen cómo arranca.",
-  steamT:"Skate 3 en Steam",steamD:"Lo suma a tu biblioteca como juego externo: Big Picture, Steam Input y la captura de Steam. Hacelo con Steam cerrado.",
+  helper:"El ayudante",  steamT:"Skate 3 en Steam",steamD:"Lo suma a tu biblioteca como juego externo: Big Picture, Steam Input y la captura de Steam. Hacelo con Steam cerrado.",
   logT:"Registro del juego",logD:"El log de la última vez que abriste el juego, por si algo falló. También va dentro del reporte.",open:"Abrir",
   zoomT:"Tamaño del modeador",zoomD:"Se adapta solo a tu pantalla. Movelo si lo querés más grande o más chico (también con Ctrl + rueda del mouse).",
   sofaT:"Modo sofá",sofaD:"Todo más grande y el foco bien marcado, para usarlo desde la tele con el joystick.",
   shuffle:"Aleatorio",
+  t_access:"Accesos",s_access:"Accesos directos, Steam y cuánto tarda cada carga directa.",
+  lnkT:"Accesos directos",lnkD:"Skate 3 Mods abre este modeador; Skate 3 (directo) y Skate 3 (normal) abren el juego con los mods. Van al escritorio y al menú Inicio.",
+  lnkMake:"Crear accesos directos",lnkDel:"Sacar accesos directos",lnkOn:"Están puestos",
+  histT:"Historial de cargas",histD:"Cuánto tardó cada carga directa y en qué se fue el tiempo, leído del registro del juego.",
+  histNone:"Todavía no hay cargas. Jugá con \"Directo a tu partida\" y aparecen acá.",
+  hOpen:"Abrir el juego",hMenus:"Logos y menús",hSave:"Tu partida y el mapa",hSpot:"Ir al spot",hRest:"Resto",
+  hAvg:"Promedio",hBest:"Mejor",hLast:"Última",
+  ollieT:"Ollie al terminar la carga",ollieD:"Un ruido de ollie cuando se va la pantalla de carga, para saber que ya podés jugar.",
+  langAuto:"Automático (el de Windows)",
   spotT:"Arrancás en",spotD:"Dónde te deja la carga directa. Fuera de \"Donde dejaste\", el recomp maneja el menú del mapa por vos mientras la pantalla de carga sigue puesta.",
-  langLnk:"Crear acceso directo para este idioma",
+  langLnk:"Crear acceso directo para este idioma",sumKb:"Teclado",sumDirect:"Directo",sumHelpers:"{n} ayudas",
   uiMonT:"Pantalla del modeador",uiMonD:"En qué monitor abre esta ventana.",
   eqT:"Graves y agudos de la radio",eqD:"Para Radio Carverton. En el medio queda como viene.",eqB:"Graves",eqH:"Agudos",
   wizT:"Asistente",wizD:"Tres preguntas y queda todo configurado.",wizGo:"Empezar",
@@ -305,7 +326,7 @@ const L = {
   modder:"El modeador",deckT:"Gráfico de la tabla",sfxT:"Sonidos del modeador",sfxD:"Los ruidos de ollie y aterrizaje al tocar botones.",
   report:"Reportar un problema",reportD:"Arma el reporte con lo que pasó y lo copia para pegarlo en el chat.",reportQ:"¿Qué pasó? Contalo con tus palabras.",send:"Armar reporte",
   favs:"Favoritos",noFavs:"Marcá temas con ☆ para armar tus favoritos.",
-  news:"Novedades de la v{v}",keysHelp:"Atajos: 1 a 7 cambian de pestaña, Enter hace Drop in, M pausa la radio, F11 pantalla completa. Con joystick: cruz para moverte, A elegir, LB/RB pestañas, Start Drop in.",
+  news:"Novedades de la v{v}",keysHelp:"Atajos: 1 a 8 cambian de pestaña, Enter hace Drop in, M pausa la radio, F11 pantalla completa. Con joystick: cruz para moverte, A elegir, LB/RB pestañas, Start Drop in.",
   bootT:"Al arrancar",direct:"Directo a tu partida",directD:"Una pantalla de carga tapa la intro, los menús y los avisos, y aparecés directo en tu carrera, en el idioma que elijas abajo.",
   afterT:"Al tocar Drop in",aMin:"Minimizar",aMinD:"Se esconde y vuelve sola cuando cerrás el juego.",aClose:"Cerrar",aCloseD:"El modeador se cierra; el ayudante sigue.",aStay:"Dejarlo abierto",aStayD:"Queda abierto detrás del juego.",
   back:"¡De vuelta!",backD:"Sesión terminada.",
@@ -336,7 +357,11 @@ const L = {
    "<b>Tip:</b> todo lo que actives se puede deshacer desde acá.","<b>Tip:</b> si actualizás el recomp, tus mods se vuelven a poner solos al jugar.",
    "<b>Tip:</b> Skate 3 (directo) en el escritorio te deja en tu partida sin tocar nada.","<b>Tip:</b> Español ARG aparece en la pantalla de idiomas del juego, en lugar de Nederlands.",
    "<b>Tip:</b> Alt+F4 cierra el juego como la X de la ventana.","<b>Tip:</b> en Controles podés jugar con teclado y mouse y cambiar cada tecla.","<b>Tip:</b> con dos monitores, elegí en Gráficos en cuál abre el juego.","<b>Tip:</b> F11 cambia el modeador entre pantalla completa y ventana.","<b>Tip:</b> tocá el género en la radio: boom bap, punk, rock, electro o cumbia.","<b>Tip:</b> el modeador se maneja con el joystick: LB/RB cambian de pestaña.","<b>Tip:</b> marcá con ☆ los temas de la radio que te gusten."]},
- en:{foot:"Modular mod pack · everything can be undone",drop:"Drop in",dropsub:"PLAY WITH MODS",folder:"GAME",original:"original music",
+ en:{chg:["Faster direct load: the game loads at high priority, the modder gets the game files ready in memory while it's open, the loading screen goes the moment you can play and the trip to the spot waits less.",
+   "The loading screen shows a different photo from the game every time (over 50 places in Port Carverton) and ends with an ollie.",
+   "New tab, Shortcuts: shortcuts with one button, Skate 3 in Steam and a load history with how long each part took.",
+   "The modder now speaks English, Español, Français, Italiano, Deutsch, 中文 and 日本語. It picks Windows' language by itself and you can change it in Language."],
+  kLMB:"Left click",kRMB:"Right click",kMMB:"Wheel",kSpace:"Space",foot:"Modular mod pack · everything can be undone",drop:"Drop in",dropsub:"PLAY WITH MODS",folder:"GAME",original:"original music",
   t_buttons:"Buttons",t_gfx:"Graphics",t_session:"Session",t_lang:"Language",t_shop:"The shop",
   s_buttons:"Pick how the buttons look in the game. Swaps instantly and goes back to Xbox whenever you want.",
   s_gfx:"One-tap presets, screen, field of view and ultrawide. You can keep tweaking in the game's Settings.",
@@ -346,14 +371,22 @@ const L = {
   installed:"on",ps3d:"Classic PS3, with the usual colors.",ps4d:"Share / Options, PS4 style.",ps5d:"Clean white, Create / Options.",xbd:"The game's originals.",
   presets:"Graphics presets",restore:"Restore my previous settings",fov:"Field of view",fovd:"Default is 60°. Higher = you see more of the street.",
   apply:"Apply",uw:"Ultrawide (21:9 or wider)",uwd:"For wide monitors: no black bars on the sides.",
-  helper:"The helper",shortcut:"Shortcuts (desktop and Start menu)",shortcutd:"Skate 3 Mods opens this modder; Skate 3 (directo) and Skate 3 (normal) start the game with the mods and pick how it boots.",
-  steamT:"Skate 3 in Steam",steamD:"Adds it to your library as a non-Steam game: Big Picture, Steam Input and Steam's capture. Do it with Steam closed.",
+  helper:"The helper",  steamT:"Skate 3 in Steam",steamD:"Adds it to your library as a non-Steam game: Big Picture, Steam Input and Steam's capture. Do it with Steam closed.",
   logT:"Game log",logD:"The log from the last time you played, in case something failed. It also goes in the report.",open:"Open",
   zoomT:"Modder size",zoomD:"Fits your screen by itself. Move it if you want it bigger or smaller (Ctrl + mouse wheel works too).",
   sofaT:"Couch mode",sofaD:"Everything bigger and a clear focus ring, to use it from the TV with a gamepad.",
   shuffle:"Shuffle",
+  t_access:"Shortcuts",s_access:"Shortcuts, Steam and how long each direct load takes.",
+  lnkT:"Shortcuts",lnkD:"Skate 3 Mods opens this modder; Skate 3 (directo) and Skate 3 (normal) start the game with the mods. They go on the desktop and in the Start menu.",
+  lnkMake:"Create shortcuts",lnkDel:"Remove shortcuts",lnkOn:"They're in place",
+  histT:"Load history",histD:"How long each direct load took and where the time went, read from the game log.",
+  histNone:"No loads yet. Play with \"Straight to your save\" and they show up here.",
+  hOpen:"Starting the game",hMenus:"Logos and menus",hSave:"Your save and the map",hSpot:"Going to the spot",hRest:"Rest",
+  hAvg:"Average",hBest:"Best",hLast:"Last",
+  ollieT:"Ollie when the load ends",ollieD:"An ollie sound when the loading screen goes away, so you know you can play.",
+  langAuto:"Automatic (Windows' language)",
   spotT:"You start at",spotD:"Where the direct load drops you. Other than \"Where you left off\", the recomp drives the map menu for you while the loading screen stays up.",
-  langLnk:"Create a shortcut for this language",
+  langLnk:"Create a shortcut for this language",sumKb:"Keyboard",sumDirect:"Direct",sumHelpers:"{n} helpers",
   uiMonT:"Modder screen",uiMonD:"Which monitor this window opens on.",
   eqT:"Radio bass and treble",eqD:"For Radio Carverton. In the middle it sounds as it comes.",eqB:"Bass",eqH:"Treble",
   wizT:"Setup assistant",wizD:"Three questions and everything is set.",wizGo:"Start",
@@ -370,7 +403,7 @@ const L = {
   modder:"The modder",deckT:"Deck graphic",sfxT:"Modder sounds",sfxD:"The ollie and landing sounds on buttons.",
   report:"Report a problem",reportD:"Builds a report with what happened and copies it so you can paste it in the chat.",reportQ:"What happened? Tell it in your own words.",send:"Build report",
   favs:"Favorites",noFavs:"Mark tracks with ☆ to build your favorites.",
-  news:"What's new in v{v}",keysHelp:"Shortcuts: 1 to 7 switch tabs, Enter is Drop in, M pauses the radio, F11 fullscreen. With a gamepad: D-pad to move, A to pick, LB/RB tabs, Start Drop in.",
+  news:"What's new in v{v}",keysHelp:"Shortcuts: 1 to 8 switch tabs, Enter is Drop in, M pauses the radio, F11 fullscreen. With a gamepad: D-pad to move, A to pick, LB/RB tabs, Start Drop in.",
   bootT:"At startup",direct:"Straight to your save",directD:"A loading screen covers the intro, menus and prompts, and you show up straight in your career, in the language you pick below.",
   afterT:"When you hit Drop in",aMin:"Minimize",aMinD:"Hides and comes back by itself when you close the game.",aClose:"Close",aCloseD:"The modder closes; the helper keeps going.",aStay:"Keep it open",aStayD:"Stays open behind the game.",
   back:"Back!",backD:"Session over.",
@@ -402,8 +435,9 @@ const L = {
    "<b>Tip:</b> Skate 3 (directo) on the desktop drops you in your save without touching anything.","<b>Tip:</b> Español ARG shows up on the game's language screen instead of Nederlands.",
    "<b>Tip:</b> Alt+F4 closes the game like the window's X.","<b>Tip:</b> in Controls you can play with keyboard and mouse and change every key.","<b>Tip:</b> with two monitors, pick in Graphics which one the game opens on.","<b>Tip:</b> F11 switches the modder between fullscreen and window.","<b>Tip:</b> tap the genre on the radio: boom bap, punk, rock, electro or cumbia.","<b>Tip:</b> the modder works with a gamepad: LB/RB switch tabs.","<b>Tip:</b> mark the radio tracks you like with ☆."]}
 };
-let S = {en:false}, page = "buttons";
-const t = k => (S.en ? L.en : L.es)[k] ?? k;
+Object.assign(L, /*I18N*/{});
+let S = {en:true, lang:"en"}, page = "buttons";
+const t = k => (L[S.lang] || L.en)[k] ?? L.en[k] ?? k;
 const $ = id => document.getElementById(id);
 const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 
@@ -449,9 +483,9 @@ function modal(title, text, buttons, html) {
 const sw = (on, onclick) => `<button class="sw ${on ? "on" : ""}" onclick="${onclick}"><span class="board"></span></button>`;
 const row = (ic, name, desc, ctl) => `<div class="row"><div class="ic">${ic}</div><div class="tx"><b>${esc(name)}</b><span>${esc(desc)}</span></div>${ctl}</div>`;
 
-const PAGES = [["buttons","🎮"],["gfx","🖼️"],["ctl","⌨️"],["session","🛹"],["lang","🧉"],["shop","🔧"]];
+const PAGES = [["buttons","🎮"],["gfx","🖼️"],["ctl","⌨️"],["session","🛹"],["access","🔗"],["lang","🧉"],["shop","🔧"]];
 function render() {
-  document.documentElement.lang = S.en ? "en" : "es";
+  document.documentElement.lang = S.lang || "en";
   document.querySelectorAll("[data-t]").forEach(e => e.textContent = t(e.dataset.t));
   $("ver").textContent = "v" + (S.version || "");
   $("rootp").textContent = S.root || "—";
@@ -464,15 +498,15 @@ function render() {
     if (+S.fov && +S.fov !== 60) sum.push("FOV " + Math.round(S.fov));
     if (S.ultrawide) sum.push("21:9");
     if (S.arg) sum.push("ARG 🧉");
-    if (S.ctl && S.ctl.mnk) sum.push(S.en ? "Keyboard" : "Teclado");
+    if (S.ctl && S.ctl.mnk) sum.push(t("sumKb"));
     if (S.ctl && S.ctl.vsync) sum.push("VSync");
-    if (S.ctl && S.ctl.direct) sum.push(S.en ? "Direct" : "Directo");
-    const on = (S.features || []).filter(f => f.on).length; if (on) sum.push(on + (S.en ? " helpers" : " ayudas"));
+    if (S.ctl && S.ctl.direct) sum.push(t("sumDirect"));
+    const on = (S.features || []).filter(f => f.on).length; if (on) sum.push(t("sumHelpers").replace("{n}", on));
   }
   $("sum").innerHTML = sum.map(x => `<span>${esc(x)}</span>`).join("");
   $("psub").textContent = t("s_" + page);
   if (!S.root) return;
-  $("pages").innerHTML = `<div class="page on">${({buttons, gfx, ctl, session, lang, shop})[page]()}</div>`;
+  $("pages").innerHTML = `<div class="page on">${({buttons, gfx, ctl, session, access, lang, shop})[page]()}</div>`;
   document.querySelectorAll("#pages .pick,#pages .key").forEach(e => e.tabIndex = 0);
   applyPrefs();
 }
@@ -515,9 +549,8 @@ function gfx() {
       ${row("💧", t("ssr"), t("ssrD"), sw(c.ssr, `act('ssr','${c.ssr ? "off" : "on"}')`))}</div></div>`;
 }
 // ------------------------------------------------------------------ controls
-const KNAME = {LMB:["Click izq.","Left click"],RMB:["Click der.","Right click"],MMB:["Rueda","Wheel"],Return:["Enter","Enter"],
-  Space:["Espacio","Space"],Up:["↑","↑"],Down:["↓","↓"],Left:["←","←"],Right:["→","→"],Control:["Ctrl","Ctrl"],"":["—","—"]};
-const kname = k => (KNAME[k] || [k, k])[S.en ? 1 : 0];
+const KNAME = {Return:"Enter",Up:"↑",Down:"↓",Left:"←",Right:"→",Control:"Ctrl","":"—"};
+const kname = k => ({LMB: t("kLMB"), RMB: t("kRMB"), MMB: t("kMMB"), Space: t("kSpace")})[k] || KNAME[k] || k;
 const CODE = {Enter:"Return",ArrowUp:"Up",ArrowDown:"Down",ArrowLeft:"Left",ArrowRight:"Right",ShiftLeft:"Shift",ShiftRight:"Shift",
   ControlLeft:"Control",ControlRight:"Control",AltLeft:"Alt",AltRight:"Alt",NumpadAdd:"NumpadPlus",NumpadSubtract:"NumpadMinus",
   NumpadMultiply:"NumpadStar",NumpadDivide:"NumpadSlash",Backquote:"Backtick",Equal:"Plus",BracketLeft:"LBracket",BracketRight:"RBracket"};
@@ -572,14 +605,37 @@ function session() {
      ${row("⏩", t("direct"), t("directD"), sw(S.ctl.direct, `act('direct','${S.ctl.direct ? "off" : "on"}')`))}
      ${S.ctl.direct ? `<div class="card grid g2" style="margin-top:8px;gap:24px"><div><b>${t("bootLangT")}</b><div class="sub" style="color:var(--dim);font-size:12.5px;margin:2px 0 12px">${t("bootLangD")}</div>
        <div class="langs">${S.ctl.bootLangs.map(l => `<button class="btn ${S.ctl.bootLang === l.key ? "hot" : ""}" onclick="act('bootlang','${l.key}')">${esc(l.name)}</button>`).join("")}
-       <button class="btn" onclick="act('langshortcut','${S.ctl.bootLang}')">🖱️ ${t("langLnk")}</button></div></div>
+</div></div>
        <div><b>${t("spotT")}</b><div class="sub" style="color:var(--dim);font-size:12.5px;margin:2px 0 10px">${t("spotD")}</div>
        <div class="langs">${(S.ctl.spots || []).map(p => `<button class="btn ${(S.ctl.spot || "here") === p.key ? "hot" : ""}" onclick="act('spot','${p.key}')">${esc(p.name)}</button>`).join("")}</div></div></div>` : ""}</div>
+    ${S.ctl.direct ? `<div class="rows" style="margin-top:8px">${row("🛹", t("ollieT"), t("ollieD"), sw(S.prefs?.ollie !== "0", `setPref('ollie','${S.prefs?.ollie === "0" ? "1" : "0"}')`))}</div>` : ""}
     <div class="sec"><h2 class="h">${t("afterT")}</h2><div class="opts">${opt("min", t("aMin"), t("aMinD"))}${opt("close", t("aClose"), t("aCloseD"))}${opt("stay", t("aStay"), t("aStayD"))}</div></div>
     <div class="sec"><h2 class="h">${t("helper")}</h2><div class="rows">
-     ${S.features.map(f => row(FICON[f.key] || "•", f.name, f.desc, sw(f.on, `act('feature','${f.key}=${f.on ? "off" : "on"}')`))).join("")}
-     ${row("🖱️", t("shortcut"), t("shortcutd"), sw(S.shortcut, `act('shortcut','${S.shortcut ? "off" : "on"}')`))}
-     ${S.hasSteam || S.steam ? row("🚂", t("steamT"), t("steamD"), sw(S.steam, `act('steam','${S.steam ? "off" : "on"}')`)) : ""}</div></div>`;
+     ${S.features.map(f => row(FICON[f.key] || "•", f.name, f.desc, sw(f.on, `act('feature','${f.key}=${f.on ? "off" : "on"}')`))).join("")}</div></div>`;
+}
+// shortcuts, Steam and the load history
+const HPH = [["open","#7fb2ff"],["menus","#ffd23f"],["save","#c6ff3d"],["spot","#ff7ad9"],["rest","#555"]];
+function access() {
+  const h = (S.bootHist || []).map(x => ({...x, rest: Math.max(0, x.total - x.open - x.menus - x.save - x.spot)}));
+  const sec = ms => (ms / 1000).toFixed(1) + " s";
+  const max = Math.max(1, ...h.map(x => x.total));
+  const bar = x => `<div class="hbar">${HPH.map(([k, c]) => x[k] > 0 ? `<i style="width:${x[k] / max * 100}%;background:${c}" title="${esc(t("h" + k[0].toUpperCase() + k.slice(1)))} · ${sec(x[k])}"></i>` : "").join("")}</div>`;
+  const avg = h.length ? h.reduce((a, x) => a + x.total, 0) / h.length : 0, best = h.length ? Math.min(...h.map(x => x.total)) : 0;
+  const bl = S.ctl.bootLangs.find(l => l.key === S.ctl.bootLang);
+  return `<div class="sec grid g2" style="gap:12px">
+      <div class="card"><div style="display:flex;align-items:center;gap:14px"><div style="font-size:34px">🖱️</div><div style="flex:1"><h3 class="h" style="margin:0">${t("lnkT")}</h3>
+        <div class="sub">${t("lnkD")}</div></div></div>
+        <p style="margin:14px 0 0;display:flex;gap:8px;flex-wrap:wrap">${S.shortcut
+          ? `<button class="btn" onclick="act('shortcut','on')">✓ ${t("lnkOn")}</button><button class="btn" onclick="act('shortcut','off')">${t("lnkDel")}</button>`
+          : `<button class="btn hot" onclick="act('shortcut','on')">${t("lnkMake")}</button>`}
+          ${S.ctl.direct && bl ? `<button class="btn" onclick="act('langshortcut','${bl.key}')">${t("langLnk")} · ${esc(bl.name)}</button>` : ""}</p></div>
+      ${S.hasSteam || S.steam ? `<div class="card"><div style="display:flex;align-items:center;gap:14px"><div style="font-size:34px">🚂</div><div style="flex:1"><h3 class="h" style="margin:0">${t("steamT")}</h3>
+        <div class="sub">${t("steamD")}</div></div>${sw(S.steam, `act('steam','${S.steam ? "off" : "on"}')`)}</div></div>` : ""}</div>
+    <div class="sec"><h2 class="h">${t("histT")}</h2><p class="sub" style="color:var(--dim);margin:-4px 0 10px">${t("histD")}</p>
+      ${h.length ? `<div class="hsum"><span>${t("hLast")} <b>${sec(h[0].total)}</b></span><span>${t("hAvg")} <b>${sec(avg)}</b></span><span>${t("hBest")} <b>${sec(best)}</b></span>
+        <span class="hkey">${HPH.map(([k, c]) => `<i style="background:${c}"></i>${t("h" + k[0].toUpperCase() + k.slice(1))}`).join("")}</span></div>
+        <div class="hist">${h.slice(0, 8).map(x => `<div class="hrow"><span class="hw">${esc(x.when.slice(5))}</span>${bar(x)}<b>${sec(x.total)}</b></div>`).join("")}</div>`
+      : `<div class="card sub">${t("histNone")}</div>`}</div>`;
 }
 function lang() {
   return `<div class="sec"><div class="card"><div style="display:flex;align-items:center;gap:16px">
@@ -587,9 +643,9 @@ function lang() {
       ${sw(S.arg, `act('arg','${S.arg ? "off" : "on"}')`)}</div>
       <div class="ba"><div>${esc(t("argBefore"))}</div><div style="font-size:22px">➜</div><div class="new">${esc(t("argAfter"))}</div></div></div></div>
     <div class="sec"><h2 class="h">${t("uiLang")}</h2><div class="grid g4">
-      <div class="card pick ${S.en ? "" : "sel"}" data-tag="✓" onclick="setUi('es')"><h3 class="h" style="margin:0">Español</h3></div>
-      <div class="card pick ${S.en ? "sel" : ""}" data-tag="✓" onclick="setUi('en')"><h3 class="h" style="margin:0">English</h3></div></div></div>`;
+      ${[["auto", t("langAuto")]].concat(UILANGS).map(([k, n]) => `<div class="card pick ${(S.langPref || "auto") === k || (k === "auto" && !UILANGS.some(l => l[0] === S.langPref)) ? "sel" : ""}" data-tag="✓" onclick="setUi('${k}')"><h3 class="h" style="margin:0;font-size:${k === "auto" ? 15 : 20}px">${esc(n)}</h3></div>`).join("")}</div></div>`;
 }
+const UILANGS = [["en","English"],["es","Español"],["fr","Français"],["it","Italiano"],["de","Deutsch"],["zh","中文"],["ja","日本語"]];
 function shop() {
   return `<div class="sec rows">
       ${row("🩹", t("repair"), t("repaird"), `<button class="btn hot" onclick="act('repair','', '${t("repair")}')">${t("repair")}</button>`)}
@@ -705,41 +761,12 @@ function askReport() {
     `${esc(t("reportQ"))}<br><br><textarea id="rtext"></textarea>`);
   setTimeout(() => $("rtext").focus(), 50);
 }
-const CHANGES = {
-  "3.5.0": {es: ["El modeador aparece con su propio ícono en la barra de tareas.",
-      "Todas las pestañas entran en la pantalla sin alejar, y la radio se corta apenas tocás Drop in.",
-      "Carga directa: el juego queda mudo mientras carga, con consejos y una barra que aprende cuánto tarda. Podés elegir dónde arrancás.",
-      "Accesos directos también en el menú Inicio, y uno por idioma.",
-      "Graves y agudos de la radio, aviso si el juego se cierra solo, revisión antes de jugar, pantalla del modeador y asistente."],
-    en: ["The modder shows its own icon on the taskbar.",
-      "Every tab fits on screen without zooming out, and the radio cuts the moment you hit Drop in.",
-      "Direct load: the game stays muted while it loads, with tips and a bar that learns how long it takes. You can pick where you start.",
-      "Shortcuts in the Start menu too, and one per language.",
-      "Radio bass and treble, a notice when the game crashes, a check before playing, modder screen and setup assistant."]},
-  "3.4.0": {es: ["Directo a tu partida ahora es carga directa: una pantalla de carga tapa los menús y aparecés en tu carrera.",
-      "El modeador se adapta solo a tu pantalla, con tamaño a gusto y modo sofá para la tele.",
-      "Radio: arranca sola al abrir, Mix y aleatorio de entrada, temas que cambian solos y la tecla M para pausar. Se sacó el DJ.",
-      "Tres accesos directos: Skate 3 Mods, Skate 3 (directo) y Skate 3 (normal).",
-      "Skate 3 en Steam, registro del juego en El taller y el ícono del modeador en todos los tamaños."],
-    en: ["Straight to your save is now a direct load: a loading screen covers the menus and you show up in your career.",
-      "The modder fits your screen by itself, with your own size and a couch mode for the TV.",
-      "Radio: starts when the modder opens, Mix and shuffle by default, tracks change by themselves and M pauses it. The DJ is gone.",
-      "Three shortcuts: Skate 3 Mods, Skate 3 (directo) and Skate 3 (normal).",
-      "Skate 3 in Steam, game log in The shop and the modder icon at every size."]},
-  "3.3.0": {es: ["Directo a tu partida: elegís el idioma en que entra (antes entraba siempre en inglés).",
-      "Radio: favoritos (☆) y DJ que presenta los temas.", "Manejo con joystick y atajos de teclado en el modeador.",
-      "Gráficos: bandas negras y reflejos en vidrios y agua.", "El taller: reportar un problema, gráfico de la tabla y sonidos del modeador.",
-      "Se sacó Tu música."],
-    en: ["Straight to your save: pick the language it starts in (it always started in English).",
-      "Radio: favorites (☆) and a DJ that introduces tracks.", "Gamepad control and keyboard shortcuts in the modder.",
-      "Graphics: black bars and glass and water reflections.", "The shop: report a problem, deck graphic and modder sounds.",
-      "Your music was removed."]}};
 function showNews() {
   const seen = S.prefs?.seen;
   if (!S.root || seen === S.version) return;
   call("pref", "seen=" + S.version);
-  const c = CHANGES[S.version]; if (!seen || !c) return;
-  modal(t("news").replace("{v}", S.version), "", [[t("ok"), "hot", null]], "<ul>" + c[S.en ? "en" : "es"].map(x => `<li>${esc(x)}</li>`).join("") + "</ul>");
+  if (!seen) return;
+  modal(t("news").replace("{v}", S.version), "", [[t("ok"), "hot", null]], "<ul>" + t("chg").map(x => `<li>${esc(x)}</li>`).join("") + "</ul>");
 }
 // keyboard: 1-7 tabs, Enter = Drop in (when nothing is focused), Enter/Space click focused cards
 addEventListener("keydown", e => {
