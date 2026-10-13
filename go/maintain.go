@@ -212,6 +212,7 @@ func uninstallAll(root string) []string {
 	_, err := applyTexts(root, root)
 	add(T("idioma", "language"), err)
 	add("skate3.toml", restoreToml(root))
+	add(T("parche de carga directa", "direct-load patch"), removeDirectDLL(root))
 	add(T("acceso directo", "shortcut"), removeShortcut())
 	dndOff(root)
 	os.Remove(filepath.Join(root, modsIni))
@@ -281,6 +282,11 @@ func diagnose(root string) (string, error) {
 	}
 	icons, _ := iconsStatus(root)
 	w("  Iconos: %s   Español ARG: %v", icons, textsOn(root))
+	dl := "-"
+	if st, err := os.Stat(filepath.Join(root, directLogName)); err == nil {
+		dl = st.ModTime().Format("2006-01-02 15:04")
+	}
+	w("  Parche de carga directa: %q   %s: %s", directDLLState(root), directLogName, dl)
 	w("")
 	w("== skate-mods.ini")
 	c := loadConfig(root)

@@ -310,6 +310,7 @@ func useRoot(root *string, d string) (string, error) {
 	*root = r
 	setLang(loadConfig(r))
 	settleIn(r)
+	syncDirectDLL(r)
 	if c := loadConfig(r); c.on("shortcut") && c["shortcut_set"] != "3.5" { // older versions made only "Skate 3"
 		if createShortcut(r) == nil {
 			c["shortcut_set"] = "3.5"

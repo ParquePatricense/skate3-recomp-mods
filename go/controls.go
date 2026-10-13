@@ -204,6 +204,7 @@ type screen struct {
 // setDirect turns on the recomp's own boot automation ("demo path") with the
 // real profile kept: no intro movie, the language screen and Press Start are
 // accepted by themselves and the boot dialogs too, straight into the career.
+// The skate3-direct patch (directdll.go) comes and goes with it.
 // Input injection stops for good once gameplay starts. The automation always
 // accepts English, so the chosen language (setBootLang) goes in that slot.
 // The helper covers all that with a loading screen until the log (flushed
@@ -254,10 +255,14 @@ func setDirect(root string, on bool) (string, error) {
 	if _, err := applyTexts(root, root); err != nil {
 		return "", err
 	}
-	if on {
-		return T("Directo a tu partida en ", "Straight to your save in ") + bootLangName(c["boot_lang"]), nil
+	later := ""
+	if syncDirectDLL(root) != nil {
+		later = T(" (el parche se acomoda al cerrar el juego)", " (the patch settles in once the game is closed)")
 	}
-	return T("Arranque normal, con intro y pantalla de idioma", "Normal startup, with intro and language screen"), nil
+	if on {
+		return T("Directo a tu partida en ", "Straight to your save in ") + bootLangName(c["boot_lang"]) + later, nil
+	}
+	return T("Arranque normal, con intro y pantalla de idioma", "Normal startup, with intro and language screen") + later, nil
 }
 
 // setBootLang picks the language "straight to your save" starts in.

@@ -4,4 +4,7 @@ Skate3-Mods.exe
 __pycache__/
 build/
 dist/
+dll/lib/kernel32.lib
+dll/out/
+go/skate3mods
 preview/png/

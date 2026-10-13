@@ -25,6 +25,7 @@ func preflight(root string) (warn string, err error) {
 		f.Close()
 		os.Remove(probe)
 	}
+	syncDirectDLL(root) // in use if the game is already open: next time
 	if free, ok := freeSpace(root); ok && free < 500<<20 {
 		return fmt.Sprintf(T("Ojo: quedan %d MB libres en el disco del juego. Con poco espacio la partida puede no guardarse.",
 			"Heads up: only %d MB free on the game's drive. With little space your save may fail."), free>>20), nil
