@@ -30,11 +30,6 @@ func showArrival(root string) {
 		return
 	}
 	arrivalName, arrivalArea = "Port Carverton", T("De vuelta en tu partida", "Back in your save")
-	if loadConfig(root)["spot"] == "pcu" {
-		if n, a := spotName(root, "library"); n != "" {
-			arrivalName, arrivalArea = n, a
-		}
-	}
 	inst, _, _ := pGetModuleHandleW.Call(0)
 	if !arrivalClassOK {
 		wc := wndClassEx{WndProc: arrivalProc, Instance: inst, ClassName: utf16("Skate3ModsArrival")}

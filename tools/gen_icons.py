@@ -1,4 +1,6 @@
-"""Draws the PlayStation button icon sets (original art) for Skate 3's buttons.rx2.
+"""Draws the button icon sets (original art) for Skate 3's buttons.rx2:
+PlayStation (PS3/PS4/PS5), Nintendo Switch (Switch 1/2, Pro, Joy-Con), Xbox
+Series, GameSir and Steam Deck.
 
 Each texture is 64x64; the game samples the icon from the top-left 48x48 area
 (icon centre at 24,24), same as the original Xbox art. `_hud` variants get an
@@ -45,7 +47,30 @@ STYLES = {
     'ps5': dict(disc=(36, 36, 40, 255), rim=None,
                 sym={k: (232, 232, 236) for k in ('cross', 'circle', 'square', 'triangle')}),
 }
+# Letter styles. The game asks for the pad's A/B/X/Y by position (A = bottom),
+# so a Nintendo pad shows its own letter for each position: B bottom, A right,
+# Y left, X top.
+LETTERS = {
+    'switch': dict(disc=(34, 34, 38, 255), face={'A': 'B', 'B': 'A', 'X': 'Y', 'Y': 'X'},
+                   col={k: (240, 240, 244) for k in 'ABXY'}, bump=('L', 'R'), trig=('ZL', 'ZR'), menu='nintendo', click=('LS', 'RS')),
+    'xseries': dict(disc=(30, 30, 34, 255), face={k: k for k in 'ABXY'},
+                    col={'A': (110, 205, 90), 'B': (240, 80, 70), 'X': (70, 150, 245), 'Y': (250, 200, 50)},
+                    bump=('LB', 'RB'), trig=('LT', 'RT'), menu='xbox', click=('LS', 'RS')),
+    'gamesir': dict(disc=(26, 26, 30, 255), face={k: k for k in 'ABXY'}, col={k: (236, 236, 240) for k in 'ABXY'},
+                    bump=('LB', 'RB'), trig=('LT', 'RT'), menu='xbox', click=('LS', 'RS'), rim=(255, 90, 31, 255)),
+    'steamdeck': dict(disc=(52, 56, 64, 255), face={k: k for k in 'ABXY'}, col={k: (236, 238, 242) for k in 'ABXY'},
+                      bump=('L1', 'R1'), trig=('L2', 'R2'), menu='xbox', click=('L3', 'R3')),
+}
+for _k in LETTERS:
+    STYLES[_k] = LETTERS[_k]
 FACE = {'A': 'cross', 'B': 'circle', 'X': 'square', 'Y': 'triangle'}
+
+def letter_face(style, btn):
+    st = LETTERS[style]
+    im, d = canvas()
+    disc(d, 12, st['disc'], st.get('rim'), 1.4)
+    text_c(d, C, C + s(0.6), st['face'][btn], 15, st['col'][btn] + (255,))
+    return im
 
 def canvas():
     im = Image.new('RGBA', (N, N), (0, 0, 0, 0))
@@ -126,19 +151,39 @@ def menu_button(style, which):
                 d.rounded_rectangle([C - s(5.5), C + s(dy) - s(0.9), C + s(5.5), C + s(dy) + s(0.9)], radius=s(0.9), fill=DARK)
     return im
 
-def shoulder(side, kind):
+def letter_menu(style, which):
+    """Xbox View / Menu, or Nintendo - / +."""
+    im, d = canvas()
+    if LETTERS[style]['menu'] == 'nintendo':
+        disc(d, 11, WHITE)
+        w = s(2.6)
+        d.line([C - s(5.5), C, C + s(5.5), C], fill=DARK, width=w)
+        if which == 'start':
+            d.line([C, C - s(5.5), C, C + s(5.5)], fill=DARK, width=w)
+        return im
+    disc(d, 11, WHITE)
+    if which == 'back':   # View: two overlapping windows
+        d.rectangle([C - s(5.5), C - s(4.5), C + s(1.5), C + s(1.5)], outline=DARK, width=s(1.6))
+        d.rectangle([C - s(1.5), C - s(1.5), C + s(5.5), C + s(4.5)], fill=WHITE, outline=DARK, width=s(1.6))
+    else:                 # Menu: three lines
+        for dy in (-3.4, 0, 3.4):
+            d.rounded_rectangle([C - s(5.5), C + s(dy) - s(0.9), C + s(5.5), C + s(dy) + s(0.9)], radius=s(0.9), fill=DARK)
+    return im
+
+def shoulder(side, kind, label=None):
     """kind 1 = bumper (L1/R1), 2 = trigger (L2/R2)."""
     im, d = canvas()
-    label = side + str(kind)
+    label = label or side + str(kind)
+    px = 14 if len(label) <= 2 else 11
     if kind == 1:
         d.rounded_rectangle([C - s(15), C - s(9), C + s(15), C + s(9)], radius=s(4), fill=WHITE)
-        text_c(d, C, C + s(0.3), label, 14, DARK)
+        text_c(d, C, C + s(0.3), label, px, DARK)
     else:
         # trigger silhouette: tall rounded top, flat bottom
         top, bot = C - s(11), C + s(10)
         d.rounded_rectangle([C - s(14), top, C + s(14), bot], radius=s(9), fill=WHITE)
         d.rectangle([C - s(14), C, C + s(14), bot], fill=WHITE)
-        text_c(d, C, C + s(1.2), label, 14, DARK)
+        text_c(d, C, C + s(1.2), label, px, DARK)
     return im
 
 def chevron(d, direction):
@@ -190,16 +235,18 @@ def build(style):
         hud = name.endswith('_hud')
         base = name[:-4] if hud else name
         im = None
+        lt = LETTERS.get(style)
         if base in FACE:
-            im = face(style, FACE[base])
+            im = letter_face(style, base) if lt else face(style, FACE[base])
         elif base == 'Back':
-            im = menu_button(style, 'back')
+            im = letter_menu(style, 'back') if lt else menu_button(style, 'back')
         elif base == 'Start':
-            im = menu_button(style, 'start')
+            im = letter_menu(style, 'start') if lt else menu_button(style, 'start')
         elif base in ('L_Bumper', 'R_Bumper', 'L_Trigger', 'R_Trigger'):
-            im = shoulder(base[0], 1 if 'Bumper' in base else 2)
+            kind = 1 if 'Bumper' in base else 2
+            im = shoulder(base[0], kind, lt and lt['bump' if kind == 1 else 'trig'][base[0] == 'R'])
         elif base in ('L3_Click', 'R3_Click'):
-            im = stick(base[0], '', label=base[:2])
+            im = stick(base[0], '', label=lt['click'][base[0] == 'R'] if lt else base[:2])
         elif base.startswith('Stick_'):
             side = 'L' if base.startswith('Stick_Left') else 'R'
             rest = base.split('_', 2)[2] if base.count('_') >= 2 else ''

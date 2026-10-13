@@ -59,13 +59,6 @@ func apiState(root string) map[string]any {
 	st["afterPlay"] = c["after_play"]
 	st["prefs"] = map[string]string{"deck": c["ui_deck"], "sfx": c["ui_sfx"], "seen": c["ui_seen"], "size": c["ui_size"], "sofa": c["ui_sofa"], "ollie": c["ui_ollie"]}
 	st["bootHist"] = bootHistory(root)
-	st["prefs"].(map[string]string)["avatar"] = c["ui_avatar"]
-	if k, ok := strings.CutPrefix(c["ui_deck"], "game:"); ok {
-		st["deckImg"] = gameDeckImg(root, k)
-	}
-	if c["ui_avatar"] != "" {
-		st["avatarImg"] = gameAvatarImg(root, c["ui_avatar"])
-	}
 	st["langPref"] = c["lang"]
 	st["steam"] = c.on("steam")
 	st["crash"] = c["crash"]
@@ -73,7 +66,6 @@ func apiState(root string) map[string]any {
 	st["uiWindow"] = c["ui_window"]
 	st["uiMonitor"] = uiMonitorSetting()
 	st["recomp"] = c["recomp_version"]
-	st["nologo"] = noLogo(root)
 	st["play"] = playStats(root, time.Now())
 	st["disk"] = diskState(root)
 	st["defender"] = c["defender"] == "1"
@@ -216,7 +208,7 @@ func apiDo(root *string, cmd, arg string) (string, error) {
 		return T("Reflejos ", "Reflections ") + onOff(onArg(arg)), setBool(r, "skate3_native_render_scene_ssr", onArg(arg))
 	case "pref":
 		key, val, _ := strings.Cut(arg, "=")
-		if key != "deck" && key != "sfx" && key != "seen" && key != "size" && key != "sofa" && key != "ollie" && key != "avatar" && key != "arrival" && key != "bg" {
+		if key != "deck" && key != "sfx" && key != "seen" && key != "size" && key != "sofa" && key != "ollie" && key != "arrival" && key != "bg" {
 			return "", errors.New("?")
 		}
 		c := loadConfig(r)
@@ -224,8 +216,6 @@ func apiDo(root *string, cmd, arg string) (string, error) {
 		return "", c.save(r)
 	case "steam":
 		return setSteam(r, onArg(arg))
-	case "spot":
-		return setSpot(r, arg)
 	case "langshortcut":
 		if bootLangSrc(arg) == "" {
 			return "", errors.New("?")
@@ -237,16 +227,6 @@ func apiDo(root *string, cmd, arg string) (string, error) {
 		return "", c.save(r)
 	case "gamelog":
 		return "", openLog(r)
-	case "gamedecks", "avatars": // the game's boards / skaters, as JSON
-		list, err := gameDecks(r)
-		if cmd == "avatars" {
-			list, err = gameAvatars(r)
-		}
-		if err != nil {
-			return "", err
-		}
-		b, err := json.Marshal(list)
-		return string(b), err
 	case "defender":
 		return setDefender(r, onArg(arg))
 	case "preload":
@@ -267,31 +247,16 @@ func apiDo(root *string, cmd, arg string) (string, error) {
 	case "forgetroot":
 		forgetRoot(arg)
 		return "", nil
-	case "drift", "guide", "tricks": // JSON for the window
-		var v any
-		switch cmd {
-		case "drift":
-			v = map[string]any{"pads": padsConnected(), "drift": stickDrift()}
-		case "guide":
-			v = portGuide(r)
-		default:
-			v = trickList(r)
-		}
-		b, err := json.Marshal(v)
+	case "drift": // JSON for the window
+		b, err := json.Marshal(map[string]any{"pads": padsConnected(), "drift": stickDrift()})
 		return string(b), err
 	case "bg":
 		return modderBackground(r), nil
 	case "issue":
-		kind, what, _ := strings.Cut(arg, "|")
 		if !repoIsPublic() {
-			if kind == "translation" {
-				return problemReport(r, "Translation fix ("+lang+"): "+what)
-			}
 			return "", errors.New("?")
 		}
-		return openIssue(r, kind, what)
-	case "nologo":
-		return setNoLogo(r, onArg(arg))
+		return openIssue(r, arg)
 	case "bootlang":
 		return setBootLang(r, arg)
 	case "afterplay":
@@ -352,11 +317,9 @@ func useRoot(root *string, d string) (string, error) {
 		}
 	}
 	msgs := checkMods(r)
-	keepNoLogo(r)
+	dropSpot(r)
 	addKnownRoot(r)
 	go repoIsPublic()
 	warmGameFiles(r)
-	go gameDecks(r) // the game's boards and skaters for Apariencia, ready before they're asked for
-	go gameAvatars(r)
 	return strings.Join(msgs, "\n"), nil
 }

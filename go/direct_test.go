@@ -44,11 +44,12 @@ func TestDirectLanguage(t *testing.T) {
 	if !bytes.Equal(en(), ar) || !textsOn(root) || !textsPatched(root) {
 		t.Fatal("English slot is not ARG")
 	}
-	if _, err := setSpot(root, "pcu"); err != nil || !spotOn(root) || readToml(root)["log_flush_interval"] != "1" {
-		t.Fatal("spot not set", err)
-	}
-	if _, err := setSpot(root, "here"); err != nil || spotOn(root) {
-		t.Fatal("spot not cleared", err)
+	setTomlValues(root, [][2]string{{"skate3_demo_path_gameplay_inputs", `"start,a"`}}) // a spot set by an older version
+	c := loadConfig(root)
+	c["spot"] = "pcu"
+	c.save(root)
+	if dropSpot(root); spotOn(root) || loadConfig(root)["spot"] != "" || readToml(root)["log_flush_interval"] != "1" {
+		t.Fatal("old spot not dropped")
 	}
 	if msgs := checkMods(root); len(msgs) != 0 {
 		t.Fatal(msgs)

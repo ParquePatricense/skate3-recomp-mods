@@ -45,39 +45,3 @@ func TestShotTitle(t *testing.T) {
 		t.Fatal(g)
 	}
 }
-
-func TestGameDecks(t *testing.T) {
-	root := os.Getenv("SKATE3_GAME")
-	if root == "" {
-		t.Skip("SKATE3_GAME not set")
-	}
-	ds, err := gameDecks(root)
-	if err != nil || len(ds) < 100 {
-		t.Fatal(len(ds), err)
-	}
-	if out := os.Getenv("SKATE3_DECKS_HTML"); out != "" {
-		h := "<body style='background:#333'>"
-		for _, d := range ds[:40] {
-			h += "<img title='" + d.Name + "' src='" + d.Img + "' style='height:200px;margin:4px'>"
-		}
-		os.WriteFile(out, []byte(h), 0o644)
-	}
-}
-
-func TestGameAvatars(t *testing.T) {
-	root := os.Getenv("SKATE3_GAME")
-	if root == "" {
-		t.Skip("SKATE3_GAME not set")
-	}
-	as, err := gameAvatars(root)
-	if err != nil || len(as) < 40 {
-		t.Fatal(len(as), err)
-	}
-	if out := os.Getenv("SKATE3_AVATARS_HTML"); out != "" {
-		h := "<body style='background:#333'>"
-		for _, a := range as {
-			h += "<img title='" + a.Name + "' src='" + a.Img + "' style='height:120px;margin:4px'>"
-		}
-		os.WriteFile(out, []byte(h), 0o644)
-	}
-}

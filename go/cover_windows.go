@@ -387,8 +387,6 @@ type gameplayWatch struct {
 var (
 	gameplayMarks = [][]byte{[]byte("gameplay reached"), []byte("context=0x8001, value=0x1)")}
 	spotMarks     = [][]byte{[]byte("gameplay input sequence complete")}
-	// logoMarks: the boot got past the movies (title screen or later)
-	logoMarks = [][]byte{[]byte("press-start"), []byte("gameplay reached"), []byte("context=0x8001, value=0x1)")}
 )
 
 // newGameplayWatch waits for gameplay, or with a starting spot for the

@@ -87,7 +87,7 @@ func readBootPhases(logPath string, start time.Time, total time.Duration) bootPh
 	return p
 }
 
-const bootHistMax = 15
+const bootHistMax = 20
 
 // addBootHistory keeps the last loads in the ini, newest first:
 // "date|total|open|menus|save|spot;..." in milliseconds.

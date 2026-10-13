@@ -23,7 +23,7 @@ import (
 	"time"
 )
 
-const version = "3.7.0"
+const version = "3.8.0"
 
 var stdin = newStdin()
 
@@ -375,7 +375,7 @@ func run(args []string) int {
 			}
 			err = play(root)
 		default:
-			fmt.Println(T("Uso", "Usage") + ": Skate3-Mods [install ps3|ps4|ps5 | uninstall | status | preset max|balanced|perf|ultra|restore | texts on|off | play] [--game DIR]")
+			fmt.Println(T("Uso", "Usage") + ": Skate3-Mods [install ps3|ps4|ps5|switch|xseries|gamesir|steamdeck | uninstall | status | preset max|balanced|perf|ultra|restore | texts on|off | play] [--game DIR]")
 			return 2
 		}
 	}

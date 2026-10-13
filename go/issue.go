@@ -1,7 +1,7 @@
 package main
 
-// GitHub issues: once the pack's repository is public, a problem report or
-// a translation fix opens GitHub's "new issue" page already filled in.
+// GitHub issues: once the pack's repository is public, a problem report
+// opens GitHub's "new issue" page already filled in.
 
 import (
 	"net/http"
@@ -44,7 +44,7 @@ func issueURL(title, body string) string {
 }
 
 // openIssue fills the report and opens it on GitHub.
-func openIssue(root, kind, what string) (string, error) {
+func openIssue(root, what string) (string, error) {
 	title := strings.TrimSpace(what)
 	if i := strings.IndexByte(title, '\n'); i > 0 {
 		title = title[:i]
@@ -53,10 +53,6 @@ func openIssue(root, kind, what string) (string, error) {
 		title = title[:70] + "..."
 	}
 	body := "**" + T("Qué pasó", "What happened") + "**\n\n" + strings.TrimSpace(what) + "\n\n```\n" + diagSummary(root) + "\n```"
-	if kind == "translation" {
-		title = "[" + lang + "] " + title
-		body = "**Translation fix (" + lang + ")**\n\n" + strings.TrimSpace(what) + "\n\nSkate 3 Mods v" + version
-	}
 	return T("Se abrió GitHub con el reporte listo para enviar", "GitHub opened with the report ready to send"), openPath(issueURL(title, body))
 }
 

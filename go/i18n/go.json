@@ -399,14 +399,6 @@
   "ja": "オランダ語が復活",
   "pt": "O holandês voltou"
  },
- "EA Black Box logo removed: the game starts without it": {
-  "fr": "Logo EA Black Box retiré : le jeu démarre sans lui",
-  "it": "Logo EA Black Box rimosso: il gioco parte senza",
-  "de": "EA Black Box-Logo entfernt: Das Spiel startet ohne",
-  "zh": "EA Black Box logo 已移除：游戏启动时不再播放",
-  "ja": "EA Black Boxロゴを削除しました：ゲームはロゴなしで起動します",
-  "pt": "Logo da EA Black Box removido: o jogo abre sem ele"
- },
  "Español ARG ready: pick it on the game's language screen": {
   "fr": "Español ARG prêt : choisis-le sur l'écran des langues du jeu",
   "it": "Español ARG pronto: sceglilo nella schermata lingua del gioco",
@@ -703,22 +695,6 @@
   "ja": "そのフォルダにはskate3.exeとgame\\data\\bigがありません。もう一度やってください（何も入れずにEnterで終了）。",
   "pt": "Essa pasta não tem skate3.exe e game\\data\\big. Tente de novo (Enter vazio para sair)."
  },
- "The EA Black Box logo is back": {
-  "fr": "Le logo EA Black Box est revenu",
-  "it": "Il logo EA Black Box è tornato",
-  "de": "Das EA Black Box-Logo ist wieder da",
-  "zh": "EA Black Box logo 已恢复",
-  "ja": "EA Black Boxロゴを元に戻しました",
-  "pt": "O logo da EA Black Box voltou"
- },
- "The game didn't get past the boot without the EA logo, so I put it back. Close it and open it again.": {
-  "fr": "Le jeu n'a pas passé le démarrage sans le logo EA, alors je l'ai remis. Ferme-le et rouvre-le.",
-  "it": "Il gioco non è andato oltre l'avvio senza il logo EA, quindi l'ho rimesso. Chiudilo e riaprilo.",
-  "de": "Das Spiel kam ohne EA-Logo nicht über den Start hinaus, also hab ich es zurückgeholt. Schließ es und öffne es nochmal.",
-  "zh": "没有 EA logo 游戏启动不了，所以我把它放回去了。关掉游戏再打开一次。",
-  "ja": "EAロゴなしではゲームが起動を抜けられなかったので、元に戻しました。閉じてもう一度開いてください。",
-  "pt": "O jogo não passou da inicialização sem o logo da EA, então eu coloquei ele de volta. Feche e abra de novo."
- },
  "The game opens on screen %d": {
   "fr": "Le jeu s'ouvre sur l'écran %d",
   "it": "Il gioco si apre sullo schermo %d",
@@ -767,14 +743,6 @@
   "ja": "Windowsが変更を受け付けませんでした（管理者確認で「いいえ」を選びましたか？）",
   "pt": "O Windows não aceitou a mudança (você recusou a permissão de administrador?)"
  },
- "You start at: ": {
-  "fr": "Tu commences à : ",
-  "it": "Parti da: ",
-  "de": "Du startest bei: ",
-  "zh": "出生点：",
-  "ja": "スタート地点：",
-  "pt": "Você começa em: "
- },
  "Your previous settings are back": {
   "fr": "Tes anciens réglages sont de retour",
   "it": "Le tue impostazioni precedenti sono tornate",
@@ -822,14 +790,6 @@
   "zh": "这台电脑上找不到 skate3recomp",
   "ja": "このPCでskate3recompが見つかりませんでした",
   "pt": "não achei o skate3recomp neste PC"
- },
- "could not find the logo movie (EA_Blackbox) in the game folder": {
-  "fr": "impossible de trouver la vidéo du logo (EA_Blackbox) dans le dossier du jeu",
-  "it": "non ho trovato il video del logo (EA_Blackbox) nella cartella del gioco",
-  "de": "Logo-Video (EA_Blackbox) nicht im Spielordner gefunden",
-  "zh": "在游戏文件夹里找不到 logo 动画（EA_Blackbox）",
-  "ja": "ゲームフォルダにロゴ動画（EA_Blackbox）が見つかりませんでした",
-  "pt": "não achei o vídeo do logo (EA_Blackbox) na pasta do jogo"
  },
  "could not replace %s (is the game running?): %v": {
   "fr": "impossible de remplacer %s (le jeu est lancé ?) : %v",
@@ -1039,13 +999,13 @@
   "ja": "不明なプリセット%q（max、balanced、perf、ultraのどれかを使ってください）",
   "pt": "preset desconhecido %q (use max, balanced, perf ou ultra)"
  },
- "unknown style %q (use ps3, ps4 or ps5)": {
-  "fr": "style inconnu %q (utilise ps3, ps4 ou ps5)",
-  "it": "stile sconosciuto %q (usa ps3, ps4 o ps5)",
-  "de": "unbekannter Stil %q (nutz ps3, ps4 oder ps5)",
-  "zh": "未知样式 %q（用 ps3、ps4 或 ps5）",
-  "ja": "不明なスタイル%q（ps3、ps4、ps5のどれかを使ってください）",
-  "pt": "estilo desconhecido %q (use ps3, ps4 ou ps5)"
+ "unknown style %q": {
+  "fr": "style inconnu %q",
+  "it": "stile sconosciuto %q",
+  "de": "unbekannter Stil %q",
+  "zh": "未知样式 %q",
+  "ja": "不明なスタイル %q",
+  "pt": "estilo desconhecido %q"
  },
  "yes": {
   "fr": "oui",

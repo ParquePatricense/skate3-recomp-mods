@@ -1,5 +1,5 @@
 // Button icons module: swaps Skate 3's Xbox 360 button icons for
-// PlayStation (PS3/PS4/PS5) ones inside game/data/big/fedynamic.big and
+// PlayStation (PS3/PS4/PS5), Switch, Xbox Series, GameSir or Steam Deck ones inside game/data/big/fedynamic.big and
 // restores the originals on request. Same logic as src/skate3_ps_buttons.py.
 package main
 
@@ -28,7 +28,8 @@ const (
 //go:embed payload/*.bin
 var payloadFS embed.FS
 
-var styleNames = map[string]string{"ps3": "PS3", "ps4": "PS4", "ps5": "PS5"}
+var styleNames = map[string]string{"ps3": "PS3", "ps4": "PS4", "ps5": "PS5", "switch": "Switch",
+	"xseries": "Xbox Series", "gamesir": "GameSir", "steamdeck": "Steam Deck"}
 
 // ---------------------------------------------------------------- RefPack
 
@@ -348,7 +349,7 @@ func exists(p string) bool { _, err := os.Stat(p); return err == nil }
 
 func installIcons(style, game string) error {
 	if _, ok := styleNames[style]; !ok {
-		return fmt.Errorf(T("estilo desconocido %q (usá ps3, ps4 o ps5)", "unknown style %q (use ps3, ps4 or ps5)"), style)
+		return fmt.Errorf(T("estilo desconocido %q", "unknown style %q"), style)
 	}
 	archive, err := findArchive(game)
 	if err != nil {
@@ -420,7 +421,7 @@ func uninstallIcons(game string) error {
 	return nil
 }
 
-// iconsStatus returns "Xbox (original)" or the installed PlayStation style.
+// iconsStatus returns "Xbox (original)" or the installed style.
 func iconsStatus(game string) (string, error) {
 	archive, err := findArchive(game)
 	if err != nil {

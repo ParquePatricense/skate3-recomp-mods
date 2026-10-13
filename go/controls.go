@@ -133,7 +133,6 @@ func controlsState(root string) map[string]any {
 		"direct":    directOn(root),
 		"letterbox": tomlBool(m, "present_letterbox", true), "ssr": tomlBool(m, "skate3_native_render_scene_ssr", false),
 		"bootLang": loadConfig(root)["boot_lang"], "bootLangs": bootLangList(),
-		"spot": loadConfig(root)["spot"], "spots": spotList(),
 	}
 }
 
@@ -218,8 +217,7 @@ func setDirect(root string, on bool) (string, error) {
 		{"log_flush_interval", flush}}
 	c := loadConfig(root)
 	if on {
-		vals = append(vals, [2]string{"skate3_demo_path_gameplay_inputs", strconv.Quote(spotInputs(c["spot"]))})
-		vals = append(vals, spotPace...)
+		vals = append(vals, [2]string{"skate3_demo_path_gameplay_inputs", `""`})
 		if _, set := c["boot_prev_language"]; !set {
 			prev, ok := readToml(root)["user_language"]
 			if !ok {
@@ -274,9 +272,17 @@ func setBootLang(root, key string) (string, error) {
 	}
 	c := loadConfig(root)
 	c["boot_lang"] = key
+	ui := key // the modder follows the game's language
+	if key == "arg" {
+		ui = "es"
+	}
+	if validLang(ui) {
+		c["lang"] = ui
+	}
 	if err := c.save(root); err != nil {
 		return "", err
 	}
+	setLang(c)
 	if _, err := applyTexts(root, root); err != nil {
 		return "", err
 	}
