@@ -338,23 +338,43 @@ static void h_stB(PPCContext* c, u8* b) {
 static void h_stC(PPCContext* c, u8* b) { state_ev(ST_TITLE, c, b); o_stC(c, b); }
 static void h_stD(PPCContext* c, u8* b) { state_ev(ST_D, c, b); o_stD(c, b); }
 static void h_stE(PPCContext* c, u8* b) { state_ev(ST_E, c, b); o_stE(c, b); }
-// Press Start. Its update waits for screen 22's "ready" flag (+0x3C, set
-// when its intro animation ends, ~1.8 s), then registers the FE message 23
-// callback (sets BootFlow+0x31) and waits for START, which the recomp taps
-// on a 0.33 s cycle. With fast_press the ready flag is set once the screen is
-// up, and once the callback is registered its effect (sub_826FE638: BootFlow
-// +0x32 = 1 and the START flag) is applied right away.
-static int g_press_ready, g_press_start;
+// Press Start. Screen 22's input handler (vtable slot 10, sub_82609238)
+// only takes START once the screen is active (+0x44, set through slot 11,
+// sub_82608EA0, when its intro ends ~1.5 s in). START there picks the pad and
+// profile, sets the "ready" flag (+0x3C) and starts the profile/save load
+// (sub_82609188); BootFlow then waits for FE message 23 (sub_826FE638).
+// With fast_press the screen is activated by calling slot 11 as soon as it is
+// up, so the recomp's real START press is taken right away. Neither the
+// ready flag nor the START flag is written by hand: that skipped the pad and
+// profile choice and the game booted into free play without the save.
+static int g_press_active, g_press_start, g_press_seen;
+static PPCFunc* g_setactive;  // host code of sub_82608EA0
+static void call_guest(PPCFunc* f, PPCContext* c, u8* b, u32 r3, u32 r4) {
+  static PPCContext save;  // only the guest main thread gets here
+  save = *c;
+  c->r3.u64 = r3;
+  c->r4.u64 = r4;
+  f(c, b);
+  *c = save;
+}
 static void h_press(PPCContext* c, u8* b) {
   state_ev(ST_PRESS, c, b);
   u32 self = c->r3.u32;
   if (g_fast_press && c->r4.u32 == 1 && g_phase < PH_GAME) {
     u32 s22 = screen(22);
-    if (!g_press_ready && s22 && gok(s22 + 0x3C, 1) && gload8(b, s22 + 0x3C) == 0 &&
-        now_s() - g_state_t > 0.15) {
-      gstore8(b, s22 + 0x3C, 1);
-      g_press_ready = 1;
-      logf("Press Start: pantalla marcada como lista a mano (%.3f s en el estado)", now_s() - g_state_t);
+    if (s22 && gok(s22 + 0x44, 4)) {
+      u32 act = gload32(b, s22 + 0x44);
+      if (act && !g_press_seen) {
+        g_press_seen = 1;
+        logf("Press Start: pantalla activa (%.3f s en el estado%s)", now_s() - g_state_t,
+             g_press_active ? ", la activé yo" : ", sola");
+      }
+      if (!act && !g_press_active && g_setactive && now_s() - g_state_t > 0.1) {
+        g_press_active = 1;
+        call_guest(g_setactive, c, b, s22, 1);
+        logf("Press Start: activo la pantalla 22 sin esperar su animación (%.3f s en el estado)",
+             now_s() - g_state_t);
+      }
     }
     if (g_press_inside && !g_press_start && gok(self + 0x31, 2) && gload8(b, self + 0x31) == 1 && rd8(G_START) == 0) {
       gstore8(b, self + 0x32, 1);
@@ -574,6 +594,11 @@ int game_install(void) {
       return 0;
     }
   }
+  if (have_map) {
+    u32 r = host_of(0x82608EA0);
+    if (r) g_setactive = host_fn(r);
+  }
+  if (!g_setactive) logf("Press Start: no encontré sub_82608EA0, queda como siempre");
   int ok = 1;
   for (usize i = 0; i < sizeof hk / sizeof hk[0]; i++) ok &= hook_entry(&hk[i]);
   CreateThread(NULL, 0, monitor, NULL, 0, NULL);

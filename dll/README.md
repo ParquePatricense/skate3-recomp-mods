@@ -4,7 +4,7 @@
 
 - `src/main.c`: entrada de la dll, reenvío de XInputGetState, chequeo de versión.
 - `src/core.c`: printf mínimo, log y el motor de ganchos (salto a una función nuestra al principio de una función recompilada; la original sigue disponible).
-- `src/game.c`: los ganchos del arranque (BootFlow, pantallas del front end, películas), el corte del logo de EA, la carga sin tope de FPS (saca `skate3_guest_fps_cap(_auto)` del recomp hasta llegar al juego y los devuelve), Press Start al toque (marca la pantalla como lista; el START lo sigue apretando el recomp, porque darlo por dentro saltea la elección de mando y perfil y el juego arranca en modo libre sin tu partida) y el monitor que anota cada espera.
+- `src/game.c`: los ganchos del arranque (BootFlow, pantallas del front end, películas), el corte del logo de EA, la carga sin tope de FPS (saca `skate3_guest_fps_cap(_auto)` del recomp hasta llegar al juego y los devuelve), Press Start al toque (activa la pantalla 22 con su propia función sin esperar su animación; el START lo aprieta el recomp y la pantalla elige mando y perfil como siempre: forzar sus banderas a mano cargaba modo libre sin tu partida) y el monitor que anota cada espera.
 - `src/prof.c`: perfilador por muestreo de la carga (qué funciones del juego ocupan cada hilo), al final del log. Solo con `SKATE3_DIRECT_PERFIL=1`: suspende todos los hilos cada 4 ms y alarga la carga.
 - `test/`: arnés para Wine que mapea `skate3.exe`, instala los ganchos y prueba el perfilador; `flag.c` prueba la API de ajustes de `rexruntime.dll`.
 
