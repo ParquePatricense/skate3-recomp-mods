@@ -37,7 +37,7 @@ static int g_skip_logo = 1;
 static int g_uncap = 1;      // no frame cap while booting/loading
 static int g_fast_fade = 0;  // run the post-START sub-machine several steps per frame (off: it is
                              // save/profile work, not a fade, and gained nothing)
-static int g_fast_press = 1; // Press Start screen ready at once
+static int g_fast_press = 0; // Press Start screen activated at once (off: v3.9.2-3.9.4 broke the profile or looped)
 static int g_press_inside = 0; // START given from inside: off, it skips the screen's own input
                                // handling (which pad/profile pressed it) and the game then
                                // boots into free play with the default skater and no save
@@ -571,7 +571,7 @@ int game_install(void) {
   if (env_off(L"SKATE3_DIRECT_LOGO")) g_skip_logo = 0;
   if (env_off(L"SKATE3_DIRECT_FPS")) g_uncap = 0;
   if (env_on(L"SKATE3_DIRECT_FADE")) g_fast_fade = 1;
-  if (env_off(L"SKATE3_DIRECT_PRESS")) g_fast_press = 0;
+  if (env_on(L"SKATE3_DIRECT_PRESS")) g_fast_press = 1;
   if (env_on(L"SKATE3_DIRECT_START")) g_press_inside = 1;
   if (env_on(L"SKATE3_DIRECT_PERFIL")) g_profile = 1;
   logf("corte del logo EA: %s | sin tope de FPS al cargar: %s | Press Start lista al toque: %s | START por dentro: %s | turbo post-START: %s | "

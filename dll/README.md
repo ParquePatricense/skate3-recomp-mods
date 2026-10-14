@@ -10,4 +10,4 @@
 
 Compilar (Linux, clang + lld): `sh build.sh` (deja la dll en `../go/payload/`). Sin CRT ni dependencias.
 
-`SKATE3_DIRECT=0` la apaga entera; `SKATE3_DIRECT_LOGO=0`, solo el corte del logo; `SKATE3_DIRECT_FPS=0`, solo la carga sin tope; `SKATE3_DIRECT_PRESS=0`, solo el Press Start al toque. `SKATE3_DIRECT_START=1` da el START por dentro (solo para pruebas: pierde la partida). `SKATE3_DIRECT_FADE=1` prende el turbo del paso post-START (apagado: no ganaba nada).
+`SKATE3_DIRECT=0` la apaga entera; `SKATE3_DIRECT_LOGO=0`, solo el corte del logo; `SKATE3_DIRECT_FPS=0`, solo la carga sin tope; `SKATE3_DIRECT_PRESS=1` prende el Press Start al toque (apagado: en la PC de Matias cargaba sin la partida o quedaba en bucle). `SKATE3_DIRECT_START=1` da el START por dentro (solo para pruebas: pierde la partida). `SKATE3_DIRECT_FADE=1` prende el turbo del paso post-START (apagado: no ganaba nada).
