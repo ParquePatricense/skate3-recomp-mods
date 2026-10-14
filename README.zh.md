@@ -1,6 +1,6 @@
 # 🛹 Skate 3 Recomp Mods 🎮
 
-[🇦🇷 Español](README.md) · [🇬🇧 English](README.en.md) · [🇧🇷 Português](README.pt.md) · [🇫🇷 Français](README.fr.md) · [🇮🇹 Italiano](README.it.md) · [🇩🇪 Deutsch](README.de.md) · **🇨🇳 中文** · [🇯🇵 日本語](README.ja.md)
+[🇬🇧 English](README.md) · [🇦🇷 Español](README.es.md) · [🇧🇷 Português](README.pt.md) · [🇫🇷 Français](README.fr.md) · [🇮🇹 Italiano](README.it.md) · [🇩🇪 Deutsch](README.de.md) · **🇨🇳 中文** · [🇯🇵 日本語](README.ja.md)
 
 为 [skate3recomp](https://github.com/mchughalex/skate3recomp) 打造的**模块化** mod 包：一次全部下载，只开你想要的。每个模块都在 **modder** 里开启或关闭——一个 Skate 3 风格、自带电台的窗口——而且一切都能撤销。
 

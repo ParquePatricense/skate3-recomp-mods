@@ -1,56 +1,56 @@
 # 🛹 Skate 3 Recomp Mods 🎮
 
-**🇦🇷 Español** · [🇬🇧 English](README.en.md) · [🇧🇷 Português](README.pt.md) · [🇫🇷 Français](README.fr.md) · [🇮🇹 Italiano](README.it.md) · [🇩🇪 Deutsch](README.de.md) · [🇨🇳 中文](README.zh.md) · [🇯🇵 日本語](README.ja.md)
+**🇬🇧 English** · [🇦🇷 Español](README.es.md) · [🇧🇷 Português](README.pt.md) · [🇫🇷 Français](README.fr.md) · [🇮🇹 Italiano](README.it.md) · [🇩🇪 Deutsch](README.de.md) · [🇨🇳 中文](README.zh.md) · [🇯🇵 日本語](README.ja.md)
 
-Pack de mods **modular** para [skate3recomp](https://github.com/mchughalex/skate3recomp): se baja todo junto y activás solo lo que quieras. Cada módulo se pone y se saca desde **el modeador**, una ventana con onda Skate 3 y radio propia, y todo se puede deshacer.
+A **modular** mod pack for [skate3recomp](https://github.com/mchughalex/skate3recomp): you download it all together and turn on only what you want. Every module is added and removed from **the modder**, a Skate 3-style window with its own radio, and everything can be undone.
 
-> 🧩 **Requiere [skate3recomp](https://github.com/mchughalex/skate3recomp) v2.0.2 y tu propia copia de Skate 3.** Esto es solo el modeador: no trae el juego ni el recomp.
+> 🧩 **Requires [skate3recomp](https://github.com/mchughalex/skate3recomp) v2.0.2 and your own copy of Skate 3.** This is only the modder: it does not include the game or the recomp.
 
-> ⚡ **De 16,6 s a ~7 s:** con *Directo a tu partida*, un parche dentro del juego te deja patinando en tu partida en unos 7 segundos desde que tocás **DROP IN**.
+> ⚡ **From 16.6 s to ~7 s:** with *Straight to your save*, a patch inside the game has you skating in your save about 7 seconds after you hit **DROP IN**.
 
-<p align="center"><img src="preview/drop-in.gif" alt="DROP IN" width="720"><br><sub>Recreación con el tiempo de una carga real: 6,9 s desde DROP IN.</sub></p>
+<p align="center"><img src="preview/drop-in.gif" alt="DROP IN" width="720"><br><sub>Recreation using the time of a real load: 6.9 s from DROP IN.</sub></p>
 
-![modeador](preview/modeador.png)
+![modder](preview/modeador.png)
 
-## ✨ Qué trae
+## ✨ What's inside
 
-| Módulo | Qué hace |
+| Module | What it does |
 |---|---|
-| 🎮 **Iconos de botones** | Cambia los iconos de Xbox 360 por los de tu joystick: PS3, PS4, PS5, Switch (1 y 2, Pro, Joy-Con), Xbox Series, GameSir o Steam Deck, más **blanco y negro** (alto contraste) y **para daltónicos** |
-| 🖼️ **Presets gráficos** | Máxima calidad, Equilibrado, Rendimiento o Ultra liviano, con un clic |
-| 🖥️ **Pantalla** | VSync, pantalla completa y en qué monitor abre el juego (ideal con dos monitores) |
-| ⏩ **Directo a tu partida** | Una pantalla de carga negra tapa la intro y los menús, un parche dentro del juego acelera todo el arranque y aparecés en tu carrera en el idioma que elijas |
-| ⌨️ **Teclado y mouse** | Activa el modo teclado+mouse del recomp, sensibilidad y remapeo de cada botón tocando la tecla |
-| 🔭 **FOV y ultrawide** | Campo de visión (40–120) y modo 21:9 |
-| 🛹 **Ayudante en sesión** | Alt+F4, reinicio rápido (Ctrl+Alt+R), prioridad alta, pantalla siempre encendida, cursor oculto, tecla Windows bloqueada, ventana recordada y no molestar |
-| ⚡ **Carga** | Defender sin revisar el juego, precarga al prender la PC, mover el juego a un SSD, gráfico de tus últimas 20 cargas, tu última carga al lado de DROP IN y el log de la carga a un clic |
-| 🌐 **Español ARG** | Agrega "Español ARG" (voseo y vocabulario rioplatense) en lugar del neerlandés; el español original queda igual |
-| 🇧🇷 **Português (Brasil)** | Los textos del juego en portugués para la carga directa (unos 13 600 textos) |
-| 🔧 **El taller** | Accesos directos, Steam, tiempo de juego, varias versiones del recomp, reparar, diagnóstico, actualizar y desinstalar todo |
-| 🎮 **Modeador con joystick** | Se maneja con el mando o con el teclado, se adapta a tu pantalla y trae radio con favoritos, Mix y aleatorio |
+| 🎮 **Button icons** | Swaps the Xbox 360 icons for your controller's: PS3, PS4, PS5, Switch (1 and 2, Pro, Joy-Con), Xbox Series, GameSir or Steam Deck, plus **black and white** (high contrast) and **colour-blind safe** |
+| 🖼️ **Graphics presets** | Max quality, Balanced, Performance or Ultra light, in one click |
+| 🖥️ **Screen** | VSync, fullscreen and which monitor the game opens on (great with two monitors) |
+| ⏩ **Straight to your save** | A black loading screen covers the intro and the menus, a patch inside the game speeds up the whole startup, and you show up in your career in the language you pick |
+| ⌨️ **Keyboard and mouse** | Turns on the recomp's keyboard+mouse mode, sensitivity, and remapping of every button by pressing the key |
+| 🔭 **FOV and ultrawide** | Field of view (40–120) and 21:9 mode |
+| 🛹 **Session helper** | Alt+F4, quick restart (Ctrl+Alt+R), high priority, screen always on, hidden cursor, Windows key blocked, remembered window and do not disturb |
+| ⚡ **Loading** | Defender skipping the game, preload when the PC starts, moving the game to an SSD, a chart of your last 20 loads, your last load next to DROP IN and the load log one click away |
+| 🌐 **Español ARG** | Adds "Español ARG" (voseo and Rioplatense vocabulary) in place of Dutch; the original Spanish stays the same |
+| 🇧🇷 **Português (Brasil)** | The game's text in Portuguese for the direct load (about 13,600 strings) |
+| 🔧 **The shop** | Shortcuts, Steam, play time, multiple recomp versions, repair, diagnostics, update and uninstall everything |
+| 🎮 **Gamepad-friendly modder** | Works with a controller or the keyboard, fits your screen and comes with a radio with favourites, Mix and shuffle |
 
-🌍 El modeador está en Español, English, Português (Brasil), Français, Italiano, Deutsch, 中文 y 日本語: elige solo el idioma de Windows y se cambia en **Idioma**.
+🌍 The modder is available in Español, English, Português (Brasil), Français, Italiano, Deutsch, 中文 and 日本語: it picks the Windows language by itself, and you can change it under **Language**.
 
 ![preview](preview/preview.png)
 
 | PS4 | PS5 |
 |---|---|
-| ![PS4 en el juego](preview/ingame-ps4.jpg) | ![PS5 en el juego](preview/ingame-ps5.jpg) |
+| ![PS4 in game](preview/ingame-ps4.jpg) | ![PS5 in game](preview/ingame-ps5.jpg) |
 
-## 📦 Instalación (Windows)
+## 📦 Installation (Windows)
 
-1. ⬇️ Descargá `Skate3-Mods.zip` desde [Releases](../../releases) y descomprimilo donde quieras (Descargas sirve).
-2. 🖱️ Abrí `Skate3-Mods.exe`: busca solo la carpeta de skate3recomp, se copia ahí y la recuerda. Si no la encuentra, te deja elegirla.
-3. ✅ Activá lo que quieras.
-4. 🛹 Jugá con **DROP IN**, los accesos directos "Skate 3 (directo)" / "Skate 3 (normal)" o `Jugar Skate 3 (mods).bat`. El ayudante en sesión solo corre si abrís el juego así; iconos, gráficos e idioma funcionan igual abriendo `skate3.exe`.
+1. ⬇️ Download `Skate3-Mods.zip` from [Releases](../../releases) and unzip it wherever you like (Downloads works).
+2. 🖱️ Open `Skate3-Mods.exe`: it finds the skate3recomp folder by itself, copies itself there and remembers it. If it can't find it, it lets you pick it.
+3. ✅ Turn on whatever you want.
+4. 🛹 Play with **DROP IN**, the "Skate 3 (directo)" / "Skate 3 (normal)" shortcuts or `Jugar Skate 3 (mods).bat`. The session helper only runs if you start the game that way; icons, graphics and language work the same when you open `skate3.exe`.
 
-> 🪟 El modeador usa WebView2, que ya viene con Windows 10 y 11. Si faltara, se abre un menú de consola (también con `Skate3-Mods.exe menu`).
+> 🪟 The modder uses WebView2, which already ships with Windows 10 and 11. If it's missing, a console menu opens instead (also available with `Skate3-Mods.exe menu`).
 
-> ⚠️ El juego tiene que haberse instalado al menos una vez (botón *Select ISO*). Cerralo antes de cambiar iconos o presets.
+> ⚠️ The game must have been installed at least once (*Select ISO* button). Close it before changing icons or presets.
 
-> 🛡️ Si aparece SmartScreen: "Más información" ➡️ "Ejecutar de todas formas" (el .exe no está firmado).
+> 🛡️ If SmartScreen shows up: "More info" ➡️ "Run anyway" (the .exe isn't signed).
 
-## 🎮 Iconos de botones
+## 🎮 Button icons
 
 | 🟢 Xbox | 🔵 PlayStation |
 |---|---|
@@ -59,120 +59,120 @@ Pack de mods **modular** para [skate3recomp](https://github.com/mchughalex/skate
 | LS / RS (click) | L3 / R3 |
 | Back / Start | PS3: Select / Start · PS4: Share / Options · PS5: Create / Options |
 
-También: **Switch** (Switch 1 y 2, Pro Controller, Joy-Con), **Xbox Series** (Vista / Menú), **GameSir** (Nova Lite, T4, G7 y la mayoría de los joysticks de PC) y **Steam Deck**. Para leer mejor: **Blanco y negro** (figuras de PlayStation negras sobre blanco) y **Para daltónicos** (letras de Xbox en colores Okabe-Ito, sin rojo contra verde), con una vista de cómo se ven en el juego. Los de Switch van por posición: si usás Steam con "Usar disposición de botones de Nintendo", A y B quedan cruzados.
+Also: **Switch** (Switch 1 and 2, Pro Controller, Joy-Con), **Xbox Series** (View / Menu), **GameSir** (Nova Lite, T4, G7 and most PC controllers) and **Steam Deck**. For easier reading: **Black and white** (black PlayStation shapes on white) and **Colour-blind safe** (Xbox letters in Okabe-Ito colours, no red against green), with a preview of how they look in game. The Switch ones go by position: if you use Steam with "Use Nintendo Button Layout", A and B end up swapped.
 
-Los iconos están en `game/data/big/fedynamic.big` ➡️ `buttons.rx2`. El mod guarda el original (`fedynamic.big.xbox-original`) y "Xbox (original)" lo restaura byte a byte. ➕ El D-Pad queda igual y el dibujo del stick del Trick Guide sigue diciendo "RS" (es otra textura).
+The icons live in `game/data/big/fedynamic.big` ➡️ `buttons.rx2`. The mod keeps the original (`fedynamic.big.xbox-original`) and "Xbox (original)" restores it byte for byte. ➕ The D-Pad stays the same and the stick drawing in the Trick Guide still says "RS" (it's a different texture).
 
-## 🖼️ Presets, FOV y ultrawide
+## 🖼️ Presets, FOV and ultrawide
 
-Escriben valores en `skate3.toml` (el mismo archivo que usa el menú *Settings* del juego, así que después podés seguir ajustando ahí). La primera vez se guarda tu `skate3.toml` como `skate3.toml.mods-original`; "Volver a mi configuración de antes" lo restaura.
+They write values to `skate3.toml` (the same file the game's *Settings* menu uses, so you can keep tweaking there afterwards). The first time, your `skate3.toml` is saved as `skate3.toml.mods-original`; "Restore my previous settings" brings it back.
 
-**Ultra liviano** apaga sombras, SSAO, bloom, rayos de sol, niebla y MSAA, y acorta la distancia de dibujado: para PCs muy justas. **Pantalla** escribe `vsync`, `fullscreen` y `monitor` (0 = automática, 1 = primera pantalla, 2 = segunda...).
+**Ultra light** turns off shadows, SSAO, bloom, sun rays, fog and MSAA, and shortens the draw distance: for really modest PCs. **Screen** writes `vsync`, `fullscreen` and `monitor` (0 = automatic, 1 = first screen, 2 = second...).
 
-## ⌨️ Teclado y mouse
+## ⌨️ Keyboard and mouse
 
-Activa `mnk_mode` del recomp: el mouse mueve la cámara (stick derecho) y cada botón del joystick va a una tecla. En **Controles** tocás un botón y apretás la tecla o el click que quieras (si ya la usaba otro botón, se intercambian). "Volver a las teclas de fábrica" deja las del recomp.
+Turns on the recomp's `mnk_mode`: the mouse moves the camera (right stick) and every controller button maps to a key. In **Controls** you tap a button and press the key or mouse click you want (if another button was already using it, they swap). "Back to default keys" restores the recomp's ones.
 
-## ⏩ Directo a tu partida
+## ⏩ Straight to your save
 
-Usa la automatización de arranque del propio recomp (`skate3_demo_path` con `skate3_demo_path_signed_in`, así conserva tu perfil y tu partida): saltea la intro, acepta la pantalla de idioma, el Press Start y los avisos de arranque, y suelta los controles en cuanto empezás a patinar. Mientras tanto, una pantalla de carga negra (con un consejo con los botones de tu estilo y una barra que aprende cuánto tarda tu carga) tapa el juego y se va apenas podés jugar; el juego queda muteado hasta entonces. El idioma que elegís se pone en el lugar del inglés dentro de `miscboot.big` mientras la opción está activa.
+Uses the recomp's own startup automation (`skate3_demo_path` with `skate3_demo_path_signed_in`, so it keeps your profile and your save): it skips the intro, accepts the language screen, Press Start and the startup notices, and lets go of the controls as soon as you start skating. Meanwhile, a black loading screen (with a tip shown with your button style and a bar that learns how long your load takes) covers the game and goes away as soon as you can play; the game stays muted until then. The language you pick goes in English's place inside `miscboot.big` while the option is on.
 
-### 🧩 El parche de carga directa
+### 🧩 The direct load patch
 
-Con la opción activa, el modeador pone `xinput9_1_0.dll` junto a `skate3.exe`. El recomp la carga al arrancar (le pasa el joystick al xinput de Windows, así que los controles andan igual) y, **solo si `skate3.exe` es la v2.0.2** (cada parche se busca por la tabla de funciones del exe y se verifica byte a byte), acelera el arranque dentro del propio juego:
+With the option on, the modder puts `xinput9_1_0.dll` next to `skate3.exe`. The recomp loads it at startup (it passes the controller through to Windows' xinput, so the controls work the same) and, **only if `skate3.exe` is v2.0.2** (each patch is located through the exe's function table and verified byte for byte), it speeds up startup inside the game itself:
 
-- 🚫 **Logo de EA** terminado a los 0,03 s en vez de ~4,7 s.
-- 🏎️ **Sin tope de FPS** mientras carga (vuelve tu valor al llegar al juego).
-- ⏱️ **Press Start** sin su espera mínima y con START al instante.
-- 😴 **Cargadores sin siesta:** los hilos de carga dejan de dormir 1 ms entre cada pasada.
-- 💓 **Tick del juego a 4 ms** en los pasos cortos de la carga (en vez de 16,7 ms).
-- 🖤 **Fundidos en un cuadro** y la placa de video con prioridad alta hasta llegar al juego.
-- 📜 **`skate3-direct.log`** junto a `skate3.exe`: cuánto tardó cada paso (se abre desde **Carga**).
+- 🚫 **EA logo** done at 0.03 s instead of ~4.7 s.
+- 🏎️ **No FPS cap** while loading (your setting comes back once you're in the game).
+- ⏱️ **Press Start** without its minimum wait and with START instantly.
+- 😴 **Loaders without naps:** the loading threads stop sleeping 1 ms between each pass.
+- 💓 **Game tick at 4 ms** during the short loading steps (instead of 16.7 ms).
+- 🖤 **One-frame fades** and the graphics card at high priority until you reach the game.
+- 📜 **`skate3-direct.log`** next to `skate3.exe`: how long each step took (opens from **Loading**).
 
-Con otra versión del recomp no toca nada. Al apagar la opción o desinstalar se borra; si había otra `xinput9_1_0.dll` que no es nuestra, no se toca. Cada parte se puede apagar con una variable de entorno (`SKATE3_DIRECT=0` la apaga entera). Detalle y código en [`dll/`](dll/).
+With any other recomp version it doesn't touch anything. Turning the option off or uninstalling deletes it; if there was another `xinput9_1_0.dll` that isn't ours, it's left alone. Each part can be turned off with an environment variable (`SKATE3_DIRECT=0` turns the whole thing off). Details and code in [`dll/`](dll/).
 
-| | Antes | Ahora |
+| | Before | Now |
 |---|---|---|
-| ⏩ Carga directa completa | ~16,6 s | **~7 s** |
+| ⏩ Full direct load | ~16.6 s | **~7 s** |
 
-## ⚡ Carga
+## ⚡ Loading
 
-- 🛡️ **Windows Defender:** agrega la carpeta del juego a las exclusiones (pide permiso de administrador una vez), para que no revise cada archivo al cargar.
-- 🌅 **Precarga al prender la PC:** al iniciar Windows lee en segundo plano, sin ventanas, el exe, las DLL, la caché de shaders y los archivos del juego, así la primera carga del día también es rápida.
-- 💽 **SSD:** si el juego está en un disco rígido y tenés un SSD, lo copia a `X:\Skate3Recomp`, verifica el tamaño y reacomoda accesos, Steam y precarga; la carpeta vieja se borra solo si lo pedís.
-- 📊 **Historial:** tus últimas 20 cargas contra los 10 s y en qué se fue el tiempo de cada una; la última aparece al lado de **DROP IN**.
-- 📜 **Log de la carga:** un botón abre la carpeta del juego con `skate3-direct.log` marcado.
+- 🛡️ **Windows Defender:** adds the game folder to the exclusions (asks for admin permission once), so it doesn't scan every file while loading.
+- 🌅 **Preload when the PC starts:** when Windows starts, it reads the exe, the DLLs, the shader cache and the game files in the background, with no windows, so the first load of the day is fast too.
+- 💽 **SSD:** if the game is on a hard disk and you have an SSD, it copies it to `X:\Skate3Recomp`, checks the size and updates shortcuts, Steam and preload; the old folder is deleted only if you ask.
+- 📊 **History:** your last 20 loads against the 10 s mark and where the time went in each one; the latest shows up next to **DROP IN**.
+- 📜 **Load log:** a button opens the game folder with `skate3-direct.log` selected.
 
 ## 🌐 Español ARG
 
-En la pantalla de idiomas del juego, "Nederlands" pasa a ser **"Español ARG"**: los textos en español del juego reescritos con reglas. "¿Quieres jugar? Puedes..." ➡️ "¿Querés jugar? Podés...", "Haz un kickflip y presiona Ⓐ" ➡️ "Hacé un kickflip y presioná Ⓐ", "colega" ➡️ "loco", "coches" ➡️ "autos", "piscina" ➡️ "pileta", "mola" ➡️ "garpa", y así (unos 2700 textos). El español original queda tal cual. Las reglas están en [`go/rioplatense.txt`](go/rioplatense.txt): si ves algo raro, se corrige ahí.
+On the game's language screen, "Nederlands" becomes **"Español ARG"**: the game's Spanish text rewritten with rules. "¿Quieres jugar? Puedes..." ➡️ "¿Querés jugar? Podés...", "Haz un kickflip y presiona Ⓐ" ➡️ "Hacé un kickflip y presioná Ⓐ", "colega" ➡️ "loco", "coches" ➡️ "autos", "piscina" ➡️ "pileta", "mola" ➡️ "garpa", and so on (about 2,700 strings). The original Spanish stays exactly as it is. The rules are in [`go/rioplatense.txt`](go/rioplatense.txt): if you spot something odd, that's where it gets fixed.
 
-Toca solo `miscboot.big` (lo guarda como `miscboot.big.original`); al desactivarlo vuelve el neerlandés, byte a byte.
+It only touches `miscboot.big` (saving it as `miscboot.big.original`); turning it off brings Dutch back, byte for byte.
 
-## 🛹 Ayudante en sesión
+## 🛹 Session helper
 
-Corre en segundo plano mientras jugás y se cierra con el juego. Cada cosa se prende o apaga en **En sesión**:
+Runs in the background while you play and closes with the game. Each feature is turned on or off in **Session**:
 
-- ⌨️ **Alt+F4** cierra el juego como la X de la ventana.
-- 🔁 **Ctrl+Alt+R** cierra y vuelve a abrir el juego si se traba.
-- ⚡ **Prioridad alta** para el proceso del juego.
-- ☀️ **Pantalla siempre encendida**, aunque juegues solo con el mando.
-- 🖱️ **Cursor oculto** sobre el juego a los 3 segundos sin mover el mouse.
-- 🪟 **Tecla Windows bloqueada** mientras el juego está en primer plano.
-- 🗔 **Ventana recordada**: monitor, tamaño y modo se guardan al cerrar.
-- 🔕 **No molestar**: apaga las notificaciones de Windows y las vuelve a prender al salir.
+- ⌨️ **Alt+F4** closes the game like the window's X.
+- 🔁 **Ctrl+Alt+R** closes and reopens the game if it hangs.
+- ⚡ **High priority** for the game process.
+- ☀️ **Screen always on**, even if you only play with the controller.
+- 🖱️ **Hidden cursor** over the game after 3 seconds without moving the mouse.
+- 🪟 **Windows key blocked** while the game is in the foreground.
+- 🗔 **Remembered window**: monitor, size and mode are saved on close.
+- 🔕 **Do not disturb**: turns off Windows notifications and turns them back on when you quit.
 
-## 🔧 El taller
+## 🔧 The shop
 
-- 🖱️ **Accesos directos:** "Skate 3 Mods", "Skate 3 (directo)" y "Skate 3 (normal)" en el escritorio y el menú Inicio, también uno por idioma.
-- 🚂 **Steam:** Skate 3 en tu biblioteca (Big Picture, Steam Input).
-- ⏱️ **Tiempo de juego** por día y por semana.
-- 🧪 **Versiones del recomp:** varias carpetas del juego, cada una con sus mods y ajustes.
-- 🩹 **Reparar:** revisa `fedynamic.big` y `miscboot.big` y arregla lo roto desde la copia.
-- 🔄 **Después de actualizar el recomp:** si un archivo cambió, se toma como nuevo original y se vuelven a poner tus mods.
-- 🩺 **Diagnóstico** y 📣 **reporte de problemas**, con el final del log del juego.
-- ⬇️ **Actualizar:** baja la versión nueva de Releases y se reemplaza solo.
-- 💀 **Desinstalar todo:** deja el juego exactamente como estaba antes de los mods.
+- 🖱️ **Shortcuts:** "Skate 3 Mods", "Skate 3 (directo)" and "Skate 3 (normal)" on the desktop and in the Start menu, plus one per language.
+- 🚂 **Steam:** Skate 3 in your library (Big Picture, Steam Input).
+- ⏱️ **Play time** per day and per week.
+- 🧪 **Recomp versions:** multiple game folders, each with its own mods and settings.
+- 🩹 **Repair:** checks `fedynamic.big` and `miscboot.big` and fixes anything broken from the backup.
+- 🔄 **After updating the recomp:** if a file changed, it's taken as the new original and your mods are applied again.
+- 🩺 **Diagnostics** and 📣 **problem reports**, with the end of the game log.
+- ⬇️ **Update:** downloads the new version from Releases and replaces itself.
+- 💀 **Uninstall everything:** leaves the game exactly as it was before the mods.
 
 ## 📻 Radio Carverton
 
-Boom bap, punk, rock, electro y cumbia generados en vivo con Web Audio, distintos en cada tema y con uno nuevo cada vez que abrís el modeador (elegís el género o Mix, y aleatorio). La tecla M la pausa. No usa archivos de música ni temas con copyright.
+Boom bap, punk, rock, electro and cumbia generated live with Web Audio, different on every track and with a new one every time you open the modder (pick the genre or Mix, and shuffle). The M key pauses it. It uses no music files and no copyrighted tracks.
 
-## ⚙️ Cómo funciona
+## ⚙️ How it works
 
-- **Iconos y textos:** reemplazan solo su archivo dentro del `.big` (agregan la versión nueva al final); el resto queda intacto.
-- **Ayudante:** `Skate3-Mods.exe play` (lo usan DROP IN, los accesos, Steam y el `.bat`; `play direct` y `play normal` eligen cómo arranca) abre el juego y deja un proceso chico sin ventana que se cierra con el juego.
-- **Modeador:** una página HTML embebida en el `.exe` (`go/ui/index.html`) dentro de WebView2.
-- 🚫 No incluye ni distribuye archivos de EA: los iconos son arte original y los mods se aplican sobre tu propia copia del juego.
+- **Icons and text:** they replace only their own file inside the `.big` (appending the new version at the end); everything else stays intact.
+- **Helper:** `Skate3-Mods.exe play` (used by DROP IN, the shortcuts, Steam and the `.bat`; `play direct` and `play normal` choose how it starts) opens the game and leaves a small windowless process that closes with the game.
+- **Modder:** an HTML page embedded in the `.exe` (`go/ui/index.html`) running inside WebView2.
+- 🚫 It doesn't include or distribute any EA files: the icons are original art and the mods are applied to your own copy of the game.
 
 ### 🐧 Linux / 🍎 macOS
 
-Los iconos funcionan con Python 3.8+ (sin dependencias):
+The icons work with Python 3.8+ (no dependencies):
 
 ```sh
-python3 src/skate3_ps_buttons.py install ps5 --game /ruta/a/skate3recomp
-python3 src/skate3_ps_buttons.py uninstall    --game /ruta/a/skate3recomp
+python3 src/skate3_ps_buttons.py install ps5 --game /path/to/skate3recomp
+python3 src/skate3_ps_buttons.py uninstall    --game /path/to/skate3recomp
 ```
 
-## 🛠️ Compilar
+## 🛠️ Building
 
 ```sh
 cd go && GOOS=windows GOARCH=amd64 go build -ldflags "-s -w -H windowsgui" -o ../dist/Skate3-Mods.exe .
 ```
 
-La DLL del parche: `cd dll && sh build.sh` (Linux, clang + lld). Al publicar un tag `v*`, GitHub Actions compila el `.exe` y sube el zip a Releases.
+The patch DLL: `cd dll && sh build.sh` (Linux, clang + lld). When a `v*` tag is pushed, GitHub Actions builds the `.exe` and uploads the zip to Releases.
 
-## 🖌️ Regenerar los iconos
+## 🖌️ Regenerating the icons
 
 ```sh
 pip install pillow numpy
-python tools/build_payload.py preview/png   # redibuja y regenera src/payload.py y go/payload/
+python tools/build_payload.py preview/png   # redraws and regenerates src/payload.py and go/payload/
 ```
 
-Fuente: Inter (SIL Open Font License, ver `tools/fonts/Inter-LICENSE.txt`).
+Font: Inter (SIL Open Font License, see `tools/fonts/Inter-LICENSE.txt`).
 
 ---
 
-📝 [Cambios de cada versión](CHANGELOG.md) · 🐛 [Reportar un problema](../../issues/new/choose)
+📝 [Changes in each version](CHANGELOG.md) · 🐛 [Report a problem](../../issues/new/choose)
 
-📄 Licencia en [`LICENSE`](LICENSE). Sin relación con EA, Sony, Microsoft, Nintendo, Valve ni el proyecto skate3recomp. Skate 3 es marca de Electronic Arts.
+📄 License in [`LICENSE`](LICENSE). Not affiliated with EA, Sony, Microsoft, Nintendo, Valve or the skate3recomp project. Skate 3 is a trademark of Electronic Arts.

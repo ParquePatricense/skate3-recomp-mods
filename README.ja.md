@@ -1,6 +1,6 @@
 # 🛹 Skate 3 Recomp Mods 🎮
 
-[🇦🇷 Español](README.md) · [🇬🇧 English](README.en.md) · [🇧🇷 Português](README.pt.md) · [🇫🇷 Français](README.fr.md) · [🇮🇹 Italiano](README.it.md) · [🇩🇪 Deutsch](README.de.md) · [🇨🇳 中文](README.zh.md) · **🇯🇵 日本語**
+[🇬🇧 English](README.md) · [🇦🇷 Español](README.es.md) · [🇧🇷 Português](README.pt.md) · [🇫🇷 Français](README.fr.md) · [🇮🇹 Italiano](README.it.md) · [🇩🇪 Deutsch](README.de.md) · [🇨🇳 中文](README.zh.md) · **🇯🇵 日本語**
 
 [skate3recomp](https://github.com/mchughalex/skate3recomp) 用の**モジュール式** Mod パックです。全部まとめてダウンロードして、使いたいものだけをオンにできます。各モジュールは **Modder**（Skate 3 の雰囲気で、専用ラジオ付きのウィンドウ）からオン・オフでき、すべて元に戻せます。
 

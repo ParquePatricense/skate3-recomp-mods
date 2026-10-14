@@ -1,75 +1,6 @@
 # 📝 Cambios / Changelog
 
-[🇦🇷 Español](#-español) · [🇬🇧 English](#-english)
-
-## 🇦🇷 Español
-
-### v3.10.1
-- ⏱️ Tu última carga aparece al lado de **DROP IN**.
-- 📜 Botón en **Carga** para abrir el log de la carga directa.
-- 🔧 **El taller** suma accesos directos, Steam, tiempo de juego y versiones del recomp: una pestaña menos.
-- ✂️ Afuera el cartel de llegada, las fotos de fondo del modeador y el aviso de carga lenta.
-- ⚡ El parche ya no mide los hilos de carga por defecto (los frenaba cada 2 ms).
-
-### v3.10.0
-- 🖤 Pantalla de carga toda negra, sin fotos del juego.
-- 🎮 Botones **blanco y negro** y **para daltónicos**, con una vista de cómo se ven en el juego.
-- 📻 La radio arranca con un tema distinto cada vez que abrís el modeador.
-- 🔤 Letra nueva, más tranquila y espaciada.
-- 🌐 Pestaña **Idioma** rehecha para que se entienda en cualquier idioma.
-- 🔇 Sin ruido de ollie al terminar la carga.
-
-### v3.9 – v3.9.19: carga directa de ~16,6 s a ~7 s
-- 🧩 **skate3-direct**: un parche dentro del juego (`xinput9_1_0.dll`) que viene y se va con *Directo a tu partida*, solo para skate3recomp v2.0.2.
-- 🚫 Logo de EA terminado a los 0,03 s.
-- 🏎️ Sin tope de FPS mientras carga.
-- ⏱️ Press Start sin espera mínima y con START al instante.
-- 😴 Hilos de carga sin siestas de 1 ms.
-- 💓 Tick del juego a 4 ms en los pasos cortos de la carga.
-- 🖤 Fundidos en un cuadro y la placa de video con prioridad hasta llegar al juego.
-- 🌅 La precarga también deja en memoria el exe, las DLL y la caché de shaders.
-- 📜 `skate3-direct.log` con el tiempo de cada paso.
-
-### v3.8.0
-- 🎮 Botones de Switch, Xbox Series, GameSir y Steam Deck.
-- 📊 Gráfico de tus últimas 20 cargas contra los 10 s.
-
-### v3.7.0
-- ⚡ Pestaña **Carga**: Windows Defender, precarga al prender la PC y mover el juego a un SSD.
-- ⏱️ Tiempo de juego, varias carpetas del recomp y revisión de drift del joystick.
-- 🇧🇷 Textos del juego en portugués de Brasil.
-
-### v3.6.0
-- 🌍 El modeador en 8 idiomas.
-- ⏩ Carga directa más rápida, con el tiempo de cada parte.
-
-### v3.5.0
-- 🔇 Juego muteado durante la carga directa, con consejos y una barra que aprende cuánto tarda.
-- 🖱️ Accesos directos en el menú Inicio y uno por idioma; aviso si el juego se cierra con un error.
-
-### v3.4.0
-- ⏩ Carga directa detrás de una pantalla de carga.
-- 🚂 Skate 3 en Steam y tres accesos directos en el escritorio.
-
-### v3.3.0
-- 🌐 Elegís el idioma de la carga directa.
-- 🎮 El modeador se maneja con joystick; reporte de problemas.
-
-### v3.2.0
-- ⏩ Directo a tu partida y géneros en la radio.
-
-### v3.1.0
-- 🖥️ VSync, pantalla completa y monitor; teclado y mouse con remapeo; aviso de versión nueva del recomp; preset Ultra liviano.
-
-### v3.0.0
-- 🛹 Modeador con onda Skate 3, radio propia, ayudante en sesión y El taller.
-
-### v2.x
-- 🧱 Pack modular: presets gráficos, FOV, ultrawide y Alt+F4.
-- 🌐 Español ARG como idioma propio, acceso directo, búsqueda automática de la carpeta del juego.
-
-### v1.x
-- 🎮 Iconos de PS3, PS4 y PS5.
+[🇬🇧 English](#-english) · [🇦🇷 Español](#-español)
 
 ## 🇬🇧 English
 
@@ -139,3 +70,72 @@
 
 ### v1.x
 - 🎮 PS3, PS4 and PS5 icons.
+
+## 🇦🇷 Español
+
+### v3.10.1
+- ⏱️ Tu última carga aparece al lado de **DROP IN**.
+- 📜 Botón en **Carga** para abrir el log de la carga directa.
+- 🔧 **El taller** suma accesos directos, Steam, tiempo de juego y versiones del recomp: una pestaña menos.
+- ✂️ Afuera el cartel de llegada, las fotos de fondo del modeador y el aviso de carga lenta.
+- ⚡ El parche ya no mide los hilos de carga por defecto (los frenaba cada 2 ms).
+
+### v3.10.0
+- 🖤 Pantalla de carga toda negra, sin fotos del juego.
+- 🎮 Botones **blanco y negro** y **para daltónicos**, con una vista de cómo se ven en el juego.
+- 📻 La radio arranca con un tema distinto cada vez que abrís el modeador.
+- 🔤 Letra nueva, más tranquila y espaciada.
+- 🌐 Pestaña **Idioma** rehecha para que se entienda en cualquier idioma.
+- 🔇 Sin ruido de ollie al terminar la carga.
+
+### v3.9 – v3.9.19: carga directa de ~16,6 s a ~7 s
+- 🧩 **skate3-direct**: un parche dentro del juego (`xinput9_1_0.dll`) que viene y se va con *Directo a tu partida*, solo para skate3recomp v2.0.2.
+- 🚫 Logo de EA terminado a los 0,03 s.
+- 🏎️ Sin tope de FPS mientras carga.
+- ⏱️ Press Start sin espera mínima y con START al instante.
+- 😴 Hilos de carga sin siestas de 1 ms.
+- 💓 Tick del juego a 4 ms en los pasos cortos de la carga.
+- 🖤 Fundidos en un cuadro y la placa de video con prioridad hasta llegar al juego.
+- 🌅 La precarga también deja en memoria el exe, las DLL y la caché de shaders.
+- 📜 `skate3-direct.log` con el tiempo de cada paso.
+
+### v3.8.0
+- 🎮 Botones de Switch, Xbox Series, GameSir y Steam Deck.
+- 📊 Gráfico de tus últimas 20 cargas contra los 10 s.
+
+### v3.7.0
+- ⚡ Pestaña **Carga**: Windows Defender, precarga al prender la PC y mover el juego a un SSD.
+- ⏱️ Tiempo de juego, varias carpetas del recomp y revisión de drift del joystick.
+- 🇧🇷 Textos del juego en portugués de Brasil.
+
+### v3.6.0
+- 🌍 El modeador en 8 idiomas.
+- ⏩ Carga directa más rápida, con el tiempo de cada parte.
+
+### v3.5.0
+- 🔇 Juego muteado durante la carga directa, con consejos y una barra que aprende cuánto tarda.
+- 🖱️ Accesos directos en el menú Inicio y uno por idioma; aviso si el juego se cierra con un error.
+
+### v3.4.0
+- ⏩ Carga directa detrás de una pantalla de carga.
+- 🚂 Skate 3 en Steam y tres accesos directos en el escritorio.
+
+### v3.3.0
+- 🌐 Elegís el idioma de la carga directa.
+- 🎮 El modeador se maneja con joystick; reporte de problemas.
+
+### v3.2.0
+- ⏩ Directo a tu partida y géneros en la radio.
+
+### v3.1.0
+- 🖥️ VSync, pantalla completa y monitor; teclado y mouse con remapeo; aviso de versión nueva del recomp; preset Ultra liviano.
+
+### v3.0.0
+- 🛹 Modeador con onda Skate 3, radio propia, ayudante en sesión y El taller.
+
+### v2.x
+- 🧱 Pack modular: presets gráficos, FOV, ultrawide y Alt+F4.
+- 🌐 Español ARG como idioma propio, acceso directo, búsqueda automática de la carpeta del juego.
+
+### v1.x
+- 🎮 Iconos de PS3, PS4 y PS5.

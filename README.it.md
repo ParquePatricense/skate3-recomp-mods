@@ -1,6 +1,6 @@
 # 🛹 Skate 3 Recomp Mods 🎮
 
-[🇦🇷 Español](README.md) · [🇬🇧 English](README.en.md) · [🇧🇷 Português](README.pt.md) · [🇫🇷 Français](README.fr.md) · **🇮🇹 Italiano** · [🇩🇪 Deutsch](README.de.md) · [🇨🇳 中文](README.zh.md) · [🇯🇵 日本語](README.ja.md)
+[🇬🇧 English](README.md) · [🇦🇷 Español](README.es.md) · [🇧🇷 Português](README.pt.md) · [🇫🇷 Français](README.fr.md) · **🇮🇹 Italiano** · [🇩🇪 Deutsch](README.de.md) · [🇨🇳 中文](README.zh.md) · [🇯🇵 日本語](README.ja.md)
 
 Pacchetto di mod **modulare** per [skate3recomp](https://github.com/mchughalex/skate3recomp): si scarica tutto insieme e attivi solo quello che vuoi. Ogni modulo si mette e si toglie dal **modder**, una finestra in stile Skate 3 con la sua radio, e tutto si può annullare.
 
