@@ -131,7 +131,7 @@ func runGUI() error {
 		})
 	}
 	moveToMonitor(hwnd, uiMonitorSetting())
-	setFullscreen(hwnd, windowModeSetting() != "window")
+	setFullscreen(hwnd, true) // always opens fullscreen; the window toggle lasts until it closes
 	w.SetHtml(strings.Replace(indexHTML, "/*I18N*/{}", uiI18nJSON, 1))
 	w.Run()
 	return nil
@@ -181,8 +181,8 @@ func putZoom(c *edge.ICoreWebView2Controller, z float64) {
 	syscall.SyscallN(vtbl[8], uintptr(unsafe.Pointer(c)), uintptr(math.Float64bits(z)))
 }
 
-// The modder opens fullscreen (borderless, on its monitor) unless the user
-// switched it to a window; the choice is kept next to the remembered folder.
+// The modder always opens fullscreen (borderless, on its monitor); switching
+// to a window is kept only while it stays open.
 const (
 	wsOverlappedWindow = 0x00CF0000
 	swMinimize         = 6

@@ -57,6 +57,7 @@ static int g_profile = 0;    // sampling profiler (suspends every thread: slows 
 static int g_profile_world = 1;  // profiler on the loading threads during the world step only
 static int g_press_clock = 1; // Press Start's 1.5 s minimum on screen counted as already elapsed
 static int g_press_tap = 1;   // START tapped the moment Press Start takes it (same synthetic input the recomp uses)
+static int g_fast_black = 1;  // fade to black before gameplay (82709338) finished on its second frame
 static int g_no_nap = 1;     // loading threads poll with SleepEx(1): yield instead while loading
 
 // ---------------------------------------------------------------- loading frame cap
@@ -479,25 +480,32 @@ static void h_psupd(PPCContext* ctx, u8* base) {
 }
 
 // ---------------------------------------------------------------- last step before gameplay
-// BootFlow 82709338 takes ~0.41 s with no frames counted. On update it waits
-// for both: the fade object [[0x830CFE14]+304] in motion (0 < +12 < 1, see
-// sub_825E8A08) and the state machine [[0x830CFE14]+308] ready (sub_825E6E70:
-// state 0, or 1 with [[[p+8]+208]+232] == 3, or 2 with [[[p+8]+56]+192] == 2).
-// Measurement only: log what it waits on, a few lines per update.
+// BootFlow 82709338 waits for the fade object [[0x830CFE14]+304] to reach
+// black: its +12 climbs 0.04 per frame from 0 to 1 (25 frames, ~0.42 s; seen
+// in Matias's v3.9.9 log), and the state moves on once it is 1. The first
+// update puts it one step short of the end, so the game's own fade code
+// finishes it on the next frame and everything after runs as always.
 static PPCFunc* o_prego;
 static float f32_of(u32 v) { return *(float*)&v; }
 static void h_prego(PPCContext* ctx, u8* base) {
   static int lines;
-  if (ctx->r4.u32 <= 1 && lines < 60) {
-    u32 inst = rd32(0x830CFE14);
-    u32 fade = inst ? rd32(inst + 304) : 0, p = inst ? rd32(inst + 308) : 0;
-    u32 st = p ? rd32(p) : 0xFFFFFFFF, q = p ? rd32(p + 8) : 0;
-    u32 v1 = q && rd32(q + 208) ? rd32(rd32(q + 208) + 232) : 0xFFFFFFFF;
-    u32 v2 = q && rd32(q + 56) ? rd32(rd32(q + 56) + 192) : 0xFFFFFFFF;
+  u32 inst = rd32(0x830CFE14);
+  u32 fade = inst ? rd32(inst + 304) : 0;
+  if (fade && ctx->r4.u32 <= 1 && lines < 4) {
     lines++;
-    logf("antes del juego ev%u: fundido actual %.3f objetivo %.3f banderas %X | máquina estado %u (v1 %d, v2 %d)",
-         ctx->r4.u32, fade ? (double)f32_of(rd32(fade + 12)) : -1.0, fade ? (double)f32_of(rd32(fade + 16)) : -1.0,
-         fade ? rd32(fade + 20) : 0, st, (int)v1, (int)v2);
+    logf("antes del juego ev%u: fundido %.3f", ctx->r4.u32, (double)f32_of(rd32(fade + 12)));
+  }
+  if (g_fast_black && fade && ctx->r4.u32 == 1 && g_phase < PH_GAME) {
+    float cur = f32_of(rd32(fade + 12));
+    if (cur > 0.0f && cur < 0.96f) {
+      float to = 0.96f;
+      gstore32(base, fade + 12, *(u32*)&to);
+      static int said;
+      if (!said) {
+        said = 1;
+        logf("antes del juego: fundido a negro adelantado (iba en %.3f)", (double)cur);
+      }
+    }
   }
   o_prego(ctx, base);
 }
@@ -740,10 +748,11 @@ int game_install(void) {
   if (env_off(L"SKATE3_DIRECT_SIESTA")) g_no_nap = 0;
   if (env_off(L"SKATE3_DIRECT_RELOJ")) g_press_clock = 0;
   if (env_off(L"SKATE3_DIRECT_TOQUE")) g_press_tap = 0;
+  if (env_off(L"SKATE3_DIRECT_NEGRO")) g_fast_black = 0;
   logf("corte del logo EA: %s | sin tope de FPS al cargar: %s | Press Start lista al toque: %s | START por dentro: %s | turbo post-START: %s | "
-       "perfilador: %s | perfil del mundo: %s | cargadores sin siesta: %s | Press Start sin espera mínima: %s | START al instante: %s",
+       "perfilador: %s | perfil del mundo: %s | cargadores sin siesta: %s | Press Start sin espera mínima: %s | START al instante: %s | fundido final corto: %s",
        g_skip_logo ? "sí" : "no", g_uncap ? "sí" : "no", g_fast_press ? "sí" : "no", g_press_inside ? "sí" : "no", g_fast_fade ? "sí" : "no",
-       g_profile ? "sí" : "no", g_profile_world ? "sí" : "no", g_no_nap ? "sí" : "no", g_press_clock ? "sí" : "no", g_press_tap ? "sí" : "no");
+       g_profile ? "sí" : "no", g_profile_world ? "sí" : "no", g_no_nap ? "sí" : "no", g_press_clock ? "sí" : "no", g_press_tap ? "sí" : "no", g_fast_black ? "sí" : "no");
   // Each hook is located through the exe's own guest->host table, so a copy
   // of the build laid out differently still gets hooked at the right place;
   // the bytes are then checked exactly as before.
