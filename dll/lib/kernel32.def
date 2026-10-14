@@ -27,6 +27,7 @@ GetEnvironmentVariableW
 SetEnvironmentVariableW
 OutputDebugStringA
 DisableThreadLibraryCalls
+GetCurrentThread
 GetCurrentThreadId
 InitializeCriticalSection
 EnterCriticalSection
@@ -44,3 +45,4 @@ GetThreadContext
 GetCurrentProcessId
 LoadLibraryExW
 GetStdHandle
+WaitForSingleObject

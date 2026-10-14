@@ -95,6 +95,8 @@ DLLIMPORT void WINAPI Sleep(DWORD ms);
 DLLIMPORT u64 WINAPI GetTickCount64(void);
 DLLIMPORT DWORD WINAPI GetEnvironmentVariableW(const wchar* name, wchar* buf, DWORD n);
 DLLIMPORT BOOL WINAPI DisableThreadLibraryCalls(HMODULE m);
+DLLIMPORT HANDLE WINAPI GetCurrentThread(void);
+DLLIMPORT DWORD WINAPI WaitForSingleObject(HANDLE h, DWORD ms);
 DLLIMPORT DWORD WINAPI GetCurrentThreadId(void);
 DLLIMPORT void WINAPI InitializeCriticalSection(CRITICAL_SECTION* cs);
 DLLIMPORT void WINAPI EnterCriticalSection(CRITICAL_SECTION* cs);

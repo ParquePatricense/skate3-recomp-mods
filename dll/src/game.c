@@ -43,6 +43,7 @@ static int g_press_inside = 0; // START given from inside: off, it skips the scr
                                // boots into free play with the default skater and no save
 static int g_profile = 0;    // sampling profiler (suspends every thread: slows the load, opt-in)
 static int g_profile_world = 1;  // profiler on the loading threads during the world step only
+static int g_no_nap = 1;     // loading threads poll with SleepEx(1): yield instead while loading
 
 // ---------------------------------------------------------------- loading frame cap
 // The recomp paces every guest frame to the display (skate3_guest_fps_cap_auto
@@ -424,6 +425,59 @@ static void h_after(PPCContext* c, u8* b) {
 static void h_stA(PPCContext* c, u8* b) { state_ev(ST_POST, c, b); o_stA(c, b); }
 static void h_stF(PPCContext* c, u8* b) { state_ev(ST_F, c, b); o_stF(c, b); }
 
+
+// ---------------------------------------------------------------- loader naps
+// load_thread, decompress_thread and the two rwfilesys threads hand work to
+// each other and poll for it with SleepEx(1, TRUE) (sub_82EE24A8, e.g. the
+// load_thread loop in sub_828A3270). Each hand-off then costs a host sleep of
+// 1 ms or more. While booting/loading those polls become SleepEx(0, TRUE):
+// same call, same APC delivery, but the thread only yields. Other threads and
+// other sleep lengths are left alone, and gameplay is never touched.
+static PPCFunc* o_sleep;
+typedef struct {
+  DWORD tid;
+  u8 kind;  // 1 loader thread, 2 other
+} NapThread;
+#define NAP_MAX 160
+static NapThread g_nap[NAP_MAX];
+static volatile long g_nap_n;
+static volatile long g_nap_cut[4];  // load, decompress, rwfilesys
+static volatile long g_nap_world;   // cut during the world step
+void thread_name_of(HANDLE h, char* out, int cap);
+
+static int nap_kind(void) {
+  DWORD tid = GetCurrentThreadId();
+  long n = g_nap_n;
+  if (n > NAP_MAX) n = NAP_MAX;
+  for (long i = 0; i < n; i++)
+    if (g_nap[i].tid == tid) return g_nap[i].kind;
+  char name[64];
+  thread_name_of(GetCurrentThread(), name, sizeof name);
+  int k = 0;
+  if (memcmp(name, "load_thread", 11) == 0) k = 1;
+  else if (memcmp(name, "decompress_thread", 17) == 0) k = 2;
+  else if (memcmp(name, "rwfilesys", 9) == 0) k = 3;
+  long i = __sync_fetch_and_add(&g_nap_n, 1);
+  if (i < NAP_MAX) {
+    g_nap[i].kind = (u8)(k ? k : 9);
+    g_nap[i].tid = tid;
+  }
+  if (k) logf("siesta: hilo %u \"%s\" duerme sin esperar mientras carga", tid, name);
+  return k ? k : 9;
+}
+
+static void h_sleep(PPCContext* ctx, u8* base) {
+  if (g_no_nap && ctx->r3.u32 == 1 && g_phase < PH_GAME) {
+    int k = nap_kind();
+    if (k <= 3) {
+      ctx->r3.u64 = 0;
+      __sync_fetch_and_add(&g_nap_cut[k], 1);
+      if (g_state == ST_WORLD) __sync_fetch_and_add(&g_nap_world, 1);
+    }
+  }
+  o_sleep(ctx, base);
+}
+
 static const HookSpec kHooks[] = {
   {"movie", 0xE41C80, 7, {0x56, 0x57, 0x53, 0x48, 0x83, 0xEC, 0x20}, h_movie, &o_movie, 0x825D60C8},  // sub_825D60C8
   {"chg", 0x13E27D0, 5, {0x41, 0x56, 0x56, 0x57, 0x53}, h_chg, &o_chg, 0x826DFB30},  // sub_826DFB30
@@ -441,6 +495,7 @@ static const HookSpec kHooks[] = {
   {"after", 0x13E1AE0, 6, {0x56, 0x57, 0x48, 0x83, 0xEC, 0x28}, h_after, &o_after, 0x826DF8B0},  // sub_826DF8B0
   {"stA", 0x148B7C0, 5, {0x8B, 0x41, 0x20, 0x85, 0xC0}, h_stA, &o_stA, 0x826FE4A8},  // sub_826FE4A8
   {"stF", 0x148B910, 6, {0x41, 0x57, 0x41, 0x56, 0x41, 0x54}, h_stF, &o_stF, 0x826FE4F8},  // sub_826FE4F8
+  {"sleep", 0x425CF30, 6, {0x56, 0x57, 0x48, 0x83, 0xEC, 0x28}, h_sleep, &o_sleep, 0x82EE24A8},  // sub_82EE24A8 SleepEx
   {"startcb", 0x148C1B0, 8, {0x48, 0xC7, 0x41, 0x50, 0x00, 0x00, 0x08, 0x83}, h_startcb, &o_startcb, 0x826FE638},  // sub_826FE638
 };
 
@@ -519,6 +574,9 @@ static DWORD WINAPI monitor(void* arg) {
            g_t_fade ? tg - g_t_fade : 0, tg);
       uncap_end();
       prof_stop();
+      if (g_no_nap)
+        logf("siesta: esperas de 1 ms salteadas: load_thread %ld, decompress %ld, rwfilesys %ld (en el paso del mundo %ld)",
+             g_nap_cut[1], g_nap_cut[2], g_nap_cut[3], g_nap_world);
     }
     if (g_base) {
       for (u32 k = 0; k < sizeof kScr / sizeof kScr[0]; k++) {
@@ -592,10 +650,11 @@ int game_install(void) {
   if (env_on(L"SKATE3_DIRECT_START")) g_press_inside = 1;
   if (env_on(L"SKATE3_DIRECT_PERFIL")) g_profile = 1;
   if (env_off(L"SKATE3_DIRECT_PERFIL_MUNDO")) g_profile_world = 0;
+  if (env_off(L"SKATE3_DIRECT_SIESTA")) g_no_nap = 0;
   logf("corte del logo EA: %s | sin tope de FPS al cargar: %s | Press Start lista al toque: %s | START por dentro: %s | turbo post-START: %s | "
-       "perfilador: %s | perfil del mundo: %s",
+       "perfilador: %s | perfil del mundo: %s | cargadores sin siesta: %s",
        g_skip_logo ? "sí" : "no", g_uncap ? "sí" : "no", g_fast_press ? "sí" : "no", g_press_inside ? "sí" : "no", g_fast_fade ? "sí" : "no",
-       g_profile ? "sí" : "no", g_profile_world ? "sí" : "no");
+       g_profile ? "sí" : "no", g_profile_world ? "sí" : "no", g_no_nap ? "sí" : "no");
   // Each hook is located through the exe's own guest->host table, so a copy
   // of the build laid out differently still gets hooked at the right place;
   // the bytes are then checked exactly as before.
@@ -626,6 +685,36 @@ int game_install(void) {
 }
 
 #ifdef S3D_TEST
+// Test-only: the nap cut on a thread named load_thread and on an unnamed one.
+static u32 g_seen_r3;
+static void stub_sleep(PPCContext* ctx, u8* base) { (void)base; g_seen_r3 = ctx->r3.u32; }
+typedef long(WINAPI* SetThreadDescription_t)(HANDLE h, const wchar* name);
+static DWORD WINAPI nap_thr(void* arg) {
+  SetThreadDescription_t sd = (SetThreadDescription_t)GetProcAddress(GetModuleHandleW(L"kernel32.dll"), "SetThreadDescription");
+  if (arg && sd) sd(GetCurrentThread(), L"load_thread (F8000060)");
+  PPCContext c;
+  memset(&c, 0, sizeof c);
+  c.r3.u64 = 1;
+  h_sleep(&c, NULL);
+  c.r3.u64 = 1;
+  h_sleep(&c, NULL);  // second call: cached kind
+  return 0;
+}
+__declspec(dllexport) int s3d_naptest(void) {
+  PPCFunc* keep = o_sleep;
+  o_sleep = stub_sleep;
+  int r = 0;
+  for (int named = 1; named >= 0; named--) {
+    g_seen_r3 = 77;
+    HANDLE h = CreateThread(NULL, 0, nap_thr, named ? (void*)1 : NULL, 0, NULL);
+    WaitForSingleObject(h, 5000);
+    r = r * 10 + (int)g_seen_r3;
+  }
+  o_sleep = keep;
+  logf("naptest: %d (cortes load %ld)", r, g_nap_cut[1]);
+  return r;  // 01: named -> 0, unnamed -> 1
+}
+
 // Test-only: round-trip a rexruntime flag through the cvar API.
 __declspec(dllexport) int s3d_flagtest(wchar* dir) {
   usize i = 0;

@@ -297,6 +297,7 @@ static void thread_name(HANDLE h, char* out, int cap) {
 }
 
 void prof_stop(void) { g_prof_stop = 1; }
+void thread_name_of(HANDLE h, char* out, int cap) { thread_name(h, out, cap); }
 
 static void report(void) {
   logf(g_focus ? "---- perfil del paso del mundo (hilos de carga, cada 2 ms) ----" : "---- perfil (muestras cada 4 ms) ----");

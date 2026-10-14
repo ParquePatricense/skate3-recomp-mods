@@ -58,5 +58,9 @@ void mainCRTStartup(void) {
   fmt(buf, sizeof buf, "game_install -> %d\n", gi); out(buf);
   Sleep(2000);
   if (gi != 1) ExitProcess(4);
+  in_t nt = (in_t)GetProcAddress(d, "s3d_naptest");
+  int nr = nt ? nt() : -2;
+  fmt(buf, sizeof buf, "naptest -> %d\n", nr); out(buf);
+  if (nr != 1) ExitProcess(5);
   ExitProcess(ctx.r3.u32 == 0x40001234 && m == 1 ? 0 : 3);
 }
