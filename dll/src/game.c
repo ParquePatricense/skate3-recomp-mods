@@ -61,6 +61,8 @@ static int g_fast_black = 1;  // fade to black before gameplay (82709338) finish
 static int g_no_nap = 1;     // loading threads poll with SleepEx(1): yield instead while loading
 static int g_no_query = 0;   // no host occlusion queries while loading (v3.9.12: no gain, opt-in)
 static int g_boost = 1;      // GPU Commands + render_thread at high priority while loading
+static int g_fast_tick = 1;  // game tick timer at 4 ms instead of ~16.7 ms from the language screen to gameplay
+static volatile int g_tick_on;
 int boost_threads(void);
 void boost_restore(void);
 static int g_boosted;
@@ -402,6 +404,7 @@ static void state_ev(u32 st, PPCContext* ctx, u8* base) {
 static int g_logo_forced;
 static void h_lang(PPCContext* c, u8* b) {
   if (c->r4.u32 == 0) {
+    g_tick_on = 1;
     uncap_begin();
     query_begin();
   }
@@ -665,6 +668,56 @@ static int hook_swap(void) {
   return 1;
 }
 
+// ---------------------------------------------------------------- game tick
+// The game's update tick runs on its own thread (sub_82966930): it waits on a
+// waitable timer, ticks the app (BootFlow and the front end included), then
+// re-arms the timer with SetWaitableTimer (sub_82EE2248) for one period
+// (this+16 = -period in 100 ns; this+24 = base 60 Hz period, this+120 = the
+// period corrected by the average error over 60 ticks: ring at this+136,
+// average at this+128). Every boot step therefore costs at least one 16.7 ms
+// tick even with nothing to do. From the language screen to gameplay the
+// timer is armed for 4 ms instead; the game's own value is left as is. When
+// gameplay starts, the error history (which saw the short ticks) is cleared
+// and the period goes back to the base, so gameplay ticks at 60 Hz at once.
+#define TICK_FAST (-40000LL)
+static PPCFunc* o_settimer;
+static u32 g_tick_obj;
+static volatile long g_tick_cut;
+static int g_tick_reset;
+static i64 gl64(u8* b, u32 a) { return (i64)(((u64)gload32(b, a) << 32) | gload32(b, a + 4)); }
+static void gs64(u8* b, u32 a, i64 v) { gstore32(b, a, (u32)((u64)v >> 32)); gstore32(b, a + 4, (u32)v); }
+static void h_settimer(PPCContext* ctx, u8* base) {
+  u32 pdue = ctx->r4.u32;
+  if (!g_base) g_base = base;
+  if (!g_fast_tick || ctx->r5.u32 != 0 || !pdue || !gok(pdue, 8)) {
+    o_settimer(ctx, base);
+    return;
+  }
+  u32 obj = pdue - 16;
+  i64 due = gl64(base, pdue);
+  int is_tick = gok(obj, 1112) && gload32(base, obj + 8) == ctx->r3.u32 && due <= -50000 && due >= -400000;
+  if (is_tick && g_tick_on && g_phase < PH_GAME) {
+    if (!g_tick_obj) {
+      g_tick_obj = obj;
+      logf("tick del juego: cada 4 ms mientras carga (era %.2f ms)", -due / 10000.0);
+    }
+    gs64(base, pdue, TICK_FAST);
+    __sync_fetch_and_add(&g_tick_cut, 1);
+    o_settimer(ctx, base);
+    gs64(base, pdue, due);
+    return;
+  }
+  if (is_tick && obj == g_tick_obj && g_phase >= PH_GAME && !g_tick_reset) {
+    g_tick_reset = 1;
+    i64 period = gl64(base, obj + 24);
+    for (u32 o = 128; o < 616; o += 8) gs64(base, obj + o, 0);
+    gs64(base, obj + 120, period);
+    gs64(base, pdue, -period);
+    logf("tick del juego: vuelve a %.2f ms (%d ticks cortos)", period / 10000.0, (int)g_tick_cut);
+  }
+  o_settimer(ctx, base);
+}
+
 static const HookSpec kHooks[] = {
   {"movie", 0xE41C80, 7, {0x56, 0x57, 0x53, 0x48, 0x83, 0xEC, 0x20}, h_movie, &o_movie, 0x825D60C8},  // sub_825D60C8
   {"chg", 0x13E27D0, 5, {0x41, 0x56, 0x56, 0x57, 0x53}, h_chg, &o_chg, 0x826DFB30},  // sub_826DFB30
@@ -685,6 +738,7 @@ static const HookSpec kHooks[] = {
   {"psupd", 0xF4DC10, 7, {0x56, 0x57, 0x53, 0x48, 0x83, 0xEC, 0x20}, h_psupd, &o_psupd, 0x82609050},  // sub_82609050 Press Start update
   {"prego", 0x14C1530, 7, {0x56, 0x57, 0x53, 0x48, 0x83, 0xEC, 0x30}, h_prego, &o_prego, 0x82709338},  // sub_82709338
   {"sleep", 0x425CF30, 6, {0x56, 0x57, 0x48, 0x83, 0xEC, 0x28}, h_sleep, &o_sleep, 0x82EE24A8},  // sub_82EE24A8 SleepEx
+  {"settimer", 0x425C270, 7, {0x56, 0x57, 0x53, 0x48, 0x83, 0xEC, 0x20}, h_settimer, &o_settimer, 0x82EE2248},  // sub_82EE2248 SetWaitableTimer
   {"delay", 0x4302070, 7, {0x56, 0x57, 0x53, 0x48, 0x83, 0xEC, 0x20}, h_delay, &o_delay, 0x82EEE988},  // sub_82EEE988 (Sleep/SleepEx)
   {"startcb", 0x148C1B0, 8, {0x48, 0xC7, 0x41, 0x50, 0x00, 0x00, 0x08, 0x83}, h_startcb, &o_startcb, 0x826FE638},  // sub_826FE638
 };
@@ -869,10 +923,11 @@ int game_install(void) {
   if (env_off(L"SKATE3_DIRECT_NEGRO")) g_fast_black = 0;
   if (env_on(L"SKATE3_DIRECT_CONSULTAS")) g_no_query = 1;
   if (env_off(L"SKATE3_DIRECT_PRIORIDAD")) g_boost = 0;
+  if (env_off(L"SKATE3_DIRECT_TICK")) g_fast_tick = 0;
   logf("corte del logo EA: %s | sin tope de FPS al cargar: %s | Press Start lista al toque: %s | START por dentro: %s | turbo post-START: %s | "
-       "perfilador: %s | perfil del mundo: %s | cargadores sin siesta: %s | Press Start sin espera mínima: %s | START al instante: %s | fundido final corto: %s | sin consultas de oclusión al cargar: %s | GPU con prioridad al cargar: %s",
+       "perfilador: %s | perfil del mundo: %s | cargadores sin siesta: %s | Press Start sin espera mínima: %s | START al instante: %s | fundido final corto: %s | sin consultas de oclusión al cargar: %s | GPU con prioridad al cargar: %s | tick rápido al cargar: %s",
        g_skip_logo ? "sí" : "no", g_uncap ? "sí" : "no", g_fast_press ? "sí" : "no", g_press_inside ? "sí" : "no", g_fast_fade ? "sí" : "no",
-       g_profile ? "sí" : "no", g_profile_world ? "sí" : "no", g_no_nap ? "sí" : "no", g_press_clock ? "sí" : "no", g_press_tap ? "sí" : "no", g_fast_black ? "sí" : "no", g_no_query ? "sí" : "no", g_boost ? "sí" : "no");
+       g_profile ? "sí" : "no", g_profile_world ? "sí" : "no", g_no_nap ? "sí" : "no", g_press_clock ? "sí" : "no", g_press_tap ? "sí" : "no", g_fast_black ? "sí" : "no", g_no_query ? "sí" : "no", g_boost ? "sí" : "no", g_fast_tick ? "sí" : "no");
   // Each hook is located through the exe's own guest->host table, so a copy
   // of the build laid out differently still gets hooked at the right place;
   // the bytes are then checked exactly as before.
@@ -951,6 +1006,43 @@ __declspec(dllexport) int s3d_boosttest(void) {
   WaitForSingleObject(b, 5000);
   logf("boosttest: %d hilos", n);
   return n;  // only the GPU one
+}
+
+static i64 g_seen_due;
+static void stub_settimer(PPCContext* ctx, u8* base) { g_seen_due = gl64(base, ctx->r4.u32); }
+__declspec(dllexport) int s3d_ticktest(u8* base) {
+  u32 obj = 0x830D0000;
+  PPCFunc* keep = o_settimer;
+  o_settimer = stub_settimer;
+  g_base = base;
+  gstore32(base, obj + 8, 0x1234);
+  gs64(base, obj + 16, -166667);
+  gs64(base, obj + 24, 166667);
+  gs64(base, obj + 120, 300000);
+  gs64(base, obj + 128, -133333);
+  gs64(base, obj + 200, -99);
+  PPCContext c;
+  memset(&c, 0, sizeof c);
+  c.r3.u64 = 0x1234;
+  c.r4.u64 = obj + 16;
+  int keep_phase = g_phase;
+  g_tick_on = 1;
+  g_phase = PH_LOADING;
+  h_settimer(&c, base);
+  int a = g_seen_due == TICK_FAST && gl64(base, obj + 16) == -166667;
+  g_phase = PH_GAME;
+  h_settimer(&c, base);
+  int b = g_seen_due == -166667 && gl64(base, obj + 120) == 166667 && gl64(base, obj + 128) == 0 &&
+          gl64(base, obj + 200) == 0 && gl64(base, obj + 24) == 166667;
+  c.r3.u64 = 0x9999;  // another timer: untouched
+  g_phase = PH_LOADING;
+  g_tick_reset = 0;
+  h_settimer(&c, base);
+  int d = g_seen_due == -166667;
+  g_phase = keep_phase;
+  o_settimer = keep;
+  logf("ticktest: %d %d %d", a, b, d);
+  return a && b && d;
 }
 
 // Test-only: round-trip a rexruntime flag through the cvar API.
