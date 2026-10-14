@@ -688,7 +688,23 @@ static int hook_swap(void) {
 static PPCFunc* o_settimer;
 static u32 g_tick_obj;
 static volatile long g_tick_cut;
-static int g_tick_reset;
+static int g_tick_reset, g_tick_fast_last;
+static volatile long g_tick_quick;
+// After START the fast tick stole CPU from the heavy load steps (v3.9.15),
+// but most post-START BootFlow steps just hand over to the next one on their
+// first update and wait a whole 16.7 ms tick to do it (Matias's v3.9.17 log:
+// ~15 of them at 0.016 s, 0 frames). The tick after one of those is armed
+// at 4 ms; the fade, the save/profile load, 8271AC38, 82704038, 8270C608,
+// 82707508 and the world step keep the normal tick.
+static int quick_state(u32 st) {
+  static const u32 k[] = {0x826FE4F8, 0x826FA7B0, 0x826DF9A8, 0x82703E80, 0x82704630, 0x82715390,
+                          0x82712D20, 0x82704350, 0x827023B0, 0x82702428, 0x82702650, 0x827076E0,
+                          0x82708B78, 0x82708BE8, 0x82708CE0, 0x82709338, 0x82709068, 0x82708D00,
+                          0x8270C890};
+  for (u32 i = 0; i < sizeof k / sizeof k[0]; i++)
+    if (k[i] == st) return 1;
+  return 0;
+}
 static i64 gl64(u8* b, u32 a) { return (i64)(((u64)gload32(b, a) << 32) | gload32(b, a + 4)); }
 static void gs64(u8* b, u32 a, i64 v) { gstore32(b, a, (u32)((u64)v >> 32)); gstore32(b, a + 4, (u32)v); }
 static void h_settimer(PPCContext* ctx, u8* base) {
@@ -701,24 +717,33 @@ static void h_settimer(PPCContext* ctx, u8* base) {
   u32 obj = pdue - 16;
   i64 due = gl64(base, pdue);
   int is_tick = gok(obj, 1112) && gload32(base, obj + 8) == ctx->r3.u32 && due <= -50000 && due >= -400000;
-  if (is_tick && g_tick_on && g_phase < PH_LOADING) {
+  int pre = g_tick_on && g_phase < PH_LOADING;
+  int quick = g_tick_obj && obj == g_tick_obj && g_phase == PH_LOADING && quick_state(g_state);
+  if (is_tick && (pre || quick)) {
     if (!g_tick_obj) {
       g_tick_obj = obj;
       logf("tick del juego: cada 4 ms hasta el START (era %.2f ms)", -due / 10000.0);
     }
     gs64(base, pdue, TICK_FAST);
-    __sync_fetch_and_add(&g_tick_cut, 1);
+    __sync_fetch_and_add(pre ? &g_tick_cut : &g_tick_quick, 1);
+    g_tick_fast_last = 1;
     o_settimer(ctx, base);
     gs64(base, pdue, due);
     return;
   }
-  if (is_tick && obj == g_tick_obj && g_phase >= PH_LOADING && !g_tick_reset) {
-    g_tick_reset = 1;
+  // Back to the normal tick: the game's drift correction (error ring at
+  // obj+128..615, corrected period at obj+120) saw the short ticks as early
+  // wakeups, so it is cleared and the period goes back to the base one.
+  if (is_tick && obj == g_tick_obj && g_phase >= PH_LOADING && g_tick_fast_last) {
+    g_tick_fast_last = 0;
     i64 period = gl64(base, obj + 24);
     for (u32 o = 128; o < 616; o += 8) gs64(base, obj + o, 0);
     gs64(base, obj + 120, period);
     gs64(base, pdue, -period);
-    logf("tick del juego: vuelve a %.2f ms (%d ticks cortos)", period / 10000.0, (int)g_tick_cut);
+    if (!g_tick_reset) {
+      g_tick_reset = 1;
+      logf("tick del juego: vuelve a %.2f ms (%d ticks cortos)", period / 10000.0, (int)g_tick_cut);
+    }
   }
   o_settimer(ctx, base);
 }
@@ -830,6 +855,8 @@ static DWORD WINAPI monitor(void* arg) {
       if (g_no_nap)
         logf("siesta: esperas de 1 ms salteadas: load_thread %d, decompress %d, rwfilesys %d (en el paso del mundo %d)",
              (int)g_nap_cut[1], (int)g_nap_cut[2], (int)g_nap_cut[3], (int)g_nap_world);
+      if (g_fast_tick)
+        logf("tick del juego: %d ticks de 4 ms en los pasos cortos después del START", (int)g_tick_quick);
       if (g_no_nap)
         logf("siesta: esperas de 1 ms del candado de archivos salteadas: load_thread %d, decompress %d, rwfilesys %d",
              (int)g_lock_cut[1], (int)g_lock_cut[2], (int)g_lock_cut[3]);
@@ -1053,10 +1080,23 @@ __declspec(dllexport) int s3d_ticktest(u8* base) {
   g_tick_reset = 0;
   h_settimer(&c, base);
   int d = g_seen_due == -166667;
+  c.r3.u64 = 0x1234;  // a quick step after START: 4 ms, then back with the ring cleared
+  u32 keep_state = g_state;
+  g_phase = PH_LOADING;
+  g_state = 0x82715390;
+  gs64(base, obj + 128, -133333);
+  h_settimer(&c, base);
+  int e = g_seen_due == TICK_FAST && gl64(base, obj + 16) == -166667;
+  g_state = ST_WORLD;
+  h_settimer(&c, base);
+  e = e && g_seen_due == -166667 && gl64(base, obj + 128) == 0;
+  h_settimer(&c, base);
+  e = e && g_seen_due == -166667;
+  g_state = keep_state;
   g_phase = keep_phase;
   o_settimer = keep;
-  logf("ticktest: %d %d %d", a, b, d);
-  return a && b && d;
+  logf("ticktest: %d %d %d %d", a, b, d, e);
+  return a && b && d && e;
 }
 
 // Test-only: round-trip a rexruntime flag through the cvar API.
