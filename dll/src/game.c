@@ -43,6 +43,7 @@ static int g_press_inside = 0; // START given from inside: off, it skips the scr
                                // boots into free play with the default skater and no save
 static int g_profile = 0;    // sampling profiler (suspends every thread: slows the load, opt-in)
 static int g_profile_world = 1;  // profiler on the loading threads during the world step only
+static int g_press_clock = 1; // Press Start's 1.5 s minimum on screen counted as already elapsed
 static int g_no_nap = 1;     // loading threads poll with SleepEx(1): yield instead while loading
 
 // ---------------------------------------------------------------- loading frame cap
@@ -426,6 +427,27 @@ static void h_stA(PPCContext* c, u8* b) { state_ev(ST_POST, c, b); o_stA(c, b); 
 static void h_stF(PPCContext* c, u8* b) { state_ev(ST_F, c, b); o_stF(c, b); }
 
 
+// ---------------------------------------------------------------- Press Start minimum time
+// Screen 22's update (sub_82609050, r4 = dt in ms) adds dt to the global
+// 0x8308355C until it passes 1500; only then it sets +0x48, and the input
+// handler (sub_82609238) takes START only with +0x48 set. Nothing else reads
+// that global (it is zeroed again when START is taken), so it is a plain
+// minimum display time: the first update finds it already elapsed. START,
+// pad and profile still go through the screen's own input handling.
+#define PS_CLOCK 0x8308355Cu
+static PPCFunc* o_psupd;
+static void h_psupd(PPCContext* ctx, u8* base) {
+  if (g_press_clock && g_phase == PH_PRESS && gload32(base, PS_CLOCK) <= 1500) {
+    static int said;
+    if (!said) {
+      said = 1;
+      logf("Press Start: reloj de 1,5 s dado por cumplido (iba en %u ms)", gload32(base, PS_CLOCK));
+    }
+    gstore32(base, PS_CLOCK, 1501);
+  }
+  o_psupd(ctx, base);
+}
+
 // ---------------------------------------------------------------- loader naps
 // load_thread, decompress_thread and the two rwfilesys threads hand work to
 // each other and poll for it with SleepEx(1, TRUE) (sub_82EE24A8, e.g. the
@@ -495,6 +517,7 @@ static const HookSpec kHooks[] = {
   {"after", 0x13E1AE0, 6, {0x56, 0x57, 0x48, 0x83, 0xEC, 0x28}, h_after, &o_after, 0x826DF8B0},  // sub_826DF8B0
   {"stA", 0x148B7C0, 5, {0x8B, 0x41, 0x20, 0x85, 0xC0}, h_stA, &o_stA, 0x826FE4A8},  // sub_826FE4A8
   {"stF", 0x148B910, 6, {0x41, 0x57, 0x41, 0x56, 0x41, 0x54}, h_stF, &o_stF, 0x826FE4F8},  // sub_826FE4F8
+  {"psupd", 0xF4DC10, 7, {0x56, 0x57, 0x53, 0x48, 0x83, 0xEC, 0x20}, h_psupd, &o_psupd, 0x82609050},  // sub_82609050 Press Start update
   {"sleep", 0x425CF30, 6, {0x56, 0x57, 0x48, 0x83, 0xEC, 0x28}, h_sleep, &o_sleep, 0x82EE24A8},  // sub_82EE24A8 SleepEx
   {"startcb", 0x148C1B0, 8, {0x48, 0xC7, 0x41, 0x50, 0x00, 0x00, 0x08, 0x83}, h_startcb, &o_startcb, 0x826FE638},  // sub_826FE638
 };
@@ -551,7 +574,9 @@ static Watch w_s5f = {"pantalla5+40 (logo listo)", -2}, w_s22f = {"pantalla22+3C
              w_mv0 = {"película+320", -2}, w_mv1 = {"película+321", -2}, w_mv2 = {"película+322", -2},
              w_mvq = {"película en cola", -2}, w_b33 = {"BootFlow+21", -2}, w_b49 = {"BootFlow+31", -2},
              w_g6c = {"global 8308396C", -2}, w_ctx = {"contexto de juego", -2},
-             w_tap = {"toque automático (botones, activo)", -2}, w_step = {"toque: paso", -2};
+             w_tap = {"toque automático (botones, activo)", -2}, w_step = {"toque: paso", -2},
+             w_s22on = {"pantalla22+44 (activa)", -2}, w_s22rdy = {"pantalla22+48 (acepta START)", -2},
+             w_s22btn = {"pantalla22+50 (botón apretado)", -2}, w_psclk = {"reloj Press Start (ms)", -2};
 
 static DWORD WINAPI monitor(void* arg) {
   (void)arg;
@@ -575,8 +600,8 @@ static DWORD WINAPI monitor(void* arg) {
       uncap_end();
       prof_stop();
       if (g_no_nap)
-        logf("siesta: esperas de 1 ms salteadas: load_thread %ld, decompress %ld, rwfilesys %ld (en el paso del mundo %ld)",
-             g_nap_cut[1], g_nap_cut[2], g_nap_cut[3], g_nap_world);
+        logf("siesta: esperas de 1 ms salteadas: load_thread %d, decompress %d, rwfilesys %d (en el paso del mundo %d)",
+             (int)g_nap_cut[1], (int)g_nap_cut[2], (int)g_nap_cut[3], (int)g_nap_world);
     }
     if (g_base) {
       for (u32 k = 0; k < sizeof kScr / sizeof kScr[0]; k++) {
@@ -589,6 +614,13 @@ static DWORD WINAPI monitor(void* arg) {
       u32 s5 = last_scr[5], s22 = last_scr[22];
       watch(&w_s5f, s5 ? rd8(s5 + 0x40) : -1);
       watch(&w_s22f, s22 ? rd8(s22 + 0x3C) : -1);
+      if (g_phase == PH_PRESS && s22) {
+        watch(&w_s22on, (i32)rd32(s22 + 0x44));
+        watch(&w_s22rdy, rd8(s22 + 0x48));
+        watch(&w_s22btn, rd8(s22 + 0x50));
+        u32 clk = rd32(PS_CLOCK);
+        watch(&w_psclk, clk > 1500 ? 1501 : (i32)(clk / 250 * 250));
+      }
       watch(&w_start, rd8(G_START));
       watch(&w_g6c, rd8(0x8308396C));
       u32 ui = rd32(G_FEUI);
@@ -651,10 +683,11 @@ int game_install(void) {
   if (env_on(L"SKATE3_DIRECT_PERFIL")) g_profile = 1;
   if (env_off(L"SKATE3_DIRECT_PERFIL_MUNDO")) g_profile_world = 0;
   if (env_off(L"SKATE3_DIRECT_SIESTA")) g_no_nap = 0;
+  if (env_off(L"SKATE3_DIRECT_RELOJ")) g_press_clock = 0;
   logf("corte del logo EA: %s | sin tope de FPS al cargar: %s | Press Start lista al toque: %s | START por dentro: %s | turbo post-START: %s | "
-       "perfilador: %s | perfil del mundo: %s | cargadores sin siesta: %s",
+       "perfilador: %s | perfil del mundo: %s | cargadores sin siesta: %s | Press Start sin espera mínima: %s",
        g_skip_logo ? "sí" : "no", g_uncap ? "sí" : "no", g_fast_press ? "sí" : "no", g_press_inside ? "sí" : "no", g_fast_fade ? "sí" : "no",
-       g_profile ? "sí" : "no", g_profile_world ? "sí" : "no", g_no_nap ? "sí" : "no");
+       g_profile ? "sí" : "no", g_profile_world ? "sí" : "no", g_no_nap ? "sí" : "no", g_press_clock ? "sí" : "no");
   // Each hook is located through the exe's own guest->host table, so a copy
   // of the build laid out differently still gets hooked at the right place;
   // the bytes are then checked exactly as before.
