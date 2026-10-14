@@ -59,6 +59,7 @@ static int g_press_clock = 1; // Press Start's 1.5 s minimum on screen counted a
 static int g_press_tap = 1;   // START tapped the moment Press Start takes it (same synthetic input the recomp uses)
 static int g_fast_black = 1;  // fade to black before gameplay (82709338) finished on its second frame
 static int g_no_nap = 1;     // loading threads poll with SleepEx(1): yield instead while loading
+static int g_no_query = 1;   // no host occlusion queries (one full GPU wait each) while loading
 
 // ---------------------------------------------------------------- loading frame cap
 // The recomp paces every guest frame to the display (skate3_guest_fps_cap_auto
@@ -104,16 +105,21 @@ static int set_flag(const char* name, const char* value) {
   return p_setflag(&n, &v) != 0;
 }
 
-static void uncap_begin(void) {
-  if (!g_uncap || g_uncapped) return;
+static int flags_ready(void) {
+  if (p_setflag && p_getflag) return 1;
   HMODULE rt = GetModuleHandleW(L"rexruntime.dll");
-  if (!rt) return;
+  if (!rt) return 0;
   p_setflag = (SetFlag_t)GetProcAddress(
       rt, "?SetFlagByName@cvar@rex@@YA_NV?$basic_string_view@DU?$char_traits@D@std@@@std@@0@Z");
   p_getflag = (GetFlag_t)GetProcAddress(
       rt, "?GetFlagByName@cvar@rex@@YA?AV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@"
           "V?$basic_string_view@DU?$char_traits@D@std@@@4@@Z");
-  if (!p_setflag || !p_getflag) {
+  return p_setflag && p_getflag;
+}
+
+static void uncap_begin(void) {
+  if (!g_uncap || g_uncapped) return;
+  if (!flags_ready()) {
     logf("tope de FPS: no encontré los ajustes del recomp, lo dejo como está");
     return;
   }
@@ -137,6 +143,41 @@ static void uncap_end(void) {
   g_uncapped = 0;
   int ok = set_flag("skate3_guest_fps_cap", g_cap) & set_flag("skate3_guest_fps_cap_auto", g_cap_auto);
   logf("tope de FPS: vuelve a auto=%s, tope=%s%s", g_cap_auto, g_cap, ok ? "" : " (falló)");
+}
+
+// ---------------------------------------------------------------- loading occlusion queries
+// With occlusion_query_enable the recomp's D3D12 backend ends every guest
+// query with a submission and then waits on the host GPU fence for it
+// (D3D12CommandProcessor::EndGuestOcclusionQuery -> CheckSubmissionFence), so
+// each query is a full CPU/GPU round trip. While loading nothing the queries
+// gate is on screen; the recomp's own fallback (query_occlusion_fake_sample_count,
+// "visible") answers them instead, and the player's value is back in gameplay.
+static volatile int g_query_off;
+static char g_query_was[8];
+
+static void query_begin(void) {
+  if (!g_no_query || g_query_off) return;
+  if (!flags_ready() || !get_flag("occlusion_query_enable", g_query_was, sizeof g_query_was)) {
+    logf("consultas de oclusión: no pude leer el ajuste del recomp, lo dejo como está");
+    return;
+  }
+  if (g_query_was[0] == 'f' || g_query_was[0] == '0') {
+    logf("consultas de oclusión: ya estaban apagadas en el recomp");
+    return;
+  }
+  if (set_flag("occlusion_query_enable", "false")) {
+    g_query_off = 1;
+    logf("consultas de oclusión: fuera mientras carga (tenías %s)", g_query_was);
+  } else {
+    logf("consultas de oclusión: el recomp no aceptó el cambio, lo dejo como está");
+  }
+}
+
+static void query_end(void) {
+  if (!g_query_off) return;
+  g_query_off = 0;
+  int ok = set_flag("occlusion_query_enable", g_query_was);
+  logf("consultas de oclusión: vuelven a %s%s", g_query_was, ok ? "" : " (falló)");
 }
 
 static int env_on(const wchar* name) {
@@ -350,7 +391,10 @@ static void state_ev(u32 st, PPCContext* ctx, u8* base) {
 
 static int g_logo_forced;
 static void h_lang(PPCContext* c, u8* b) {
-  if (c->r4.u32 == 0) uncap_begin();
+  if (c->r4.u32 == 0) {
+    uncap_begin();
+    query_begin();
+  }
   state_ev(ST_LANG, c, b);
   o_lang(c, b);
 }
@@ -661,6 +705,7 @@ static DWORD WINAPI monitor(void* arg) {
            g_t_press && g_t_title ? g_t_press - g_t_title : 0, g_t_fade && g_t_press ? g_t_fade - g_t_press : 0,
            g_t_fade ? tg - g_t_fade : 0, tg);
       uncap_end();
+      query_end();
       prof_stop();
       if (g_no_nap)
         logf("siesta: esperas de 1 ms salteadas: load_thread %d, decompress %d, rwfilesys %d (en el paso del mundo %d)",
@@ -733,6 +778,7 @@ static DWORD WINAPI monitor(void* arg) {
     Sleep(3);
   }
   uncap_end();  // never left without the player's cap, even if gameplay was not seen
+  query_end();
   return 0;
 }
 
@@ -749,10 +795,11 @@ int game_install(void) {
   if (env_off(L"SKATE3_DIRECT_RELOJ")) g_press_clock = 0;
   if (env_off(L"SKATE3_DIRECT_TOQUE")) g_press_tap = 0;
   if (env_off(L"SKATE3_DIRECT_NEGRO")) g_fast_black = 0;
+  if (env_off(L"SKATE3_DIRECT_CONSULTAS")) g_no_query = 0;
   logf("corte del logo EA: %s | sin tope de FPS al cargar: %s | Press Start lista al toque: %s | START por dentro: %s | turbo post-START: %s | "
-       "perfilador: %s | perfil del mundo: %s | cargadores sin siesta: %s | Press Start sin espera mínima: %s | START al instante: %s | fundido final corto: %s",
+       "perfilador: %s | perfil del mundo: %s | cargadores sin siesta: %s | Press Start sin espera mínima: %s | START al instante: %s | fundido final corto: %s | sin consultas de oclusión al cargar: %s",
        g_skip_logo ? "sí" : "no", g_uncap ? "sí" : "no", g_fast_press ? "sí" : "no", g_press_inside ? "sí" : "no", g_fast_fade ? "sí" : "no",
-       g_profile ? "sí" : "no", g_profile_world ? "sí" : "no", g_no_nap ? "sí" : "no", g_press_clock ? "sí" : "no", g_press_tap ? "sí" : "no", g_fast_black ? "sí" : "no");
+       g_profile ? "sí" : "no", g_profile_world ? "sí" : "no", g_no_nap ? "sí" : "no", g_press_clock ? "sí" : "no", g_press_tap ? "sí" : "no", g_fast_black ? "sí" : "no", g_no_query ? "sí" : "no");
   // Each hook is located through the exe's own guest->host table, so a copy
   // of the build laid out differently still gets hooked at the right place;
   // the bytes are then checked exactly as before.
@@ -844,6 +891,14 @@ __declspec(dllexport) int s3d_flagtest(wchar* dir) {
   } else return -3;
   logf("flagtest: vsync %d'%s' set %d -> %d'%s' | fps %d'%s' set0 %d | unknown %d | back '%s'", r1, a, s1, r2, b,
        r3, c, s2, s3, d);
-  return r1 && s1 && r2 && b[0] == 't' && !s2 && !s3 && d[0] == a[0];
+  char q[8] = {0};
+  query_begin();
+  int qoff = g_query_off;
+  get_flag("occlusion_query_enable", q, sizeof q);
+  query_end();
+  char q2[8] = {0};
+  get_flag("occlusion_query_enable", q2, sizeof q2);
+  logf("flagtest: oclusión apagada %d '%s' -> vuelve '%s'", qoff, q, q2);
+  return r1 && s1 && r2 && b[0] == 't' && !s2 && !s3 && d[0] == a[0] && qoff && q[0] == 'f' && q2[0] == 't';
 }
 #endif

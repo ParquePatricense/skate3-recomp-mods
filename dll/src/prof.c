@@ -236,6 +236,8 @@ static void sample_one(int si, int phase) {
   u32 chain[6];
   int n = 0;
   u64 rip = 0, rt_ret = 0;
+  u32 rtc[4];  // rexruntime return addresses on the stack, innermost first
+  int nrt = 0;
   if (GetThreadContext(s->h, g_ctx)) {
     rip = *(u64*)(g_ctx + 0xF8);
     u64 rsp = *(u64*)(g_ctx + 0x98);
@@ -246,11 +248,17 @@ static void sample_one(int si, int phase) {
       u64 exe = (u64)g_exe;
       for (u64 p = rsp & ~7ull; p + 8 <= end && n < 6; p += 8) {
         u64 v = *(u64*)p;
-        if (!rt_ret && g_rt && v >= (u64)g_rt + 0x1000 + 8 && v < (u64)g_rt + g_rt_size) {
+        if (nrt < 4 && g_rt && v >= (u64)g_rt + 0x1000 + 8 && v < (u64)g_rt + g_rt_size) {
           u8* ra = (u8*)v;
           if (ra[-5] == 0xE8 || (ra[-2] == 0xFF && (ra[-1] & 0x38) == 0x10) ||
               (ra[-3] == 0xFF && (ra[-2] & 0x38) == 0x10) || (ra[-6] == 0xFF && ra[-5] == 0x15))
-            rt_ret = v;
+          {
+            if (!rt_ret) rt_ret = v;
+            u32 r = ((u32)(v - (u64)g_rt) & ~0xFu) | 1;
+            int dup = 0;
+            for (int k = 0; k < nrt; k++) dup |= rtc[k] == r;
+            if (!dup) rtc[nrt++] = r;
+          }
         }
         if (v < exe + TEXT_RVA + 8 || v >= exe + g_text_end) continue;
         u8* ra = (u8*)v;
@@ -284,6 +292,9 @@ static void sample_one(int si, int phase) {
     bump((u32)(rip - (u64)g_rt) & ~0xFu, base | 3);  // where in rexruntime.dll
   else if (!leaf && rt_ret)
     bump(((u32)(rt_ret - (u64)g_rt) & ~0xFu) | 1, base | 3);  // in the OS/driver, called from rexruntime (odd = caller)
+  // Outer rexruntime callers too (inclusive), so a wait can be traced to who asked for it.
+  if (!leaf)
+    for (int k = 1; k < nrt; k++) bump(rtc[k], base | 3);
 }
 
 static volatile int g_prof_stop;
