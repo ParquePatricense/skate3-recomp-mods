@@ -35,7 +35,10 @@ static u32 syn_polls(void) { return g_rt_syn ? *(volatile u32*)(g_rt_syn + 0x11A
 // ---------------------------------------------------------------- options
 static int g_skip_logo = 1;
 static int g_uncap = 1;      // no frame cap while booting/loading
-static int g_fast_fade = 1;  // run the post-START transition several steps per frame
+static int g_fast_fade = 0;  // run the post-START sub-machine several steps per frame (off: it is
+                             // save/profile work, not a fade, and gained nothing)
+static int g_fast_press = 1; // Press Start ready at once and START accepted without waiting for a tap
+static int g_profile = 0;    // sampling profiler (suspends every thread: slows the load, opt-in)
 
 // ---------------------------------------------------------------- loading frame cap
 // The recomp paces every guest frame to the display (skate3_guest_fps_cap_auto
@@ -114,6 +117,12 @@ static void uncap_end(void) {
   g_uncapped = 0;
   int ok = set_flag("skate3_guest_fps_cap", g_cap) & set_flag("skate3_guest_fps_cap_auto", g_cap_auto);
   logf("tope de FPS: vuelve a auto=%s, tope=%s%s", g_cap_auto, g_cap, ok ? "" : " (falló)");
+}
+
+static int env_on(const wchar* name) {
+  wchar v[8];
+  DWORD n = GetEnvironmentVariableW(name, v, 8);
+  return n == 1 && v[0] == '1';
 }
 
 static int env_off(const wchar* name) {
@@ -326,7 +335,33 @@ static void h_stB(PPCContext* c, u8* b) {
 static void h_stC(PPCContext* c, u8* b) { state_ev(ST_TITLE, c, b); o_stC(c, b); }
 static void h_stD(PPCContext* c, u8* b) { state_ev(ST_D, c, b); o_stD(c, b); }
 static void h_stE(PPCContext* c, u8* b) { state_ev(ST_E, c, b); o_stE(c, b); }
-static void h_press(PPCContext* c, u8* b) { state_ev(ST_PRESS, c, b); o_press(c, b); }
+// Press Start. Its update waits for screen 22's "ready" flag (+0x3C, set
+// when its intro animation ends, ~1.8 s), then registers the FE message 23
+// callback (sets BootFlow+0x31) and waits for START, which the recomp taps
+// on a 0.33 s cycle. With fast_press the ready flag is set once the screen is
+// up, and once the callback is registered its effect (sub_826FE638: BootFlow
+// +0x32 = 1 and the START flag) is applied right away.
+static int g_press_ready, g_press_start;
+static void h_press(PPCContext* c, u8* b) {
+  state_ev(ST_PRESS, c, b);
+  u32 self = c->r3.u32;
+  if (g_fast_press && c->r4.u32 == 1 && g_phase < PH_GAME) {
+    u32 s22 = screen(22);
+    if (!g_press_ready && s22 && gok(s22 + 0x3C, 1) && gload8(b, s22 + 0x3C) == 0 &&
+        now_s() - g_state_t > 0.15) {
+      gstore8(b, s22 + 0x3C, 1);
+      g_press_ready = 1;
+      logf("Press Start: pantalla marcada como lista a mano (%.3f s en el estado)", now_s() - g_state_t);
+    }
+    if (!g_press_start && gok(self + 0x31, 2) && gload8(b, self + 0x31) == 1 && rd8(G_START) == 0) {
+      gstore8(b, self + 0x32, 1);
+      gstore8(b, G_START, 1);
+      g_press_start = 1;
+      logf("Press Start: START dado por dentro (%.3f s en el estado)", now_s() - g_state_t);
+    }
+  }
+  o_press(c, b);
+}
 // The state after START runs a sub-machine ([BootFlow+20], started by the
 // Press Start handler) until it reports done, then switches to post-start.
 // With the turbo on, each frame steps it up to 8 more times, stopping as soon
@@ -512,9 +547,13 @@ int game_install(void) {
   InitializeCriticalSection(&g_seen_cs);
   if (env_off(L"SKATE3_DIRECT_LOGO")) g_skip_logo = 0;
   if (env_off(L"SKATE3_DIRECT_FPS")) g_uncap = 0;
-  if (env_off(L"SKATE3_DIRECT_FADE")) g_fast_fade = 0;
-  logf("corte del logo EA: %s | sin tope de FPS al cargar: %s | fundido rápido: %s", g_skip_logo ? "sí" : "no",
-       g_uncap ? "sí" : "no", g_fast_fade ? "sí" : "no");
+  if (env_on(L"SKATE3_DIRECT_FADE")) g_fast_fade = 1;
+  if (env_off(L"SKATE3_DIRECT_PRESS")) g_fast_press = 0;
+  if (env_on(L"SKATE3_DIRECT_PERFIL")) g_profile = 1;
+  logf("corte del logo EA: %s | sin tope de FPS al cargar: %s | Press Start al toque: %s | turbo post-START: %s | "
+       "perfilador: %s",
+       g_skip_logo ? "sí" : "no", g_uncap ? "sí" : "no", g_fast_press ? "sí" : "no", g_fast_fade ? "sí" : "no",
+       g_profile ? "sí" : "no");
   // Each hook is located through the exe's own guest->host table, so a copy
   // of the build laid out differently still gets hooked at the right place;
   // the bytes are then checked exactly as before.
@@ -534,7 +573,7 @@ int game_install(void) {
   int ok = 1;
   for (usize i = 0; i < sizeof hk / sizeof hk[0]; i++) ok &= hook_entry(&hk[i]);
   CreateThread(NULL, 0, monitor, NULL, 0, NULL);
-  prof_start();
+  if (g_profile) prof_start();
   return ok;
 }
 
