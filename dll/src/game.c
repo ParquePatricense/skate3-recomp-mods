@@ -37,7 +37,10 @@ static int g_skip_logo = 1;
 static int g_uncap = 1;      // no frame cap while booting/loading
 static int g_fast_fade = 0;  // run the post-START sub-machine several steps per frame (off: it is
                              // save/profile work, not a fade, and gained nothing)
-static int g_fast_press = 1; // Press Start ready at once and START accepted without waiting for a tap
+static int g_fast_press = 1; // Press Start screen ready at once
+static int g_press_inside = 0; // START given from inside: off, it skips the screen's own input
+                               // handling (which pad/profile pressed it) and the game then
+                               // boots into free play with the default skater and no save
 static int g_profile = 0;    // sampling profiler (suspends every thread: slows the load, opt-in)
 
 // ---------------------------------------------------------------- loading frame cap
@@ -353,7 +356,7 @@ static void h_press(PPCContext* c, u8* b) {
       g_press_ready = 1;
       logf("Press Start: pantalla marcada como lista a mano (%.3f s en el estado)", now_s() - g_state_t);
     }
-    if (!g_press_start && gok(self + 0x31, 2) && gload8(b, self + 0x31) == 1 && rd8(G_START) == 0) {
+    if (g_press_inside && !g_press_start && gok(self + 0x31, 2) && gload8(b, self + 0x31) == 1 && rd8(G_START) == 0) {
       gstore8(b, self + 0x32, 1);
       gstore8(b, G_START, 1);
       g_press_start = 1;
@@ -549,10 +552,11 @@ int game_install(void) {
   if (env_off(L"SKATE3_DIRECT_FPS")) g_uncap = 0;
   if (env_on(L"SKATE3_DIRECT_FADE")) g_fast_fade = 1;
   if (env_off(L"SKATE3_DIRECT_PRESS")) g_fast_press = 0;
+  if (env_on(L"SKATE3_DIRECT_START")) g_press_inside = 1;
   if (env_on(L"SKATE3_DIRECT_PERFIL")) g_profile = 1;
-  logf("corte del logo EA: %s | sin tope de FPS al cargar: %s | Press Start al toque: %s | turbo post-START: %s | "
+  logf("corte del logo EA: %s | sin tope de FPS al cargar: %s | Press Start lista al toque: %s | START por dentro: %s | turbo post-START: %s | "
        "perfilador: %s",
-       g_skip_logo ? "sí" : "no", g_uncap ? "sí" : "no", g_fast_press ? "sí" : "no", g_fast_fade ? "sí" : "no",
+       g_skip_logo ? "sí" : "no", g_uncap ? "sí" : "no", g_fast_press ? "sí" : "no", g_press_inside ? "sí" : "no", g_fast_fade ? "sí" : "no",
        g_profile ? "sí" : "no");
   // Each hook is located through the exe's own guest->host table, so a copy
   // of the build laid out differently still gets hooked at the right place;
