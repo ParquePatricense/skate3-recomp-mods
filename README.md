@@ -75,7 +75,7 @@ Para que tarde lo menos posible: el juego carga con prioridad alta, el modeador 
 ## ⚡ Carga
 
 - 🛡️ **Windows Defender:** agrega la carpeta del juego y el proceso a las exclusiones (pide permiso de administrador una vez), para que no revise cada archivo al cargar.
-- 🌅 **Precarga al prender la PC:** 45 s después de iniciar Windows lee los archivos del juego en segundo plano, sin ventanas.
+- 🌅 **Precarga al prender la PC:** 45 s después de iniciar Windows lee en segundo plano, sin ventanas, primero el exe, las DLL y la caché de shaders del recomp y después los archivos del juego (lo mismo hace el modeador mientras está abierto).
 - 💽 **SSD:** si el juego está en un disco rígido y tenés un SSD, lo copia a `X:\Skate3Recomp`, verifica el tamaño y reacomoda accesos, Steam y precarga; la carpeta vieja se borra solo si lo pedís.
 - 🐢 **Carga lenta:** si una carga tarda bastante más que tu promedio, te dice qué parte se hizo lenta.
 

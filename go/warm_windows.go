@@ -2,7 +2,8 @@
 
 package main
 
-// Warm-up: while the modder is open, the game's data files are read once in
+// Warm-up: while the modder is open, the recomp's own files (exe, DLLs,
+// shader cache) and then the game's data files are read once in
 // the background, at the lowest disk priority, so Windows already has them
 // in memory when you hit Drop in. On a cold PC (just turned on, or a hard
 // disk) that is the slowest part of the load. If they are already cached it
@@ -10,11 +11,8 @@ package main
 
 import (
 	"io"
-	"io/fs"
 	"os"
-	"path/filepath"
 	"runtime"
-	"sort"
 	"sync"
 	"unsafe"
 )
@@ -50,24 +48,11 @@ func warmRun(root string) {
 			budget = q // never more than a quarter of the free memory
 		}
 	}
-	type f struct {
-		p string
-		n int64
-	}
-	var list []f
-	filepath.WalkDir(filepath.Join(root, "game", "data"), func(p string, d fs.DirEntry, err error) error {
-		if err == nil && !d.IsDir() {
-			if st, e := d.Info(); e == nil && st.Size() > 0 {
-				list = append(list, f{p, st.Size()})
-			}
-		}
-		return nil
-	})
-	sort.Slice(list, func(i, j int) bool { return list[i].n < list[j].n })
+	list := warmList(root, os.Getenv("APPDATA"))
 	buf := make([]byte, 1<<20)
 	for _, x := range list {
 		if x.n > budget {
-			break
+			continue
 		}
 		budget -= x.n
 		if h, err := os.Open(x.p); err == nil {

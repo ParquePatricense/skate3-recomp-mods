@@ -23,6 +23,8 @@ DLLIMPORT DWORD WINAPI SuspendThread(HANDLE h);
 DLLIMPORT DWORD WINAPI ResumeThread(HANDLE h);
 DLLIMPORT BOOL WINAPI GetThreadContext(HANDLE h, void* ctx);
 DLLIMPORT DWORD WINAPI GetCurrentProcessId(void);
+DLLIMPORT BOOL WINAPI SetThreadPriority(HANDLE h, int prio);
+DLLIMPORT int WINAPI GetThreadPriority(HANDLE h);
 
 // ---------------------------------------------------------------- func map
 // PPCFuncMappings in skate3.exe .data: {u64 guest, u64 host} pairs, sorted by
@@ -406,4 +408,61 @@ int prof_start(void) {
   CreateThread(NULL, 0, prof_thread, NULL, 0, NULL);
   logf("perfil: %u funciones del juego mapeadas", g_nfn);
   return 1;
+}
+
+// ---------------------------------------------------------------- loading boost
+// While loading, the world waits on the GPU chain: the game's render_thread
+// fills the ring buffer and the recomp's "GPU Commands" thread drains it. Both
+// go up to THREAD_PRIORITY_HIGHEST so the loader threads spinning next to
+// them don't take their turn; the old priorities are put back in gameplay.
+#define THREAD_PRIO_ACCESS (0x0020 | 0x0040)  // set / query information
+static struct {
+  HANDLE h;
+  int was;
+} g_boost[8];
+static int g_nboost;
+
+static int boost_wanted(const char* n) {
+  static const char* k[] = {"GPU Commands", "render_thread"};
+  for (int i = 0; i < 2; i++) {
+    int j = 0;
+    while (k[i][j] && n[j] == k[i][j]) j++;
+    if (!k[i][j]) return 1;
+  }
+  return 0;
+}
+
+int boost_threads(void) {
+  HANDLE snap = CreateToolhelp32Snapshot(TH32CS_SNAPTHREAD, 0);
+  if (snap == INVALID_HANDLE_VALUE) return 0;
+  THREADENTRY32 te;
+  te.dwSize = sizeof te;
+  DWORD pid = GetCurrentProcessId();
+  if (Thread32First(snap, &te)) do {
+      if (te.th32OwnerProcessID != pid || g_nboost >= 8) continue;
+      HANDLE h = OpenThread(THREAD_PRIO_ACCESS, FALSE, te.th32ThreadID);
+      if (!h) continue;
+      char name[64];
+      thread_name(h, name, sizeof name);
+      int was = GetThreadPriority(h);
+      if (boost_wanted(name) && was < 2 && SetThreadPriority(h, 2)) {
+        g_boost[g_nboost].h = h;
+        g_boost[g_nboost].was = was;
+        g_nboost++;
+        logf("prioridad: \"%s\" de %d a 2 mientras carga", name, was);
+      } else {
+        CloseHandle(h);
+      }
+    } while (Thread32Next(snap, &te));
+  CloseHandle(snap);
+  return g_nboost;
+}
+
+void boost_restore(void) {
+  for (int i = 0; i < g_nboost; i++) {
+    SetThreadPriority(g_boost[i].h, g_boost[i].was);
+    CloseHandle(g_boost[i].h);
+  }
+  if (g_nboost) logf("prioridad: %d hilos vuelven a la suya", g_nboost);
+  g_nboost = 0;
 }

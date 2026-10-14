@@ -59,7 +59,11 @@ static int g_press_clock = 1; // Press Start's 1.5 s minimum on screen counted a
 static int g_press_tap = 1;   // START tapped the moment Press Start takes it (same synthetic input the recomp uses)
 static int g_fast_black = 1;  // fade to black before gameplay (82709338) finished on its second frame
 static int g_no_nap = 1;     // loading threads poll with SleepEx(1): yield instead while loading
-static int g_no_query = 1;   // no host occlusion queries (one full GPU wait each) while loading
+static int g_no_query = 0;   // no host occlusion queries while loading (v3.9.12: no gain, opt-in)
+static int g_boost = 1;      // GPU Commands + render_thread at high priority while loading
+int boost_threads(void);
+void boost_restore(void);
+static int g_boosted;
 
 // ---------------------------------------------------------------- loading frame cap
 // The recomp paces every guest frame to the display (skate3_guest_fps_cap_auto
@@ -774,11 +778,20 @@ static DWORD WINAPI monitor(void* arg) {
         hexdump("p", s, 0x80);
       }
     }
+    if (g_boost && !g_boosted && g_phase == PH_LOADING) {
+      g_boosted = 1;
+      if (!boost_threads()) logf("prioridad: no encontré los hilos de GPU, la dejo como está");
+    }
+    if (g_boosted == 1 && g_phase >= PH_GAME) {
+      g_boosted = 2;
+      boost_restore();
+    }
     if (g_phase == PH_GAME && i % 300 == 0) break;
     Sleep(3);
   }
   uncap_end();  // never left without the player's cap, even if gameplay was not seen
   query_end();
+  if (g_boosted == 1) boost_restore();
   return 0;
 }
 
@@ -795,11 +808,12 @@ int game_install(void) {
   if (env_off(L"SKATE3_DIRECT_RELOJ")) g_press_clock = 0;
   if (env_off(L"SKATE3_DIRECT_TOQUE")) g_press_tap = 0;
   if (env_off(L"SKATE3_DIRECT_NEGRO")) g_fast_black = 0;
-  if (env_off(L"SKATE3_DIRECT_CONSULTAS")) g_no_query = 0;
+  if (env_on(L"SKATE3_DIRECT_CONSULTAS")) g_no_query = 1;
+  if (env_off(L"SKATE3_DIRECT_PRIORIDAD")) g_boost = 0;
   logf("corte del logo EA: %s | sin tope de FPS al cargar: %s | Press Start lista al toque: %s | START por dentro: %s | turbo post-START: %s | "
-       "perfilador: %s | perfil del mundo: %s | cargadores sin siesta: %s | Press Start sin espera mínima: %s | START al instante: %s | fundido final corto: %s | sin consultas de oclusión al cargar: %s",
+       "perfilador: %s | perfil del mundo: %s | cargadores sin siesta: %s | Press Start sin espera mínima: %s | START al instante: %s | fundido final corto: %s | sin consultas de oclusión al cargar: %s | GPU con prioridad al cargar: %s",
        g_skip_logo ? "sí" : "no", g_uncap ? "sí" : "no", g_fast_press ? "sí" : "no", g_press_inside ? "sí" : "no", g_fast_fade ? "sí" : "no",
-       g_profile ? "sí" : "no", g_profile_world ? "sí" : "no", g_no_nap ? "sí" : "no", g_press_clock ? "sí" : "no", g_press_tap ? "sí" : "no", g_fast_black ? "sí" : "no", g_no_query ? "sí" : "no");
+       g_profile ? "sí" : "no", g_profile_world ? "sí" : "no", g_no_nap ? "sí" : "no", g_press_clock ? "sí" : "no", g_press_tap ? "sí" : "no", g_fast_black ? "sí" : "no", g_no_query ? "sí" : "no", g_boost ? "sí" : "no");
   // Each hook is located through the exe's own guest->host table, so a copy
   // of the build laid out differently still gets hooked at the right place;
   // the bytes are then checked exactly as before.
@@ -860,6 +874,24 @@ __declspec(dllexport) int s3d_naptest(void) {
   return r;  // 01: named -> 0, unnamed -> 1
 }
 
+static DWORD WINAPI gpu_thr(void* arg) {
+  SetThreadDescription_t sd = (SetThreadDescription_t)GetProcAddress(GetModuleHandleW(L"kernel32.dll"), "SetThreadDescription");
+  if (sd) sd(GetCurrentThread(), arg ? L"GPU Commands (F8000018)" : L"otro hilo");
+  Sleep(1500);
+  return 0;
+}
+__declspec(dllexport) int s3d_boosttest(void) {
+  HANDLE a = CreateThread(NULL, 0, gpu_thr, (void*)1, 0, NULL);
+  HANDLE b = CreateThread(NULL, 0, gpu_thr, NULL, 0, NULL);
+  Sleep(300);
+  int n = boost_threads();
+  boost_restore();
+  WaitForSingleObject(a, 5000);
+  WaitForSingleObject(b, 5000);
+  logf("boosttest: %d hilos", n);
+  return n;  // only the GPU one
+}
+
 // Test-only: round-trip a rexruntime flag through the cvar API.
 __declspec(dllexport) int s3d_flagtest(wchar* dir) {
   usize i = 0;
@@ -892,6 +924,7 @@ __declspec(dllexport) int s3d_flagtest(wchar* dir) {
   logf("flagtest: vsync %d'%s' set %d -> %d'%s' | fps %d'%s' set0 %d | unknown %d | back '%s'", r1, a, s1, r2, b,
        r3, c, s2, s3, d);
   char q[8] = {0};
+  g_no_query = 1;
   query_begin();
   int qoff = g_query_off;
   get_flag("occlusion_query_enable", q, sizeof q);

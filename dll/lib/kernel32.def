@@ -46,3 +46,5 @@ GetCurrentProcessId
 LoadLibraryExW
 GetStdHandle
 WaitForSingleObject
+SetThreadPriority
+GetThreadPriority
