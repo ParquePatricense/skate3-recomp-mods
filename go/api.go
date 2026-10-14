@@ -72,8 +72,6 @@ func apiState(root string) map[string]any {
 	st["preload"] = preloadOn()
 	st["roots"] = rootList(root)
 	st["repoPublic"] = repoPublic
-	st["prefs"].(map[string]string)["arrival"] = c["ui_arrival"]
-	st["prefs"].(map[string]string)["bg"] = c["ui_bg"]
 	return st
 }
 
@@ -208,7 +206,7 @@ func apiDo(root *string, cmd, arg string) (string, error) {
 		return T("Reflejos ", "Reflections ") + onOff(onArg(arg)), setBool(r, "skate3_native_render_scene_ssr", onArg(arg))
 	case "pref":
 		key, val, _ := strings.Cut(arg, "=")
-		if key != "deck" && key != "sfx" && key != "seen" && key != "size" && key != "sofa" && key != "arrival" && key != "bg" {
+		if key != "deck" && key != "sfx" && key != "seen" && key != "size" && key != "sofa" {
 			return "", errors.New("?")
 		}
 		c := loadConfig(r)
@@ -250,8 +248,8 @@ func apiDo(root *string, cmd, arg string) (string, error) {
 	case "drift": // JSON for the window
 		b, err := json.Marshal(map[string]any{"pads": padsConnected(), "drift": stickDrift()})
 		return string(b), err
-	case "bg":
-		return modderBackground(r), nil
+	case "directlog":
+		return "", openDirectLog(r)
 	case "issue":
 		if !repoIsPublic() {
 			return "", errors.New("?")

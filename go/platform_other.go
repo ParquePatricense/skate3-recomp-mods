@@ -26,6 +26,7 @@ func removeShortcut() error       { return nil }
 
 func createLangShortcut(string, string, string) error { return errors.New("only on Windows") }
 func openLog(string) error                            { return errors.New("only on Windows") }
+func openDirectLog(string) error                      { return errors.New("only on Windows") }
 
 func dndOff(string) {}
 

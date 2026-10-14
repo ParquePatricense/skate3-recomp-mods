@@ -54,7 +54,7 @@ static int g_press_inside = 0; // START given from inside: off, it skips the scr
                                // handling (which pad/profile pressed it) and the game then
                                // boots into free play with the default skater and no save
 static int g_profile = 0;    // sampling profiler (suspends every thread: slows the load, opt-in)
-static int g_profile_world = 1;  // profiler on the loading threads during the world step only
+static int g_profile_world = 0;  // profiler on the loading threads (pre-language, Press Start, world step); opt-in: it suspends them every 2 ms
 static int g_press_clock = 1; // Press Start's 1.5 s minimum on screen counted as already elapsed
 static int g_press_tap = 1;   // START tapped the moment Press Start takes it (same synthetic input the recomp uses)
 static int g_fast_black = 1;  // fade to black before gameplay (82709338) finished on its second frame
@@ -976,7 +976,7 @@ int game_install(void) {
   if (env_on(L"SKATE3_DIRECT_PRESS")) g_fast_press = 1;
   if (env_on(L"SKATE3_DIRECT_START")) g_press_inside = 1;
   if (env_on(L"SKATE3_DIRECT_PERFIL")) g_profile = 1;
-  if (env_off(L"SKATE3_DIRECT_PERFIL_MUNDO")) g_profile_world = 0;
+  if (env_on(L"SKATE3_DIRECT_PERFIL_MUNDO")) g_profile_world = 1;
   if (env_off(L"SKATE3_DIRECT_SIESTA")) g_no_nap = 0;
   if (env_off(L"SKATE3_DIRECT_RELOJ")) g_press_clock = 0;
   if (env_off(L"SKATE3_DIRECT_TOQUE")) g_press_tap = 0;

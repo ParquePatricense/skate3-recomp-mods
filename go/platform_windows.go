@@ -454,7 +454,6 @@ func play(root string) error {
 						pSetPriorityClass.Call(uintptr(proc), normalPriorityClass)
 					}
 					bootTook = took
-					showArrival(root)
 					recordBoot(root, took)
 					addBootHistory(root, time.Now(), readBootPhases(watch.path, coverStart, took))
 					watch = nil
@@ -689,6 +688,15 @@ func openLog(root string) error {
 		return errors.New(T("todavía no hay registro: abrí el juego una vez", "no log yet: start the game once"))
 	}
 	return exec.Command("notepad.exe", p).Start()
+}
+
+// openDirectLog opens the folder of skate3-direct.log with the file selected.
+func openDirectLog(root string) error {
+	p := filepath.Join(root, directLogName)
+	if !exists(p) {
+		return errors.New(T("todavía no hay log de la carga: entrá directo una vez", "no load log yet: go in directly once"))
+	}
+	return exec.Command("explorer.exe", "/select,"+p).Start()
 }
 
 func documentsDir() string {
