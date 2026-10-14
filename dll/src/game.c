@@ -322,7 +322,7 @@ static volatile long g_swaps, g_swaps_world;
 static double g_swap_t, g_swap_gap;
 static int g_swap_hooked;
 static void h_chg(PPCContext* ctx, u8* base) {
-  u32 to = ctx->r4.u32;
+  u32 to = ctx->r4.u32, from = g_state;
   double t = now_s();
   if (!g_base) g_base = base;
   if (g_swap_hooked && g_state == ST_WORLD && to != ST_WORLD)
@@ -341,6 +341,17 @@ static void h_chg(PPCContext* ctx, u8* base) {
   if (to == ST_PRESS) set_phase(PH_PRESS);
   if (to == ST_FADE) set_phase(PH_LOADING);
   if (g_profile_world && !g_profile) {
+    // Also the two slow stretches before the world: the wait before the
+    // language screen (826FDC50) and Press Start (25 updates in 0.54 s with
+    // a 4 ms tick: something holds the main thread ~20 ms per update).
+    static int pre_win;
+    if ((to == 0x826FDC50u || to == ST_PRESS) && pre_win < 4) {
+      pre_win++;
+      prof_window(1);
+    } else if ((to == ST_LANG || from == ST_PRESS) && (pre_win & 1)) {
+      pre_win++;
+      prof_window(0);
+    }
     static int win;
     if (to == ST_WORLD && !win) {
       win = 1;
@@ -530,7 +541,7 @@ static void h_psupd(PPCContext* ctx, u8* base) {
     tapped = 1;
     if (!p_queue_syn) resolve_runtime();
     if (p_queue_syn) {
-      static const SynStep tap[] = {{0x0010, 5, 0, 0}, {0, 5, 0, 0}};
+      static const SynStep tap[] = {{0x0010, 3, 0, 0}, {0, 3, 0, 0}};  // the screen takes it on release; 5+5 until v3.9.18
       p_queue_syn(tap, 2);
       logf("Press Start: START al instante (la pantalla ya lo acepta)");
     } else {
@@ -693,11 +704,15 @@ static volatile long g_tick_quick;
 // After START the fast tick stole CPU from the heavy load steps (v3.9.15),
 // but most post-START BootFlow steps just hand over to the next one on their
 // first update and wait a whole 16.7 ms tick to do it (Matias's v3.9.17 log:
-// ~15 of them at 0.016 s, 0 frames). The tick after one of those is armed
-// at 4 ms; the fade, the save/profile load, 8271AC38, 82704038, 8270C608,
-// 82707508 and the world step keep the normal tick.
+// ~15 of them at 0.016 s, 0 frames). The timer is armed before the tick
+// runs, so g_state here is the step this tick updates: the next tick comes
+// at 4 ms after a step from this list (they finish on their first or second
+// update) and after the first update of any step just entered (v3.9.18 only
+// had the list, so the first step after the fade or the world kept 16.7 ms).
+// The fade, the save/profile load, 82702650, 8270C608 and the world step
+// keep the normal tick for the rest of their updates.
 static int quick_state(u32 st) {
-  static const u32 k[] = {0x826FE4F8, 0x826FA7B0, 0x826DF9A8, 0x82703E80, 0x82704630, 0x82715390,
+  static const u32 k[] = {0x8271AC38, 0x82704038, 0x826FE4F8, 0x826FA7B0, 0x826DF9A8, 0x82703E80, 0x82704630, 0x82715390,
                           0x82712D20, 0x82704350, 0x827023B0, 0x82702428, 0x82702650, 0x827076E0,
                           0x82708B78, 0x82708BE8, 0x82708CE0, 0x82709338, 0x82709068, 0x82708D00,
                           0x8270C890};
@@ -718,7 +733,11 @@ static void h_settimer(PPCContext* ctx, u8* base) {
   i64 due = gl64(base, pdue);
   int is_tick = gok(obj, 1112) && gload32(base, obj + 8) == ctx->r3.u32 && due <= -50000 && due >= -400000;
   int pre = g_tick_on && g_phase < PH_LOADING;
-  int quick = g_tick_obj && obj == g_tick_obj && g_phase == PH_LOADING && quick_state(g_state);
+  static u32 armed_state;
+  u32 st = g_state;
+  int fresh = st != armed_state;
+  if (is_tick) armed_state = st;
+  int quick = g_tick_obj && obj == g_tick_obj && g_phase == PH_LOADING && (fresh || quick_state(st));
   if (is_tick && (pre || quick)) {
     if (!g_tick_obj) {
       g_tick_obj = obj;
@@ -1087,8 +1106,10 @@ __declspec(dllexport) int s3d_ticktest(u8* base) {
   gs64(base, obj + 128, -133333);
   h_settimer(&c, base);
   int e = g_seen_due == TICK_FAST && gl64(base, obj + 16) == -166667;
-  g_state = ST_WORLD;
+  g_state = ST_WORLD;  // first update of a step just entered: still 4 ms
   h_settimer(&c, base);
+  e = e && g_seen_due == TICK_FAST;
+  h_settimer(&c, base);  // its later updates: normal tick, ring cleared
   e = e && g_seen_due == -166667 && gl64(base, obj + 128) == 0;
   h_settimer(&c, base);
   e = e && g_seen_due == -166667;

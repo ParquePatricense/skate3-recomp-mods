@@ -322,7 +322,7 @@ void prof_stop(void) { g_prof_stop = 1; }
 void thread_name_of(HANDLE h, char* out, int cap) { thread_name(h, out, cap); }
 
 static void report(void) {
-  logf(g_focus ? "---- perfil del paso del mundo (hilos de carga, cada 2 ms) ----" : "---- perfil (muestras cada 4 ms) ----");
+  logf(g_focus ? "---- perfil de la espera antes del idioma [arranque], Press Start [press-start] y el paso del mundo [cargando] (cada 2 ms) ----" : "---- perfil (muestras cada 4 ms) ----");
   for (int ph = 0; ph < 5; ph++) {
     for (int si = 0; si < g_nslots; si++) {
       Slot* s = &g_slots[si];
