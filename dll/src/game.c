@@ -316,10 +316,16 @@ static void h_movie(PPCContext* ctx, u8* base) {
 }
 
 // BootFlow::ChangeState(this, handler, ...)
+static volatile long g_swaps, g_swaps_world;
+static double g_swap_t, g_swap_gap;
+static int g_swap_hooked;
 static void h_chg(PPCContext* ctx, u8* base) {
   u32 to = ctx->r4.u32;
   double t = now_s();
   if (!g_base) g_base = base;
+  if (g_swap_hooked && g_state == ST_WORLD && to != ST_WORLD)
+    logf("paso del mundo: %d cuadros del juego (%.0f por segundo), el hueco más largo entre cuadros %.0f ms",
+         (int)g_swaps_world, g_swaps_world / (t - g_state_t), g_swap_gap * 1000);
   logf("BootFlow %s -> %s %08X (%.3f s, %u cuadros, %u lecturas de mando)", state_name(g_state),
        state_name(to), to, g_state ? t - g_state_t : 0.0, g_frames, syn_polls());
   g_state = to;
@@ -610,6 +616,55 @@ static void h_sleep(PPCContext* ctx, u8* base) {
   o_sleep(ctx, base);
 }
 
+// The same 1 ms naps also come in through Sleep(ms) (sub_82EE24E0, straight
+// into sub_82EEE988 without SleepEx): the file system's lock (sub_82A40368)
+// spins TryEnterCriticalSection + Sleep(1) for up to 10 s, and the
+// decompress_thread spent ~28% of the world step there. Same rule: loader
+// threads, 1 ms, before gameplay -> yield.
+static PPCFunc* o_delay;
+static volatile long g_lock_cut[4];
+static void h_delay(PPCContext* ctx, u8* base) {
+  if (g_no_nap && ctx->r3.u32 == 1 && g_phase < PH_GAME) {
+    int k = nap_kind();
+    if (k <= 3) {
+      ctx->r3.u64 = 0;
+      __sync_fetch_and_add(&g_lock_cut[k], 1);
+    }
+  }
+  o_delay(ctx, base);
+}
+
+// ---------------------------------------------------------------- guest frames
+// VdSwap (xboxkrnl 0x25B) is reached through an import thunk in skate3.exe,
+// `jmp [rip+x]` into rexruntime. Swapping that slot counts the game's frames,
+// so the log says how many frames the world step took and the longest gap:
+// GPU bound shows as few, slow frames.
+static PPCFunc* o_swap;
+static void h_swap(PPCContext* ctx, u8* base) {
+  __sync_fetch_and_add(&g_swaps, 1);
+  if (g_state == ST_WORLD) {
+    double t = now_s();
+    if (g_swaps_world && t - g_swap_t > g_swap_gap) g_swap_gap = t - g_swap_t;
+    g_swap_t = t;
+    __sync_fetch_and_add(&g_swaps_world, 1);
+  }
+  o_swap(ctx, base);
+}
+
+static int hook_swap(void) {
+  u32 r = host_of(0x82F9CDE4);
+  if (!r) return 0;
+  u8* p = g_exe + r;
+  if (p[0] != 0xFF || p[1] != 0x25) return 0;
+  PPCFunc** slot = (PPCFunc**)(p + 6 + *(i32*)(p + 2));
+  DWORD old;
+  if (!VirtualProtect(slot, 8, PAGE_READWRITE, &old)) return 0;
+  o_swap = *slot;
+  *slot = h_swap;
+  VirtualProtect(slot, 8, old, &old);
+  return 1;
+}
+
 static const HookSpec kHooks[] = {
   {"movie", 0xE41C80, 7, {0x56, 0x57, 0x53, 0x48, 0x83, 0xEC, 0x20}, h_movie, &o_movie, 0x825D60C8},  // sub_825D60C8
   {"chg", 0x13E27D0, 5, {0x41, 0x56, 0x56, 0x57, 0x53}, h_chg, &o_chg, 0x826DFB30},  // sub_826DFB30
@@ -630,6 +685,7 @@ static const HookSpec kHooks[] = {
   {"psupd", 0xF4DC10, 7, {0x56, 0x57, 0x53, 0x48, 0x83, 0xEC, 0x20}, h_psupd, &o_psupd, 0x82609050},  // sub_82609050 Press Start update
   {"prego", 0x14C1530, 7, {0x56, 0x57, 0x53, 0x48, 0x83, 0xEC, 0x30}, h_prego, &o_prego, 0x82709338},  // sub_82709338
   {"sleep", 0x425CF30, 6, {0x56, 0x57, 0x48, 0x83, 0xEC, 0x28}, h_sleep, &o_sleep, 0x82EE24A8},  // sub_82EE24A8 SleepEx
+  {"delay", 0x4302070, 7, {0x56, 0x57, 0x53, 0x48, 0x83, 0xEC, 0x20}, h_delay, &o_delay, 0x82EEE988},  // sub_82EEE988 (Sleep/SleepEx)
   {"startcb", 0x148C1B0, 8, {0x48, 0xC7, 0x41, 0x50, 0x00, 0x00, 0x08, 0x83}, h_startcb, &o_startcb, 0x826FE638},  // sub_826FE638
 };
 
@@ -714,6 +770,9 @@ static DWORD WINAPI monitor(void* arg) {
       if (g_no_nap)
         logf("siesta: esperas de 1 ms salteadas: load_thread %d, decompress %d, rwfilesys %d (en el paso del mundo %d)",
              (int)g_nap_cut[1], (int)g_nap_cut[2], (int)g_nap_cut[3], (int)g_nap_world);
+      if (g_no_nap)
+        logf("siesta: esperas de 1 ms del candado de archivos salteadas: load_thread %d, decompress %d, rwfilesys %d",
+             (int)g_lock_cut[1], (int)g_lock_cut[2], (int)g_lock_cut[3]);
     }
     if (g_base) {
       for (u32 k = 0; k < sizeof kScr / sizeof kScr[0]; k++) {
@@ -837,6 +896,8 @@ int game_install(void) {
   if (!g_setactive) logf("Press Start: no encontré sub_82608EA0, queda como siempre");
   int ok = 1;
   for (usize i = 0; i < sizeof hk / sizeof hk[0]; i++) ok &= hook_entry(&hk[i]);
+  if (have_map) g_swap_hooked = hook_swap();
+  if (!g_swap_hooked) logf("cuadros: no encontré VdSwap, no los cuento");
   CreateThread(NULL, 0, monitor, NULL, 0, NULL);
   if (g_profile) prof_start();
   else if (g_profile_world) prof_start_focus();
