@@ -25,12 +25,15 @@ DLLIMPORT BOOL WINAPI GetThreadContext(HANDLE h, void* ctx);
 DLLIMPORT DWORD WINAPI GetCurrentProcessId(void);
 
 // ---------------------------------------------------------------- func map
-// PPCFuncMappings in skate3.exe .data: {u64 guest, u64 host} pairs.
-#define MAP_RVA 0x5EF7EC0u
-#define MAP_COUNT 48175u
+// PPCFuncMappings in skate3.exe .data: {u64 guest, u64 host} pairs, sorted by
+// guest. It is found by content (first pair is the start of the guest .text)
+// so a copy of the build with another layout still maps.
 #define TEXT_RVA 0x1000u
-#define TEXT_END 0x5BE95F6u
+#define MAP_FIRST_GUEST 0x82380000ull
 
+static u32 g_text_end;
+static u64* g_map;     // raw table
+static u32 g_mapn;
 static u32* g_hrva;   // sorted host RVAs of guest functions
 static u32* g_hguest; // guest address for each
 static u32 g_nfn;
@@ -51,31 +54,78 @@ static void sort_map(void) {
     }
 }
 
-int load_map(void) {
-  u64* m = (u64*)(g_exe + MAP_RVA);
-  g_hrva = (u32*)VirtualAlloc(NULL, MAP_COUNT * 8, MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE);
-  if (!g_hrva) return 0;
-  g_hguest = g_hrva + MAP_COUNT;
+static int host_rva(u64 h, u32* out) {
   u64 exe = (u64)g_exe;
-  for (u32 i = 0; i < MAP_COUNT; i++) {
-    u64 g = m[2 * i], h = m[2 * i + 1];
-    if (g < 0x82000000ull || g >= 0x84000000ull) return 0;
-    if (h >= exe && h - exe < TEXT_END)
-      g_hrva[i] = (u32)(h - exe);
-    else if (h >= 0x140000000ull && h - 0x140000000ull < TEXT_END)  // image not relocated
-      g_hrva[i] = (u32)(h - 0x140000000ull);
-    else
-      return 0;
-    g_hguest[i] = (u32)g;
+  if (h >= exe + TEXT_RVA && h - exe < g_text_end) { *out = (u32)(h - exe); return 1; }
+  if (h >= 0x140000000ull + TEXT_RVA && h - 0x140000000ull < g_text_end) {  // image not relocated
+    *out = (u32)(h - 0x140000000ull);
+    return 1;
   }
-  g_nfn = MAP_COUNT;
+  return 0;
+}
+
+static int find_map(void) {
+  u8* nt = g_exe + *(u32*)(g_exe + 0x3C);
+  u16 nsec = *(u16*)(nt + 6);
+  u8* sec = nt + 24 + *(u16*)(nt + 20);
+  g_text_end = 0;
+  for (u16 i = 0; i < nsec; i++) {
+    u8* s = sec + 40 * i;
+    if (memcmp(s, ".text", 6) == 0) g_text_end = *(u32*)(s + 12) + *(u32*)(s + 8);
+  }
+  if (!g_text_end) return 0;
+  for (u16 i = 0; i < nsec; i++) {
+    u8* s = sec + 40 * i;
+    u32 va = *(u32*)(s + 12), vs = *(u32*)(s + 8);
+    if (memcmp(s, ".data", 6) != 0 && memcmp(s, ".rdata", 7) != 0) continue;
+    u64* p = (u64*)(g_exe + ((va + 7) & ~7u));
+    u64* e = (u64*)(g_exe + va + vs) - 4;
+    for (; p < e; p++) {
+      u32 r;
+      if (p[0] != MAP_FIRST_GUEST || p[2] <= p[0] || p[2] >= 0x84000000ull || !host_rva(p[1], &r) ||
+          !host_rva(p[3], &r))
+        continue;
+      u32 n = 0;
+      u64* q = p;
+      while (q + 1 < (u64*)(g_exe + va + vs) && q[0] >= 0x82000000ull && q[0] < 0x84000000ull &&
+             host_rva(q[1], &r)) {
+        n++;
+        q += 2;
+      }
+      if (n < 1000) continue;
+      g_map = p;
+      g_mapn = n;
+      return 1;
+    }
+  }
+  return 0;
+}
+
+int load_map(void) {
+  if (g_nfn) return 1;
+  if (!g_map && !find_map()) return 0;
+  g_hrva = (u32*)VirtualAlloc(NULL, (usize)g_mapn * 8, MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE);
+  if (!g_hrva) return 0;
+  g_hguest = g_hrva + g_mapn;
+  for (u32 i = 0; i < g_mapn; i++) {
+    host_rva(g_map[2 * i + 1], &g_hrva[i]);
+    g_hguest[i] = (u32)g_map[2 * i];
+  }
+  g_nfn = g_mapn;
   sort_map();
   return 1;
 }
 
+// Host RVA of a guest function, 0 if the table doesn't list it.
+u32 host_of(u32 guest) {
+  for (u32 i = 0; i < g_nfn; i++)
+    if (g_hguest[i] == guest) return g_hrva[i];
+  return 0;
+}
+
 u32 guest_of(u64 rip) {
   u64 exe = (u64)g_exe;
-  if (rip < exe + TEXT_RVA || rip >= exe + TEXT_END || !g_nfn) return 0;
+  if (rip < exe + TEXT_RVA || rip >= exe + g_text_end || !g_nfn) return 0;
   u32 r = (u32)(rip - exe);
   u32 lo = 0, hi = g_nfn;
   while (hi - lo > 1) {
@@ -173,7 +223,7 @@ static void sample_one(int si, int phase) {
       u64 exe = (u64)g_exe;
       for (u64 p = rsp & ~7ull; p + 8 <= end && n < 6; p += 8) {
         u64 v = *(u64*)p;
-        if (v < exe + TEXT_RVA + 8 || v >= exe + TEXT_END) continue;
+        if (v < exe + TEXT_RVA + 8 || v >= exe + g_text_end) continue;
         u8* ra = (u8*)v;
         // must follow a call: E8 rel32, or FF /2 forms
         if (ra[-5] != 0xE8 && !(ra[-2] == 0xFF && (ra[-1] & 0x38) == 0x10) &&

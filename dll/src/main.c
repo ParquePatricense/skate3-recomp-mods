@@ -31,19 +31,24 @@ __declspec(dllexport) DWORD WINAPI XInputGetState(DWORD idx, void* state) {
 }
 
 // The modder finds its own dll by this export (and the version in it).
-__declspec(dllexport) u32 skate3_direct_version(void) { return 1; }
+__declspec(dllexport) u32 skate3_direct_version(void) { return 2; }
 
 // ---------------------------------------------------------------- startup
+// The v2.0.2 build is recognised by its timestamp; copies of it can differ in
+// size (a section added after linking), so the size is only logged. What
+// decides is game_install: every hook checks its exact bytes first and
+// nothing is touched if a single one differs.
 static int exe_matches(void) {
   IMAGE_DOS_HEADER* d = (IMAGE_DOS_HEADER*)g_exe;
   if (d->e_magic != 0x5A4D) return 0;
   u8* nt = g_exe + d->e_lfanew;
   u32 ts = *(u32*)(nt + 8);
   u32 size = *(u32*)(nt + 24 + 56);
-  if (ts != EXE_TIMESTAMP || size != EXE_IMAGESIZE) {
+  if (ts != EXE_TIMESTAMP) {
     logf("skate3.exe no es la v2.0.2 conocida (stamp %08X, size %08X): no toco nada", ts, size);
     return 0;
   }
+  if (size != EXE_IMAGESIZE) logf("skate3.exe v2.0.2 con otro tamaño (%08X): reviso byte a byte", size);
   return 1;
 }
 

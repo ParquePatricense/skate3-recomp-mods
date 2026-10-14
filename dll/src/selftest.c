@@ -34,12 +34,15 @@ __declspec(dllexport) int s3d_proftest(int stop) { if (stop) { prof_stop(); retu
 int game_install(void);
 __declspec(dllexport) int s3d_install(void) { return game_install(); }
 u32 guest_of(u64 rip);
+u32 host_of(u32 guest);
 __declspec(dllexport) int s3d_maptest(void) {
   if (!load_map()) return -1;
   u32 a = guest_of((u64)(g_exe + 0x8000E0 + 10));
   u32 b = guest_of((u64)(g_exe + 0xE41C80));
   u32 c = guest_of((u64)(g_exe + 0x14892A0 + 0x300));
-  logf("maptest: %08X %08X %08X", a, b, c);
+  u32 h1 = host_of(0x825D60C8), h2 = host_of(0x826FE638);
+  logf("maptest: %08X %08X %08X host %X %X", a, b, c, h1, h2);
+  if (h1 != 0xE41C80 || h2 != 0x148C1B0) return 0;
   return (a == 0x824AD240 && b == 0x825D60C8 && c == 0x826FDD70) ? 1 : 0;
 }
 #endif

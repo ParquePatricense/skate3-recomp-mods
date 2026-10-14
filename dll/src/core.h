@@ -75,6 +75,7 @@ typedef struct {
   u8 expect[24];
   PPCFunc* fn;      // replacement
   PPCFunc** orig;   // out: original (trampoline or callee)
+  u32 guest;        // guest function the host code belongs to (0: use rva as is)
 } HookSpec;
 
 int check_bytes(u32 rva, const u8* expect, usize n);

@@ -34,6 +34,87 @@ static u32 syn_polls(void) { return g_rt_syn ? *(volatile u32*)(g_rt_syn + 0x11A
 
 // ---------------------------------------------------------------- options
 static int g_skip_logo = 1;
+static int g_uncap = 1;      // no frame cap while booting/loading
+static int g_fast_fade = 1;  // run the post-START transition several steps per frame
+
+// ---------------------------------------------------------------- loading frame cap
+// The recomp paces every guest frame to the display (skate3_guest_fps_cap_auto
+// / skate3_guest_fps_cap, src/skate3_native_render.cpp PaceGuestFrame): a
+// frame that finished early sleeps until the next beat. While booting and
+// loading that sleep only delays the work done frame by frame, so the cap is
+// lifted at the first boot state and the player's values go back once in
+// gameplay. Only the in-memory values change; skate3.toml is not written.
+typedef struct {
+  const char* p;
+  u64 n;
+} StrView;  // std::string_view (passed by address in the x64 ABI)
+typedef u8 (*SetFlag_t)(StrView* name, StrView* value);
+typedef void* (*GetFlag_t)(void* out, StrView* name);
+static SetFlag_t p_setflag;
+static GetFlag_t p_getflag;
+static volatile int g_uncapped;
+static char g_cap_auto[24], g_cap[24];
+
+static StrView sv(const char* s) {
+  StrView v = {s, s_len(s)};
+  return v;
+}
+
+// rex::cvar::GetFlagByName returns a std::string (MSVC layout: 16-byte
+// inline buffer or heap pointer, size at +16, capacity at +24). A heap copy
+// is left alone rather than freed with the wrong allocator.
+static int get_flag(const char* name, char* out, usize cap) {
+  u8 str[32];
+  for (int i = 0; i < 32; i++) str[i] = 0;
+  StrView n = sv(name);
+  p_getflag(str, &n);
+  u64 len = *(u64*)(str + 16), res = *(u64*)(str + 24);
+  const char* p = res > 15 ? *(const char**)str : (const char*)str;
+  if (!len || len >= cap || !p) return 0;
+  for (u64 i = 0; i < len; i++) out[i] = p[i];
+  out[len] = 0;
+  return 1;
+}
+
+static int set_flag(const char* name, const char* value) {
+  StrView n = sv(name), v = sv(value);
+  return p_setflag(&n, &v) != 0;
+}
+
+static void uncap_begin(void) {
+  if (!g_uncap || g_uncapped) return;
+  HMODULE rt = GetModuleHandleW(L"rexruntime.dll");
+  if (!rt) return;
+  p_setflag = (SetFlag_t)GetProcAddress(
+      rt, "?SetFlagByName@cvar@rex@@YA_NV?$basic_string_view@DU?$char_traits@D@std@@@std@@0@Z");
+  p_getflag = (GetFlag_t)GetProcAddress(
+      rt, "?GetFlagByName@cvar@rex@@YA?AV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@"
+          "V?$basic_string_view@DU?$char_traits@D@std@@@4@@Z");
+  if (!p_setflag || !p_getflag) {
+    logf("tope de FPS: no encontré los ajustes del recomp, lo dejo como está");
+    return;
+  }
+  if (!get_flag("skate3_guest_fps_cap_auto", g_cap_auto, sizeof g_cap_auto) ||
+      !get_flag("skate3_guest_fps_cap", g_cap, sizeof g_cap)) {
+    logf("tope de FPS: no pude leer los valores actuales, lo dejo como está");
+    return;
+  }
+  if (set_flag("skate3_guest_fps_cap_auto", "false") && set_flag("skate3_guest_fps_cap", "0")) {
+    g_uncapped = 1;
+    logf("tope de FPS: fuera mientras carga (tenías auto=%s, tope=%s)", g_cap_auto, g_cap);
+  } else {
+    set_flag("skate3_guest_fps_cap_auto", g_cap_auto);
+    set_flag("skate3_guest_fps_cap", g_cap);
+    logf("tope de FPS: el recomp no aceptó el cambio, lo dejo como está");
+  }
+}
+
+static void uncap_end(void) {
+  if (!g_uncapped) return;
+  g_uncapped = 0;
+  int ok = set_flag("skate3_guest_fps_cap", g_cap) & set_flag("skate3_guest_fps_cap_auto", g_cap_auto);
+  logf("tope de FPS: vuelve a auto=%s, tope=%s%s", g_cap_auto, g_cap, ok ? "" : " (falló)");
+}
 
 static int env_off(const wchar* name) {
   wchar v[8];
@@ -47,6 +128,8 @@ volatile int g_phase = PH_BOOT;
 static const char* kPhase[] = {"arranque", "logo", "press-start", "cargando", "juego"};
 const char* kPhaseName(int p) { return p >= 0 && p < 5 ? kPhase[p] : "?"; }
 int prof_start(void);
+int load_map(void);
+u32 host_of(u32 guest);
 void prof_stop(void);
 
 #define ST_LANG 0x826FDD70u
@@ -221,7 +304,11 @@ static void state_ev(u32 st, PPCContext* ctx, u8* base) {
 }
 
 static int g_logo_forced;
-static void h_lang(PPCContext* c, u8* b) { state_ev(ST_LANG, c, b); o_lang(c, b); }
+static void h_lang(PPCContext* c, u8* b) {
+  if (c->r4.u32 == 0) uncap_begin();
+  state_ev(ST_LANG, c, b);
+  o_lang(c, b);
+}
 static void h_stB(PPCContext* c, u8* b) {
   state_ev(ST_LOGO, c, b);
   // Fallback when the logo is not the movie the widget asks about: after a
@@ -240,28 +327,46 @@ static void h_stC(PPCContext* c, u8* b) { state_ev(ST_TITLE, c, b); o_stC(c, b);
 static void h_stD(PPCContext* c, u8* b) { state_ev(ST_D, c, b); o_stD(c, b); }
 static void h_stE(PPCContext* c, u8* b) { state_ev(ST_E, c, b); o_stE(c, b); }
 static void h_press(PPCContext* c, u8* b) { state_ev(ST_PRESS, c, b); o_press(c, b); }
-static void h_after(PPCContext* c, u8* b) { state_ev(ST_FADE, c, b); o_after(c, b); }
+// The state after START runs a sub-machine ([BootFlow+20], started by the
+// Press Start handler) until it reports done, then switches to post-start.
+// With the turbo on, each frame steps it up to 8 more times, stopping as soon
+// as BootFlow has left this state.
+static void h_after(PPCContext* c, u8* b) {
+  state_ev(ST_FADE, c, b);
+  u32 self = c->r3.u32, ev = c->r4.u32;
+  o_after(c, b);
+  if (!g_fast_fade || ev != 1 || g_phase >= PH_GAME) return;
+  int n = 0;
+  while (n < 8 && rd32(self + 8) == ST_FADE && rd32(self + 20)) {
+    c->r3.u64 = self;
+    c->r4.u64 = 1;
+    o_after(c, b);
+    n++;
+  }
+  if (rd32(self + 8) != ST_FADE && first_time(0x30000000))
+    logf("fundido: terminado en %.3f s (%u cuadros, turbo)", now_s() - g_state_t, g_frames);
+}
 static void h_stA(PPCContext* c, u8* b) { state_ev(ST_POST, c, b); o_stA(c, b); }
 static void h_stF(PPCContext* c, u8* b) { state_ev(ST_F, c, b); o_stF(c, b); }
 
 static const HookSpec kHooks[] = {
-  {"movie", 0xE41C80, 7, {0x56, 0x57, 0x53, 0x48, 0x83, 0xEC, 0x20}, h_movie, &o_movie},  // sub_825D60C8
-  {"chg", 0x13E27D0, 5, {0x41, 0x56, 0x56, 0x57, 0x53}, h_chg, &o_chg},  // sub_826DFB30
-  {"fereq", 0x3712E50, 7, {0x56, 0x57, 0x53, 0x48, 0x83, 0xEC, 0x20}, h_fereq, &o_fereq},  // sub_82D0ABE0
-  {"feset", 0x3714230, 7, {0x56, 0x57, 0x53, 0x48, 0x83, 0xEC, 0x20}, h_feset, &o_feset},  // sub_82D0AFA0
-  {"feaef0", 0x3713E60, 7, {0x56, 0x57, 0x53, 0x48, 0x83, 0xEC, 0x20}, h_feaef0, &o_feaef0},  // sub_82D0AEF0
-  {"fepop", 0x3712AB0, 7, {0x56, 0x57, 0x53, 0x48, 0x83, 0xEC, 0x20}, h_fepop, &o_fepop},  // sub_82D0AB30
-  {"fedone", 0x370CAB0, 5, {0x8B, 0x01, 0x83, 0xC0, 0x10}, h_fedone, &o_fedone},  // sub_82D09A40
-  {"lang", 0x14892A0, 7, {0x56, 0x57, 0x53, 0x48, 0x83, 0xEC, 0x20}, h_lang, &o_lang},  // sub_826FDD70
-  {"stB", 0x14896C0, 7, {0x56, 0x57, 0x53, 0x48, 0x83, 0xEC, 0x20}, h_stB, &o_stB},  // sub_826FDE48
-  {"stC", 0x1489940, 5, {0x41, 0x57, 0x41, 0x56, 0x56}, h_stC, &o_stC},  // sub_826FDEF0
-  {"stD", 0x148A1D0, 6, {0x41, 0x57, 0x41, 0x56, 0x41, 0x54}, h_stD, &o_stD},  // sub_826FE058
-  {"stE", 0x148A660, 7, {0x56, 0x57, 0x53, 0x48, 0x83, 0xEC, 0x20}, h_stE, &o_stE},  // sub_826FE138
-  {"press", 0x148A950, 6, {0x41, 0x57, 0x41, 0x56, 0x41, 0x55}, h_press, &o_press},  // sub_826FE1D8
-  {"after", 0x13E1AE0, 6, {0x56, 0x57, 0x48, 0x83, 0xEC, 0x28}, h_after, &o_after},  // sub_826DF8B0
-  {"stA", 0x148B7C0, 5, {0x8B, 0x41, 0x20, 0x85, 0xC0}, h_stA, &o_stA},  // sub_826FE4A8
-  {"stF", 0x148B910, 6, {0x41, 0x57, 0x41, 0x56, 0x41, 0x54}, h_stF, &o_stF},  // sub_826FE4F8
-  {"startcb", 0x148C1B0, 8, {0x48, 0xC7, 0x41, 0x50, 0x00, 0x00, 0x08, 0x83}, h_startcb, &o_startcb},  // sub_826FE638
+  {"movie", 0xE41C80, 7, {0x56, 0x57, 0x53, 0x48, 0x83, 0xEC, 0x20}, h_movie, &o_movie, 0x825D60C8},  // sub_825D60C8
+  {"chg", 0x13E27D0, 5, {0x41, 0x56, 0x56, 0x57, 0x53}, h_chg, &o_chg, 0x826DFB30},  // sub_826DFB30
+  {"fereq", 0x3712E50, 7, {0x56, 0x57, 0x53, 0x48, 0x83, 0xEC, 0x20}, h_fereq, &o_fereq, 0x82D0ABE0},  // sub_82D0ABE0
+  {"feset", 0x3714230, 7, {0x56, 0x57, 0x53, 0x48, 0x83, 0xEC, 0x20}, h_feset, &o_feset, 0x82D0AFA0},  // sub_82D0AFA0
+  {"feaef0", 0x3713E60, 7, {0x56, 0x57, 0x53, 0x48, 0x83, 0xEC, 0x20}, h_feaef0, &o_feaef0, 0x82D0AEF0},  // sub_82D0AEF0
+  {"fepop", 0x3712AB0, 7, {0x56, 0x57, 0x53, 0x48, 0x83, 0xEC, 0x20}, h_fepop, &o_fepop, 0x82D0AB30},  // sub_82D0AB30
+  {"fedone", 0x370CAB0, 5, {0x8B, 0x01, 0x83, 0xC0, 0x10}, h_fedone, &o_fedone, 0x82D09A40},  // sub_82D09A40
+  {"lang", 0x14892A0, 7, {0x56, 0x57, 0x53, 0x48, 0x83, 0xEC, 0x20}, h_lang, &o_lang, 0x826FDD70},  // sub_826FDD70
+  {"stB", 0x14896C0, 7, {0x56, 0x57, 0x53, 0x48, 0x83, 0xEC, 0x20}, h_stB, &o_stB, 0x826FDE48},  // sub_826FDE48
+  {"stC", 0x1489940, 5, {0x41, 0x57, 0x41, 0x56, 0x56}, h_stC, &o_stC, 0x826FDEF0},  // sub_826FDEF0
+  {"stD", 0x148A1D0, 6, {0x41, 0x57, 0x41, 0x56, 0x41, 0x54}, h_stD, &o_stD, 0x826FE058},  // sub_826FE058
+  {"stE", 0x148A660, 7, {0x56, 0x57, 0x53, 0x48, 0x83, 0xEC, 0x20}, h_stE, &o_stE, 0x826FE138},  // sub_826FE138
+  {"press", 0x148A950, 6, {0x41, 0x57, 0x41, 0x56, 0x41, 0x55}, h_press, &o_press, 0x826FE1D8},  // sub_826FE1D8
+  {"after", 0x13E1AE0, 6, {0x56, 0x57, 0x48, 0x83, 0xEC, 0x28}, h_after, &o_after, 0x826DF8B0},  // sub_826DF8B0
+  {"stA", 0x148B7C0, 5, {0x8B, 0x41, 0x20, 0x85, 0xC0}, h_stA, &o_stA, 0x826FE4A8},  // sub_826FE4A8
+  {"stF", 0x148B910, 6, {0x41, 0x57, 0x41, 0x56, 0x41, 0x54}, h_stF, &o_stF, 0x826FE4F8},  // sub_826FE4F8
+  {"startcb", 0x148C1B0, 8, {0x48, 0xC7, 0x41, 0x50, 0x00, 0x00, 0x08, 0x83}, h_startcb, &o_startcb, 0x826FE638},  // sub_826FE638
 };
 
 // ---------------------------------------------------------------- monitor
@@ -337,6 +442,7 @@ static DWORD WINAPI monitor(void* arg) {
            g_t_lang, g_t_logo && g_t_lang ? g_t_logo - g_t_lang : 0, g_t_title && g_t_logo ? g_t_title - g_t_logo : 0,
            g_t_press && g_t_title ? g_t_press - g_t_title : 0, g_t_fade && g_t_press ? g_t_fade - g_t_press : 0,
            g_t_fade ? tg - g_t_fade : 0, tg);
+      uncap_end();
       prof_stop();
     }
     if (g_base) {
@@ -398,22 +504,66 @@ static DWORD WINAPI monitor(void* arg) {
     if (g_phase == PH_GAME && i % 300 == 0) break;
     Sleep(3);
   }
+  uncap_end();  // never left without the player's cap, even if gameplay was not seen
   return 0;
 }
 
 int game_install(void) {
   InitializeCriticalSection(&g_seen_cs);
   if (env_off(L"SKATE3_DIRECT_LOGO")) g_skip_logo = 0;
-  logf("corte del logo EA: %s", g_skip_logo ? "sí" : "no");
+  if (env_off(L"SKATE3_DIRECT_FPS")) g_uncap = 0;
+  if (env_off(L"SKATE3_DIRECT_FADE")) g_fast_fade = 0;
+  logf("corte del logo EA: %s | sin tope de FPS al cargar: %s | fundido rápido: %s", g_skip_logo ? "sí" : "no",
+       g_uncap ? "sí" : "no", g_fast_fade ? "sí" : "no");
+  // Each hook is located through the exe's own guest->host table, so a copy
+  // of the build laid out differently still gets hooked at the right place;
+  // the bytes are then checked exactly as before.
+  static HookSpec hk[sizeof kHooks / sizeof kHooks[0]];
+  int have_map = load_map();
+  if (!have_map) logf("no encontré la tabla de funciones: uso las direcciones fijas");
   for (usize i = 0; i < sizeof kHooks / sizeof kHooks[0]; i++) {
-    if (!check_bytes(kHooks[i].rva, kHooks[i].expect, kHooks[i].len)) {
-      logf("no coincide %s: no toco nada", kHooks[i].name);
+    hk[i] = kHooks[i];
+    u32 r = have_map && hk[i].guest ? host_of(hk[i].guest) : 0;
+    if (r && r != hk[i].rva) logf("%s: %08X está en rva %X (no %X)", hk[i].name, hk[i].guest, r, hk[i].rva);
+    if (r) hk[i].rva = r;
+    if (!check_bytes(hk[i].rva, hk[i].expect, hk[i].len)) {
+      logf("no coincide %s: no toco nada", hk[i].name);
       return 0;
     }
   }
   int ok = 1;
-  for (usize i = 0; i < sizeof kHooks / sizeof kHooks[0]; i++) ok &= hook_entry(&kHooks[i]);
+  for (usize i = 0; i < sizeof hk / sizeof hk[0]; i++) ok &= hook_entry(&hk[i]);
   CreateThread(NULL, 0, monitor, NULL, 0, NULL);
   prof_start();
   return ok;
 }
+
+#ifdef S3D_TEST
+// Test-only: round-trip a rexruntime flag through the cvar API.
+__declspec(dllexport) int s3d_flagtest(wchar* dir) {
+  usize i = 0;
+  for (; dir[i]; i++) g_dir[i] = dir[i];
+  g_dir[i] = 0;
+  log_open();
+  HMODULE rt = GetModuleHandleW(L"rexruntime.dll");
+  if (!rt) return -1;
+  p_setflag = (SetFlag_t)GetProcAddress(
+      rt, "?SetFlagByName@cvar@rex@@YA_NV?$basic_string_view@DU?$char_traits@D@std@@@std@@0@Z");
+  p_getflag = (GetFlag_t)GetProcAddress(
+      rt, "?GetFlagByName@cvar@rex@@YA?AV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@"
+          "V?$basic_string_view@DU?$char_traits@D@std@@@4@@Z");
+  if (!p_setflag || !p_getflag) return -2;
+  char a[24] = {0}, b[24] = {0}, c[24] = {0}, d[24] = {0};
+  int r1 = get_flag("vsync", a, sizeof a);
+  int s1 = set_flag("vsync", "true");
+  int r2 = get_flag("vsync", b, sizeof b);
+  int r3 = get_flag("d3d12_present_frame_limiter_fps", c, sizeof c);
+  int s2 = set_flag("d3d12_present_frame_limiter_fps", "0");  // out of range: must fail
+  int s3 = set_flag("no_such_flag_x", "1");
+  set_flag("vsync", a);
+  get_flag("vsync", d, sizeof d);
+  logf("flagtest: vsync %d'%s' set %d -> %d'%s' | fps %d'%s' set0 %d | unknown %d | back '%s'", r1, a, s1, r2, b,
+       r3, c, s2, s3, d);
+  return r1 && s1 && r2 && b[0] == 't' && !s2 && !s3 && d[0] == a[0];
+}
+#endif
