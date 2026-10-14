@@ -1,0 +1,46 @@
+name: 🐛 Problema / Problem
+description: Algo no anda como debería / Something doesn't work as it should
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        🔧 Lo más rápido: en el modeador, **El taller → Avisar en GitHub**, que abre el reporte ya escrito. / The fastest way: in the modder, **The shop → Report on GitHub**, which opens the report already written.
+        🧩 Requiere skate3recomp v2.0.2 y tu propia copia de Skate 3. / Requires skate3recomp v2.0.2 and your own copy of Skate 3.
+  - type: textarea
+    id: what
+    attributes:
+      label: 🛹 Qué pasó / What happened
+      description: Qué hiciste, qué esperabas y qué pasó. / What you did, what you expected and what happened.
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: 📦 Versión del modeador y del recomp / Modder and recomp version
+      description: Abajo a la izquierda del modeador y en El taller. / Bottom left of the modder and in The shop.
+      placeholder: Skate 3 Mods v3.10.1 / recomp 2.0.2
+    validations:
+      required: true
+  - type: dropdown
+    id: icons
+    attributes:
+      label: 🎮 Iconos / Icons
+      options: [Xbox 360, PS3, PS4, PS5, Switch, Xbox Series, GameSir, Steam Deck, Blanco y negro / Black and white, Para daltónicos / Colour-blind safe]
+  - type: dropdown
+    id: direct
+    attributes:
+      label: ⏩ Directo a tu partida / Straight to your save
+      options: [Prendido / On, Apagado / Off]
+  - type: textarea
+    id: diag
+    attributes:
+      label: 🩺 Diagnóstico / Diagnostics
+      description: El taller → Diagnóstico deja Skate3-Mods-diagnostico.txt en el escritorio; pegá su contenido. / The shop → Diagnostics leaves Skate3-Mods-diagnostico.txt on the desktop; paste its contents.
+      render: text
+  - type: textarea
+    id: log
+    attributes:
+      label: 📜 skate3-direct.log (si es de la carga / if it's about loading)
+      description: Carga → Log de la carga lo abre. / Loading → Load log opens it.
+      render: text

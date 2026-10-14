@@ -8,6 +8,8 @@ Pack de mods **modular** para o [skate3recomp](https://github.com/mchughalex/ska
 
 > ⚡ **De 16,6 s para ~7 s:** com *Direto para o seu save*, um patch dentro do jogo te deixa andando de skate no seu save em uns 7 segundos depois que você aperta **DROP IN**.
 
+<p align="center"><img src="preview/drop-in.gif" alt="DROP IN" width="720"><br><sub>Recriação com o tempo de um carregamento real: 6,9 s a partir do DROP IN.</sub></p>
+
 ![modder](preview/modeador.png)
 
 ## ✨ O que vem
@@ -170,5 +172,7 @@ python tools/build_payload.py preview/png   # redesenha e regenera src/payload.p
 Fonte: Inter (SIL Open Font License, veja `tools/fonts/Inter-LICENSE.txt`).
 
 ---
+
+📝 [Mudanças de cada versão](CHANGELOG.md) · 🐛 [Relatar um problema](../../issues/new/choose)
 
 📄 Licença em [`LICENSE`](LICENSE). Sem relação com a EA, Sony, Microsoft, Nintendo, Valve nem com o projeto skate3recomp. Skate 3 é marca da Electronic Arts.

@@ -8,6 +8,8 @@
 
 > ⚡ **16.6 秒から約 7 秒へ:** *セーブに直行* を使うと、ゲーム内パッチのおかげで **DROP IN** を押してから約 7 秒で自分のセーブデータで滑り出せます。
 
+<p align="center"><img src="preview/drop-in.gif" alt="DROP IN" width="720"><br><sub>実際のロード時間で再現：DROP IN から 6.9 秒。</sub></p>
+
 ![modder](preview/modeador.png)
 
 ## ✨ 主な機能
@@ -170,5 +172,7 @@ python tools/build_payload.py preview/png   # 再描画して src/payload.py と
 フォント：Inter（SIL Open Font License、`tools/fonts/Inter-LICENSE.txt` を参照）。
 
 ---
+
+📝 [各バージョンの変更点](CHANGELOG.md) · 🐛 [問題を報告](../../issues/new/choose)
 
 📄 ライセンスは [`LICENSE`](LICENSE) を参照してください。EA、Sony、Microsoft、Nintendo、Valve、skate3recomp プロジェクトとは関係ありません。Skate 3 は Electronic Arts の商標です。

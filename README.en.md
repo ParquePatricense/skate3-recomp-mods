@@ -8,6 +8,8 @@ A **modular** mod pack for [skate3recomp](https://github.com/mchughalex/skate3re
 
 > ⚡ **From 16.6 s to ~7 s:** with *Straight to your save*, a patch inside the game has you skating in your save about 7 seconds after you hit **DROP IN**.
 
+<p align="center"><img src="preview/drop-in.gif" alt="DROP IN" width="720"><br><sub>Recreation using the time of a real load: 6.9 s from DROP IN.</sub></p>
+
 ![modder](preview/modeador.png)
 
 ## ✨ What's inside
@@ -170,5 +172,7 @@ python tools/build_payload.py preview/png   # redraws and regenerates src/payloa
 Font: Inter (SIL Open Font License, see `tools/fonts/Inter-LICENSE.txt`).
 
 ---
+
+📝 [Changes in each version](CHANGELOG.md) · 🐛 [Report a problem](../../issues/new/choose)
 
 📄 License in [`LICENSE`](LICENSE). Not affiliated with EA, Sony, Microsoft, Nintendo, Valve or the skate3recomp project. Skate 3 is a trademark of Electronic Arts.

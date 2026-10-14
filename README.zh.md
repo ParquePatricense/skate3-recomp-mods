@@ -8,6 +8,8 @@
 
 > ⚡ **从 16.6 秒缩短到约 7 秒：** 开启*直达存档*后，游戏内补丁能让你从点下 **DROP IN** 起大约 7 秒就在自己的存档里开滑。
 
+<p align="center"><img src="preview/drop-in.gif" alt="DROP IN" width="720"><br><sub>按真实加载时间重现：从 DROP IN 起 6.9 秒。</sub></p>
+
 ![modder](preview/modeador.png)
 
 ## ✨ 包含内容
@@ -170,5 +172,7 @@ python tools/build_payload.py preview/png   # 重新绘制并重新生成 src/pa
 字体：Inter（SIL Open Font License，见 `tools/fonts/Inter-LICENSE.txt`）。
 
 ---
+
+📝 [每个版本的更新内容](CHANGELOG.md) · 🐛 [报告问题](../../issues/new/choose)
 
 📄 许可证见 [`LICENSE`](LICENSE)。与 EA、Sony、Microsoft、Nintendo、Valve 以及 skate3recomp 项目均无关联。Skate 3 是 Electronic Arts 的商标。

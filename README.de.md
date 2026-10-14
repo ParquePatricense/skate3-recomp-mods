@@ -8,6 +8,8 @@
 
 > ⚡ **Von 16,6 s auf ~7 s:** Mit *Direkt zu deinem Spielstand* bringt dich ein Patch im Spiel in etwa 7 Sekunden ab dem Druck auf **DROP IN** in deinen Spielstand aufs Board.
 
+<p align="center"><img src="preview/drop-in.gif" alt="DROP IN" width="720"><br><sub>Nachgestellt mit der Zeit eines echten Ladevorgangs: 6,9 s ab DROP IN.</sub></p>
+
 ![Modder](preview/modeador.png)
 
 ## ✨ Was drin ist
@@ -170,5 +172,7 @@ python tools/build_payload.py preview/png   # zeichnet neu und erzeugt src/paylo
 Schrift: Inter (SIL Open Font License, siehe `tools/fonts/Inter-LICENSE.txt`).
 
 ---
+
+📝 [Änderungen jeder Version](CHANGELOG.md) · 🐛 [Problem melden](../../issues/new/choose)
 
 📄 Lizenz in [`LICENSE`](LICENSE). Keine Verbindung zu EA, Sony, Microsoft, Nintendo, Valve oder dem Projekt skate3recomp. Skate 3 ist eine Marke von Electronic Arts.
