@@ -189,7 +189,8 @@ static void thread_name(HANDLE h, char* out, int cap);
 // is in the world-load step (827077D8), so the rest of the game never stops.
 static volatile int g_focus, g_window;
 static const char* kFocusNames[] = {"load_thread", "decompress_thread", "rwfilesys", "Main XThread",
-                                    "render_thread", "Job Manager"};
+                                    "render_thread", "Job Manager", "GPU Commands", "D3D12 Pipelines",
+                                    "Shader Translation", "GPU VSync"};
 static int focus_wanted(HANDLE h) {
   char name[64];
   thread_name(h, name, sizeof name);
@@ -234,7 +235,7 @@ static void sample_one(int si, int phase) {
   *(DWORD*)(g_ctx + 0x30) = CONTEXT_CONTROL_INT;
   u32 chain[6];
   int n = 0;
-  u64 rip = 0;
+  u64 rip = 0, rt_ret = 0;
   if (GetThreadContext(s->h, g_ctx)) {
     rip = *(u64*)(g_ctx + 0xF8);
     u64 rsp = *(u64*)(g_ctx + 0x98);
@@ -245,6 +246,12 @@ static void sample_one(int si, int phase) {
       u64 exe = (u64)g_exe;
       for (u64 p = rsp & ~7ull; p + 8 <= end && n < 6; p += 8) {
         u64 v = *(u64*)p;
+        if (!rt_ret && g_rt && v >= (u64)g_rt + 0x1000 + 8 && v < (u64)g_rt + g_rt_size) {
+          u8* ra = (u8*)v;
+          if (ra[-5] == 0xE8 || (ra[-2] == 0xFF && (ra[-1] & 0x38) == 0x10) ||
+              (ra[-3] == 0xFF && (ra[-2] & 0x38) == 0x10) || (ra[-6] == 0xFF && ra[-5] == 0x15))
+            rt_ret = v;
+        }
         if (v < exe + TEXT_RVA + 8 || v >= exe + g_text_end) continue;
         u8* ra = (u8*)v;
         // must follow a call: E8 rel32, or FF /2 forms
@@ -260,7 +267,7 @@ static void sample_one(int si, int phase) {
   s->samples[phase]++;
   s->total++;
   if (n || guest_of(rip)) s->with_guest++;
-  else if (s->total >= 500 && !s->with_guest) s->dropped = 1;  // 2 s without game code
+  else if (s->total >= 500 && !s->with_guest && !g_focus) s->dropped = 1;  // 2 s without game code
   u32 leaf = guest_of(rip);
   u16 base = (u16)((phase << 12) | (si << 2));
   if (leaf) {
@@ -275,6 +282,8 @@ static void sample_one(int si, int phase) {
   }
   if (!leaf && g_rt && rip >= (u64)g_rt && rip < (u64)g_rt + g_rt_size)
     bump((u32)(rip - (u64)g_rt) & ~0xFu, base | 3);  // where in rexruntime.dll
+  else if (!leaf && rt_ret)
+    bump(((u32)(rt_ret - (u64)g_rt) & ~0xFu) | 1, base | 3);  // in the OS/driver, called from rexruntime (odd = caller)
 }
 
 static volatile int g_prof_stop;
@@ -304,7 +313,7 @@ static void report(void) {
   for (int ph = 0; ph < 5; ph++) {
     for (int si = 0; si < g_nslots; si++) {
       Slot* s = &g_slots[si];
-      if (s->samples[ph] < 25 || !s->with_guest) continue;
+      if (s->samples[ph] < 25 || (!s->with_guest && !g_focus)) continue;
       char name[64];
       thread_name(s->h, name, sizeof name);
       logf("[%s] hilo %u \"%s\": %u muestras, %u en código del juego", kPhaseName(ph), s->tid, name,
