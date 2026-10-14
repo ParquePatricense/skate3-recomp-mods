@@ -61,7 +61,7 @@ static int g_fast_black = 1;  // fade to black before gameplay (82709338) finish
 static int g_no_nap = 1;     // loading threads poll with SleepEx(1): yield instead while loading
 static int g_no_query = 0;   // no host occlusion queries while loading (v3.9.12: no gain, opt-in)
 static int g_boost = 1;      // GPU Commands + render_thread at high priority while loading
-static int g_fast_tick = 1;  // game tick timer at 4 ms instead of ~16.7 ms from the language screen to gameplay
+static int g_fast_tick = 1;  // game tick timer at 4 ms instead of ~16.7 ms from the language screen to START
 static volatile int g_tick_on;
 int boost_threads(void);
 void boost_restore(void);
@@ -675,10 +675,12 @@ static int hook_swap(void) {
 // (this+16 = -period in 100 ns; this+24 = base 60 Hz period, this+120 = the
 // period corrected by the average error over 60 ticks: ring at this+136,
 // average at this+128). Every boot step therefore costs at least one 16.7 ms
-// tick even with nothing to do. From the language screen to gameplay the
-// timer is armed for 4 ms instead; the game's own value is left as is. When
-// gameplay starts, the error history (which saw the short ticks) is cleared
-// and the period goes back to the base, so gameplay ticks at 60 Hz at once.
+// tick even with nothing to do. From the language screen to START the
+// timer is armed for 4 ms instead; the game's own value is left as is. After
+// START the error history (which saw the short ticks) is cleared and the
+// period goes back to the base. v3.9.15 kept it up to gameplay: the screens
+// before START got 0.17 s faster, but after START the save/world steps got
+// 0.3 s slower (the extra ticks take CPU from the loader threads).
 #define TICK_FAST (-40000LL)
 static PPCFunc* o_settimer;
 static u32 g_tick_obj;
@@ -696,10 +698,10 @@ static void h_settimer(PPCContext* ctx, u8* base) {
   u32 obj = pdue - 16;
   i64 due = gl64(base, pdue);
   int is_tick = gok(obj, 1112) && gload32(base, obj + 8) == ctx->r3.u32 && due <= -50000 && due >= -400000;
-  if (is_tick && g_tick_on && g_phase < PH_GAME) {
+  if (is_tick && g_tick_on && g_phase < PH_LOADING) {
     if (!g_tick_obj) {
       g_tick_obj = obj;
-      logf("tick del juego: cada 4 ms mientras carga (era %.2f ms)", -due / 10000.0);
+      logf("tick del juego: cada 4 ms hasta el START (era %.2f ms)", -due / 10000.0);
     }
     gs64(base, pdue, TICK_FAST);
     __sync_fetch_and_add(&g_tick_cut, 1);
@@ -707,7 +709,7 @@ static void h_settimer(PPCContext* ctx, u8* base) {
     gs64(base, pdue, due);
     return;
   }
-  if (is_tick && obj == g_tick_obj && g_phase >= PH_GAME && !g_tick_reset) {
+  if (is_tick && obj == g_tick_obj && g_phase >= PH_LOADING && !g_tick_reset) {
     g_tick_reset = 1;
     i64 period = gl64(base, obj + 24);
     for (u32 o = 128; o < 616; o += 8) gs64(base, obj + o, 0);
@@ -1027,15 +1029,15 @@ __declspec(dllexport) int s3d_ticktest(u8* base) {
   c.r4.u64 = obj + 16;
   int keep_phase = g_phase;
   g_tick_on = 1;
-  g_phase = PH_LOADING;
+  g_phase = PH_PRESS;
   h_settimer(&c, base);
   int a = g_seen_due == TICK_FAST && gl64(base, obj + 16) == -166667;
-  g_phase = PH_GAME;
+  g_phase = PH_LOADING;
   h_settimer(&c, base);
   int b = g_seen_due == -166667 && gl64(base, obj + 120) == 166667 && gl64(base, obj + 128) == 0 &&
           gl64(base, obj + 200) == 0 && gl64(base, obj + 24) == 166667;
   c.r3.u64 = 0x9999;  // another timer: untouched
-  g_phase = PH_LOADING;
+  g_phase = PH_PRESS;
   g_tick_reset = 0;
   h_settimer(&c, base);
   int d = g_seen_due == -166667;
