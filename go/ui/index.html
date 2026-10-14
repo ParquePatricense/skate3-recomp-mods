@@ -8,6 +8,7 @@
   --asphalt:#141414; --asphalt2:#1d1d1d; --ink:#f4f1ea; --dim:#a9a49a; --mute:#6f6a62;
   --orange:#ff5a1f; --orange2:#ffb020; --lime:#c6ff3d; --red:#ff3b3b; --blue:#3fa9ff; --pink:#ff6fb5; --green:#2fe39a;
   --tape:#f2e7c9; --sticker:#fffdf6; --line:rgba(255,255,255,.08);
+  --hfont:"Bahnschrift","Segoe UI Semibold","Segoe UI",sans-serif;
 }
 *{box-sizing:border-box}
 html,body{margin:0;height:100%;overflow:hidden;background:var(--asphalt);color:var(--ink);
@@ -18,7 +19,7 @@ body::after{content:"";position:fixed;inset:0;pointer-events:none;
   background:linear-gradient(90deg,transparent 0 calc(25% - 1px),var(--line) calc(25% - 1px) 25%,transparent 25%) 0 0/440px 100%,
              radial-gradient(1200px 600px at 75% -10%,rgba(255,90,31,.16),transparent 60%),
              radial-gradient(900px 500px at -10% 110%,rgba(198,255,61,.08),transparent 60%)}
-.h{font-family:Impact,"Arial Black",sans-serif;letter-spacing:.5px;text-transform:uppercase;font-style:italic}
+.h{font-family:var(--hfont);font-weight:700;font-stretch:condensed;letter-spacing:1.2px;text-transform:uppercase;font-style:normal;line-height:1.1}
 button{font:inherit;color:inherit;cursor:pointer}
 #app{position:relative;z-index:1;display:grid;grid-template-columns:250px 1fr;height:100%}
 
@@ -37,7 +38,7 @@ button{font:inherit;color:inherit;cursor:pointer}
   transform:rotate(-4deg);font-size:22px;box-shadow:3px 3px 0 #000}
 nav{position:relative;display:flex;flex-direction:column;gap:9px;margin-top:20px;padding:0 10px}
 nav button{position:relative;text-align:left;border:0;background:transparent;padding:10px 14px 9px 40px;
-  font-family:Impact,"Arial Black",sans-serif;font-style:italic;text-transform:uppercase;font-size:20px;color:var(--dim);
+  font-family:var(--hfont);font-weight:700;font-stretch:condensed;letter-spacing:1.2px;text-transform:uppercase;font-size:19px;color:var(--dim);
   transition:transform .15s,color .15s}
 nav button i{position:absolute;left:10px;top:50%;transform:translateY(-50%);font-style:normal;font-size:18px;filter:grayscale(1);opacity:.6}
 nav button:hover{color:var(--ink);transform:translateX(4px)}
@@ -53,11 +54,11 @@ nav button.on i{filter:none;opacity:1}
 
 /* ---------- main ---------- */
 #main{position:relative;display:flex;flex-direction:column;min-width:0}
-#top{display:flex;align-items:center;gap:16px;padding:22px 30px 6px}
+#top{display:flex;align-items:center;gap:28px;padding:22px 30px 14px}
 #title{flex:1;min-width:0}
 #title h1{margin:0;font-size:44px;line-height:1;text-shadow:3px 3px 0 #000}
-#title p{margin:6px 0 0;color:var(--dim);font-size:14px}
-#drop{position:relative;border:0;padding:16px 34px 14px;background:var(--orange);color:#111;font-size:30px;
+#title p{margin:8px 0 0;color:var(--dim);font-size:14px;line-height:1.5}
+#drop{position:relative;flex:none;margin:6px 26px 4px 0;border:0;padding:16px 34px 14px;background:var(--orange);color:#111;font-size:30px;
   transform:rotate(-3deg);box-shadow:6px 6px 0 #000;transition:transform .12s,box-shadow .12s}
 #drop:hover{transform:rotate(-3deg) translate(-2px,-3px);box-shadow:8px 9px 0 #000}
 #drop:active{transform:rotate(-3deg) translate(3px,3px);box-shadow:2px 2px 0 #000}
@@ -66,14 +67,14 @@ nav button.on i{filter:none;opacity:1}
 #rootbar span{overflow:hidden;text-overflow:ellipsis}
 .chip{padding:2px 8px;border:1px solid #333;border-radius:20px;color:var(--dim)}
 #upd{display:none;background:var(--lime);color:#111;border:0;border-radius:3px;padding:3px 10px;font-weight:800}
-#pages{flex:1;overflow:auto;padding:16px 30px 120px}
+#pages{flex:1;overflow:auto;padding:22px 30px 120px}
 #pages::-webkit-scrollbar{width:10px}#pages::-webkit-scrollbar-thumb{background:#333;border-radius:10px}
 .page{display:none;animation:in .25s ease-out}
 .page.on{display:block}
 @keyframes in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
 .sec{margin:6px 0 22px}
-.sec>h2{margin:0 0 4px;font-size:26px}
-.sec>p{margin:0 0 14px;color:var(--dim);font-size:14px;max-width:760px}
+.sec>h2{margin:0 0 8px;font-size:24px}
+.sec>p{margin:0 0 14px;color:var(--dim);font-size:14px;line-height:1.5;max-width:760px}
 .grid{display:grid;gap:16px}
 .g4{grid-template-columns:repeat(4,minmax(0,1fr))}
 .g3{grid-template-columns:repeat(3,minmax(0,1fr))}
@@ -88,7 +89,7 @@ nav button.on i{filter:none;opacity:1}
 .pick.sel::after{content:attr(data-tag);position:absolute;top:-11px;right:12px;padding:2px 10px;background:var(--tape);
   color:#222;font:700 11px "Segoe UI";letter-spacing:1px;text-transform:uppercase;transform:rotate(3deg);box-shadow:2px 2px 0 rgba(0,0,0,.4)}
 .card h3{margin:10px 0 2px;font-size:22px}
-.card .sub{color:var(--dim);font-size:12.5px;line-height:1.35}
+.card .sub{color:var(--dim);font-size:12.5px;line-height:1.45}
 .btns{display:flex;justify-content:center;gap:8px;padding:14px 0 6px;background:#101010;border-radius:9px}
 .gl{width:38px;height:38px;border-radius:50%;display:grid;place-items:center;font:900 19px "Segoe UI";background:#262626;
   box-shadow:inset 0 -3px 0 rgba(0,0,0,.4)}
@@ -119,7 +120,7 @@ nav button.on i{filter:none;opacity:1}
 body.sofa :focus-visible{outline:5px solid var(--lime);outline-offset:4px;box-shadow:0 0 0 10px rgba(198,255,61,.18)}
 .row .tx{flex:1;min-width:0}
 .row .tx b{display:block;font-size:15.5px}
-.row .tx span{color:var(--dim);font-size:13px}
+.row .tx span{color:var(--dim);font-size:13px;line-height:1.45}
 .row .ic{font-size:22px;width:30px;text-align:center}
 .sw{position:relative;width:74px;height:34px;flex:none;border:0;border-radius:18px;background:#2a2a2a;
   box-shadow:inset 0 2px 6px rgba(0,0,0,.6);transition:background .2s}
@@ -208,7 +209,7 @@ body.busy #pages{pointer-events:none;opacity:.6;transition:opacity .2s}
 @keyframes blink{50%{box-shadow:0 0 0 3px rgba(255,90,31,.35)}}
 .scr{display:flex;gap:12px;flex-wrap:wrap}
 .scr .card{min-width:150px;text-align:center;padding:14px 18px}
-.scr .mon{width:90px;height:56px;margin:0 auto 8px;border:3px solid #444;border-radius:6px;display:grid;place-items:center;font:900 22px Impact,sans-serif;font-style:italic}
+.scr .mon{width:90px;height:56px;margin:0 auto 8px;border:3px solid #444;border-radius:6px;display:grid;place-items:center;font:700 22px var(--hfont)}
 .scr .sel .mon{border-color:var(--orange);color:var(--orange)}
 #rgen{width:auto;padding:0 12px;border-radius:19px;font:800 11px "Segoe UI";letter-spacing:1px;text-transform:uppercase;color:var(--lime)}
 #gmenu{display:none;position:fixed;bottom:84px;left:330px;flex-direction:column;gap:4px;padding:8px;background:#1b1b1b;border:1px solid #333;border-radius:12px;box-shadow:6px 6px 0 #000}
@@ -220,7 +221,7 @@ body.full #winctl{display:flex}
 #winctl button{width:40px;height:30px;border:0;border-radius:6px;background:transparent;color:var(--dim);font-size:15px}
 #winctl button:hover{background:#2a2a2a;color:var(--ink)}
 #winctl button.x:hover{background:#c42b1c;color:#fff}
-body.full #top{padding-top:34px}
+body.full #top{padding-top:46px}
 .opts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
 .opts .card{padding:14px 16px}.opts b{display:block;font-size:15px}.opts span{color:var(--dim);font-size:12.5px}
 .langs{display:flex;flex-wrap:wrap;gap:8px}
@@ -244,6 +245,13 @@ textarea{width:100%;min-height:110px;background:#111;color:var(--ink);border:1px
 .rr span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--dim)}.rr small{color:var(--mute)}
 .rr.on{border-color:var(--orange)}.rr.on span{color:var(--ink)}.rr b{color:var(--lime);font-size:12px}
 .rr .btn{padding:4px 10px;font-size:12px}
+.bn .gl{background:#f6f6f6;color:#111;box-shadow:inset 0 0 0 2px #111}
+.cvd .gl{background:#18181c;box-shadow:inset 0 0 0 2px #ebebf0}
+.lbadge{flex:none;min-width:64px;padding:8px 10px;border-radius:10px;background:#262626;border:1px solid #333;text-align:center;font:700 16px var(--hfont);letter-spacing:1px;color:var(--ink)}
+.prev{display:flex;flex-direction:column;justify-content:center;gap:10px;background:#101010}
+.prev .pl{display:flex;align-items:center;gap:12px;font-size:15px;color:var(--ink)}
+.prev .pl .gl{width:32px;height:32px;font-size:16px;flex:none}
+.prev .cap{color:var(--mute);font-size:12px;letter-spacing:1px;text-transform:uppercase}
 </style>
 </head>
 <body>
@@ -295,13 +303,13 @@ textarea{width:100%;min-height:110px;background:#111;color:var(--ink);border:1px
 "use strict";
 // ------------------------------------------------------------------ texts
 const L = {
- es:{chg:["Carga directa: un parche dentro del juego corta el logo de EA, saca el tope de FPS mientras carga y anota cada paso en skate3-direct.log.",
-   "Botones nuevos: Switch (1 y 2, Pro y Joy-Con), Xbox Series, GameSir y Steam Deck.",
-   "Pestaña Carga: Defender sin revisar el juego, precarga al prender la PC, mover el juego a un SSD con un botón, aviso de carga lenta y gráfico de tus últimas 20 cargas contra los 10 s.",
-   "Skate 3 en Português (Brasil): el juego entero traducido, y el modeador también.",
-   "Al elegir el idioma de la carga directa, el modeador se pasa al mismo.",
-   "Tiempo de juego por día y semana, resumen al volver, cartel al llegar y aviso de drift del joystick.",
-   "Fondo del modeador con fotos del juego y varias versiones del recomp a mano."],
+ es:{chg:["Pantalla de carga toda negra, sin fotos del juego.",
+   "Botones para leer mejor: blanco y negro y para daltónicos, con una vista de cómo se ven en el juego.",
+   "La radio arranca con un tema distinto cada vez que abrís el modeador.",
+   "Letra nueva, más tranquila y espaciada, y más aire alrededor de Drop in.",
+   "Pestaña Idioma rehecha: primero el idioma de esta ventana, después los idiomas extra del juego.",
+   "Carga directa en ~7 s: tick rápido, logo de EA en 0,03 s y menos esperas dentro del juego.",
+   "Fuera el ruido de ollie al terminar la carga."],
   t_speed:"Carga",s_speed:"Todo lo que saca segundos de la carga, y cuánto tarda cada una.",
   defT:"Que Windows Defender no revise el juego",defD:"Defender revisa cada archivo que el juego abre al cargar. Esto le pide a Windows (con su permiso de administrador) que deje afuera la carpeta del juego.",
   preT:"Precarga al prender la PC",preD:"Al iniciar Windows, sin abrir ninguna ventana, el modeador deja los archivos del juego en memoria para que la primera carga del día sea rápida.",
@@ -324,7 +332,7 @@ const L = {
   s_buttons:"Elegí cómo se ven los botones en el juego, según tu joystick. Se cambian al toque y vuelven a Xbox 360 cuando quieras.",
   s_gfx:"Presets de un toque, pantalla, campo de visión y ultrawide. Después podés seguir ajustando en Settings del juego.",
   s_session:"Cosas que hace el ayudante mientras jugás. Funcionan si abrís el juego con DROP IN o con el acceso directo.",
-  s_lang:"Español ARG en la pantalla de idiomas del juego, y el idioma de esta ventana.",
+  s_lang:"El idioma de esta ventana, y dos idiomas extra para el juego: español rioplatense y portugués de Brasil.",
   s_shop:"Mantenimiento: reparar, carpetas, diagnóstico, actualizar y desinstalar.",
   installed:"puesto",ps3d:"Clásicos de PS3, con los colores de siempre.",ps4d:"Share / Options, estilo PS4.",ps5d:"Blancos y limpios, Create / Options.",xbd:"Los originales del juego (Xbox 360).",swd:"Switch 1 y 2, Pro Controller y Joy-Con: B abajo, A a la derecha, ZL / ZR y − / +.",xsd:"Xbox One y Series: LB / RB, LT / RT, Vista y Menú.",gsd:"GameSir (Nova Lite, T4, G7 y otros) y la mayoría de los joysticks de PC.",sdd:"Steam Deck: L1 / R1, L2 / R2, L3 / R3.",
   presets:"Presets gráficos",restore:"Volver a mi configuración de antes",fov:"Campo de visión",fovd:"El original es 60°. Más alto = ves más de la calle.",
@@ -348,7 +356,6 @@ const L = {
   histNone:"Todavía no hay cargas. Jugá con \"Directo a tu partida\" y aparecen acá.",
   hOpen:"Abrir el juego",hMenus:"Logos y menús",hSave:"Tu partida y el mapa",hSpot:"Ir al spot",hRest:"Resto",
   hAvg:"Promedio",hBest:"Mejor",hLast:"Última",
-  ollieT:"Ollie al terminar la carga",ollieD:"Un ruido de ollie cuando se va la pantalla de carga, para saber que ya podés jugar.",
   langAuto:"Automático (el de Windows)",
   langLnk:"Crear acceso directo para este idioma",sumKb:"Teclado",sumDirect:"Directo",sumHelpers:"{n} ayudas",
   uiMonT:"Pantalla del modeador",uiMonD:"En qué monitor abre esta ventana.",
@@ -358,7 +365,12 @@ const L = {
   wiz2:"¿Qué tan potente es tu PC?",wizMax:"Potente",wizBal:"Normal",wizPerf:"Justa",wizUltra:"Muy justa",
   wiz3:"¿Cómo querés arrancar el juego?",wizDirect:"Directo a mi partida",wizNormal:"Normal, con los menús",wizDone:"Listo, todo configurado. Tocá Drop in.",
   crashT:"El juego se cerró solo",crashD:"Se cerró con el error {c}. ¿Armo el reporte con el registro del juego para mandármelo?",crashGo:"Armar reporte",crashTxt:"El juego se cerró solo (error {c}).",
-  argT:"Español ARG",argd:"Reemplaza \"Nederlands\" en la pantalla de idiomas por \"Español ARG\": voseo y vocabulario de acá. El español de siempre queda igual.",
+  readT:"Para leer mejor",readD:"Dos juegos más pensados para que los botones se distingan bien, sin depender de los colores.",
+  bnT:"Blanco y negro",bnd:"Figuras de PlayStation negras sobre blanco: el máximo contraste, ideal para jugar desde la tele.",
+  cvdT:"Para daltónicos",cvdd:"Letras de Xbox con colores que se distinguen con cualquier tipo de daltonismo (sin rojo contra verde).",
+  prevT:"Así se ven en el juego",pvPush:"Empujar",pvBack:"Volver",pvOff:"Bajarte de la tabla",
+  langGameT:"Idiomas extra para el juego",langGameD:"Dos idiomas que el juego no trae. Se suman a su pantalla de idiomas y a la carga directa.",
+  argT:"Español ARG",argd:"Español rioplatense (Argentina y Uruguay): voseo y vocabulario de acá. Aparece en lugar de \"Nederlands\" en la pantalla de idiomas; el español de siempre queda igual.",
   argBefore:"¿Quieres jugar? Haz un kickflip, colega.",argAfter:"¿Querés jugar? Hacé un kickflip, loco.",
   uiLang:"Idioma de esta ventana",
   goalT:"Tus últimas cargas contra los 10 s",goalD:"{n} de {m} cargas entraron en 10 s o menos (verde). Pasá el mouse por una barra para ver la fecha.",bootLangT:"Idioma al entrar directo",bootLangD:"El juego entra en este idioma sin mostrar la pantalla de idiomas, y el modeador se pasa al mismo.",
@@ -398,13 +410,13 @@ const L = {
    "<b>Tip:</b> todo lo que actives se puede deshacer desde acá.","<b>Tip:</b> si actualizás el recomp, tus mods se vuelven a poner solos al jugar.",
    "<b>Tip:</b> Skate 3 (directo) en el escritorio te deja en tu partida sin tocar nada.","<b>Tip:</b> Español ARG aparece en la pantalla de idiomas del juego, en lugar de Nederlands.",
    "<b>Tip:</b> Alt+F4 cierra el juego como la X de la ventana.","<b>Tip:</b> en Controles podés jugar con teclado y mouse y cambiar cada tecla.","<b>Tip:</b> con dos monitores, elegí en Gráficos en cuál abre el juego.","<b>Tip:</b> F11 cambia el modeador entre pantalla completa y ventana.","<b>Tip:</b> tocá el género en la radio: boom bap, punk, rock, electro o cumbia.","<b>Tip:</b> el modeador se maneja con el joystick: LB/RB cambian de pestaña.","<b>Tip:</b> marcá con ☆ los temas de la radio que te gusten."]},
- en:{chg:["Direct load: an in-game patch ends the EA logo, lifts the FPS cap while loading and logs every step to skate3-direct.log.",
-   "New buttons: Switch (1 and 2, Pro and Joy-Con), Xbox Series, GameSir and Steam Deck.",
-   "Loading tab: Defender skips the game, preload at sign-in, move the game to an SSD in one click, slow-load notice and a chart of your last 20 loads against 10 s.",
-   "Skate 3 in Português (Brasil): the whole game translated, and the modder too.",
-   "Picking the direct-load language switches the modder to it too.",
-   "Play time per day and week, a summary when you come back, an arrival sign and a stick drift check.",
-   "Game photos behind the modder and several recomp versions at hand."],
+ en:{chg:["Loading screen all black, no game photos.",
+   "Easier-to-read buttons: black and white and colour-blind safe, with a preview of how they look in the game.",
+   "The radio starts on a different track every time you open the modder.",
+   "New, calmer and roomier font, and more space around Drop in.",
+   "Language tab redone: this window's language first, then the game's extra languages.",
+   "Direct load in ~7 s: fast tick, EA logo in 0.03 s and fewer waits inside the game.",
+   "No more ollie sound when the load ends."],
   t_speed:"Loading",s_speed:"Everything that takes seconds off the load, and how long each one takes.",
   defT:"Keep Windows Defender off the game",defD:"Defender scans every file the game opens while loading. This asks Windows (with its admin prompt) to leave the game folder out.",
   preT:"Preload when the PC starts",preD:"When Windows starts, without opening any window, the modder gets the game files into memory so the day's first load is fast.",
@@ -427,7 +439,7 @@ const L = {
   s_buttons:"Pick how the buttons look in the game, to match your controller. Swaps instantly and goes back to Xbox 360 whenever you want.",
   s_gfx:"One-tap presets, screen, field of view and ultrawide. You can keep tweaking in the game's Settings.",
   s_session:"Things the helper does while you play. They work when you start the game with DROP IN or the shortcut.",
-  s_lang:"Español ARG on the game's language screen, and this window's language.",
+  s_lang:"This window's language, and two extra languages for the game: Rioplatense Spanish and Brazilian Portuguese.",
   s_shop:"Maintenance: repair, folders, diagnostics, updates and uninstall.",
   installed:"on",ps3d:"Classic PS3, with the usual colors.",ps4d:"Share / Options, PS4 style.",ps5d:"Clean white, Create / Options.",xbd:"The game's originals (Xbox 360).",swd:"Switch 1 and 2, Pro Controller and Joy-Con: B at the bottom, A on the right, ZL / ZR and − / +.",xsd:"Xbox One and Series: LB / RB, LT / RT, View and Menu.",gsd:"GameSir (Nova Lite, T4, G7 and more) and most PC controllers.",sdd:"Steam Deck: L1 / R1, L2 / R2, L3 / R3.",
   presets:"Graphics presets",restore:"Restore my previous settings",fov:"Field of view",fovd:"Default is 60°. Higher = you see more of the street.",
@@ -451,7 +463,6 @@ const L = {
   histNone:"No loads yet. Play with \"Straight to your save\" and they show up here.",
   hOpen:"Starting the game",hMenus:"Logos and menus",hSave:"Your save and the map",hSpot:"Going to the spot",hRest:"Rest",
   hAvg:"Average",hBest:"Best",hLast:"Last",
-  ollieT:"Ollie when the load ends",ollieD:"An ollie sound when the loading screen goes away, so you know you can play.",
   langAuto:"Automatic (Windows' language)",
   langLnk:"Create a shortcut for this language",sumKb:"Keyboard",sumDirect:"Direct",sumHelpers:"{n} helpers",
   uiMonT:"Modder screen",uiMonD:"Which monitor this window opens on.",
@@ -461,7 +472,12 @@ const L = {
   wiz2:"How powerful is your PC?",wizMax:"Powerful",wizBal:"Normal",wizPerf:"Modest",wizUltra:"Very modest",
   wiz3:"How do you want the game to start?",wizDirect:"Straight to my save",wizNormal:"Normal, with the menus",wizDone:"Done, everything is set. Hit Drop in.",
   crashT:"The game closed by itself",crashD:"It closed with error {c}. Build the report with the game log so you can send it to me?",crashGo:"Build report",crashTxt:"The game closed by itself (error {c}).",
-  argT:"Español ARG",argd:"Turns \"Nederlands\" on the game's language screen into \"Español ARG\" (Rioplatense Spanish). Regular Spanish stays as is.",
+  readT:"Easier to read",readD:"Two more sets made so the buttons stand apart without relying on colour.",
+  bnT:"Black and white",bnd:"Black PlayStation shapes on white: the most contrast, great for playing from the TV.",
+  cvdT:"Colour-blind safe",cvdd:"Xbox letters in colours that stay apart with any kind of colour blindness (no red against green).",
+  prevT:"How they look in the game",pvPush:"Push",pvBack:"Back",pvOff:"Step off the board",
+  langGameT:"Extra languages for the game",langGameD:"Two languages the game doesn't ship with. They join its language screen and the direct load.",
+  argT:"Español ARG",argd:"Rioplatense Spanish (Argentina and Uruguay), the way people talk there. It takes \"Nederlands\"' place on the language screen; regular Spanish stays as is.",
   argBefore:"¿Quieres jugar? Haz un kickflip, colega.",argAfter:"¿Querés jugar? Hacé un kickflip, loco.",
   uiLang:"This window's language",
   goalT:"Your last loads against 10 s",goalD:"{n} of {m} loads made it in 10 s or less (green). Hover a bar to see its date.",bootLangT:"Language for straight-to-save",bootLangD:"The game starts in this language without showing the language screen, and the modder switches to it too.",
@@ -550,7 +566,7 @@ function modal(title, text, buttons, html) {
 const sw = (on, onclick) => `<button class="sw ${on ? "on" : ""}" onclick="${onclick}"><span class="board"></span></button>`;
 const row = (ic, name, desc, ctl) => `<div class="row"><div class="ic">${ic}</div><div class="tx"><b>${esc(name)}</b><span>${esc(desc)}</span></div>${ctl}</div>`;
 
-const PAGES = [["buttons","🎮"],["gfx","🖼️"],["ctl","⌨️"],["session","🛹"],["speed","⚡"],["access","🔗"],["look","🎨"],["lang","🧉"],["shop","🔧"]];
+const PAGES = [["buttons","🎮"],["gfx","🖼️"],["ctl","⌨️"],["session","🛹"],["speed","⚡"],["access","🔗"],["look","🎨"],["lang","🌐"],["shop","🔧"]];
 function render() {
   document.documentElement.lang = S.lang || "en";
   document.querySelectorAll("[data-t]").forEach(e => e.textContent = t(e.dataset.t));
@@ -560,11 +576,11 @@ function render() {
   $("ptitle").textContent = t("t_" + page);
   const sum = [];
   if (S.root) {
-    sum.push(({xbox: "Xbox", switch: "Switch", xseries: "Xbox Series", gamesir: "GameSir", steamdeck: "Steam Deck"})[S.icons] || (S.icons || "").toUpperCase());
+    sum.push(({xbox: "Xbox", switch: "Switch", xseries: "Xbox Series", gamesir: "GameSir", steamdeck: "Steam Deck", bn: t("bnT"), daltonico: t("cvdT")})[S.icons] || (S.icons || "").toUpperCase());
     const p = (S.presets || []).find(p => p.key === S.preset); if (p) sum.push(p.name.split(" (")[0]);
     if (+S.fov && +S.fov !== 60) sum.push("FOV " + Math.round(S.fov));
     if (S.ultrawide) sum.push("21:9");
-    if (S.arg) sum.push("ARG 🧉");
+    if (S.arg) sum.push("ES-AR");
     if (S.ctl && S.ctl.mnk) sum.push(t("sumKb"));
     if (S.ctl && S.ctl.vsync) sum.push("VSync");
     if (S.ctl && S.ctl.direct) sum.push(t("sumDirect"));
@@ -593,7 +609,22 @@ function buttons() {
     ${card("switch", "", lt(["B","A","Y","X"], ["#f2f2f2"]), "Switch", t("swd"))}
     ${card("xseries", "", lt(["A","B","X","Y"], ["#6ecd5a","#f05046","#4696f5","#fac832"]), "Xbox Series", t("xsd"))}
     ${card("gamesir", "", lt(["A","B","X","Y"], ["#ececf0"], "box-shadow:inset 0 0 0 2px #ff5a1f"), "GameSir", t("gsd"))}
-    ${card("steamdeck", "", lt(["A","B","X","Y"], ["#eceef2"], "background:#343840"), "Steam Deck", t("sdd"))}</div>`;
+    ${card("steamdeck", "", lt(["A","B","X","Y"], ["#eceef2"], "background:#343840"), "Steam Deck", t("sdd"))}</div>
+    <div class="sec" style="margin-top:26px"><h2 class="h">${t("readT")}</h2><p>${t("readD")}</p><div class="grid g4">
+    ${card("bn", "bn", ps(["#111","#111","#111","#111"]), t("bnT"), t("bnd"))}
+    ${card("daltonico", "cvd", lt(["A","B","X","Y"], ["#56b4e9","#e69f00","#cc79a7","#f0e442"]), t("cvdT"), t("cvdd"))}
+    <div class="card prev" style="grid-column:span 2"><div class="cap">${t("prevT")}</div>${preview()}</div></div></div>`;
+}
+// how the installed set reads in a game prompt
+function preview() {
+  const k = S.icons || "xbox", P = {ps3: ["#7fb2ff","#ff5c5c","#38d6a0"], ps4: ["#7fb2ff","#ff5c5c","#38d6a0"], ps5: ["#222","#222","#222"], bn: ["#111","#111","#111"]};
+  const LT = {xbox: [["A","#5fd35f"],["B","#ff4d4d"],["Y","#ffd23f"]], xseries: [["A","#6ecd5a"],["B","#f05046"],["Y","#fac832"]],
+    daltonico: [["A","#56b4e9"],["B","#e69f00"],["Y","#f0e442"]], switch: [["B","#f2f2f2"],["A","#f2f2f2"],["X","#f2f2f2"]],
+    gamesir: [["A","#ececf0"],["B","#ececf0"],["Y","#ececf0"]], steamdeck: [["A","#eceef2"],["B","#eceef2"],["Y","#eceef2"]]};
+  const cls = {ps5: "ps5", bn: "bn", daltonico: "cvd", xbox: "xb"}[k] || "";
+  const g = P[k] ? ["✕","○","△"].map((x, i) => [x, P[k][i]]) : LT[k] || LT.xbox;
+  const glyph = ([x, c]) => k === "xbox" ? `<span class="gl" style="background:${c};color:#111">${x}</span>` : `<span class="gl" style="color:${c}">${x}</span>`;
+  return `<div class="${cls}" style="display:grid;gap:10px">${[t("pvPush"), t("pvBack"), t("pvOff")].map((a, i) => `<div class="pl">${glyph(g[i])}<span>${esc(a)}</span></div>`).join("")}</div>`;
 }
 function gfx() {
   const c = S.ctl, mons = c.monitors || [];
@@ -634,7 +665,7 @@ function keyFromCode(c) {
   if (/^(F([1-9]|1[0-9]|2[0-4])|Numpad[0-9])$/.test(c)) return c;
   return "";
 }
-const padName = b => S.icons && S.icons !== "xbox" ? b.ps : b.xb;
+const padName = b => ["ps3", "ps4", "ps5", "bn"].includes(S.icons) ? b.ps : b.xb;
 function ctl() {
   const c = S.ctl, counts = {};
   c.binds.forEach(b => counts[b.val] = (counts[b.val] || 0) + 1);
@@ -689,8 +720,7 @@ function session() {
      ${row("⏩", t("direct"), t("directD"), sw(S.ctl.direct, `act('direct','${S.ctl.direct ? "off" : "on"}')`))}
      ${S.ctl.direct ? `<div class="card" style="margin-top:8px"><div><b>${t("bootLangT")}</b><div class="sub" style="color:var(--dim);font-size:12.5px;margin:2px 0 12px">${t("bootLangD")}</div>
        <div class="langs">${S.ctl.bootLangs.map(l => `<button class="btn ${S.ctl.bootLang === l.key ? "hot" : ""}" onclick="act('bootlang','${l.key}')">${esc(l.name)}</button>`).join("")}</div></div></div>` : ""}</div>
-    ${S.ctl.direct ? `<div class="rows" style="margin-top:8px">${row("🛹", t("ollieT"), t("ollieD"), sw(S.prefs?.ollie !== "0", `setPref('ollie','${S.prefs?.ollie === "0" ? "1" : "0"}')`))}
-      ${row("📍", t("arrT"), t("arrD"), sw(S.prefs?.arrival !== "0", `setPref('arrival','${S.prefs?.arrival === "0" ? "1" : "0"}')`))}</div>` : ""}
+    ${S.ctl.direct ? `<div class="rows" style="margin-top:8px">${row("📍", t("arrT"), t("arrD"), sw(S.prefs?.arrival !== "0", `setPref('arrival','${S.prefs?.arrival === "0" ? "1" : "0"}')`))}</div>` : ""}
     <div class="sec"><h2 class="h">${t("afterT")}</h2><div class="opts">${opt("min", t("aMin"), t("aMinD"))}${opt("close", t("aClose"), t("aCloseD"))}${opt("stay", t("aStay"), t("aStayD"))}</div></div>
     <div class="sec"><h2 class="h">${t("helper")}</h2><div class="rows">
      ${S.features.map(f => row(FICON[f.key] || "•", f.name, f.desc, sw(f.on, `act('feature','${f.key}=${f.on ? "off" : "on"}')`))).join("")}</div></div>`;
@@ -770,15 +800,15 @@ function speed() {
 function askMove(l) { modal(t("diskT"), t("moveQ").replace("{d}", l), [[t("cancel"), "", null], [t("moveTo").replace("{d}", l).replace(" ({f} libres)", "").replace(" ({f} free)", ""), "hot", () => act("move", l)]]); }
 function askDelOld(p) { modal(t("delOld"), t("delOldQ").replace("{d}", p), [[t("cancel"), "", null], [t("delOld"), "danger", () => act("deleteold")]]); }
 function lang() {
-  return `<div class="sec"><div class="card"><div style="display:flex;align-items:center;gap:16px">
-      <div style="font-size:42px">🧉</div><div style="flex:1"><h3 class="h" style="margin:0">${t("argT")}</h3><div class="sub">${t("argd")}</div></div>
-      ${sw(S.arg, `act('arg','${S.arg ? "off" : "on"}')`)}</div>
-      <div class="ba"><div>${esc(t("argBefore"))}</div><div style="font-size:22px">➜</div><div class="new">${esc(t("argAfter"))}</div></div></div></div>
-    <div class="sec">
-      <div class="card"><div style="display:flex;align-items:center;gap:16px"><div style="font-size:38px">🇧🇷</div><div style="flex:1"><h3 class="h" style="margin:0">${t("ptT")}</h3><div class="sub">${t("ptD")}</div></div>
-        ${S.ctl.bootLang === "pt" ? `<b style="color:var(--lime)">✓ ${t("ptOn")}</b>` : `<button class="btn hot" onclick="act('bootlang','pt')">${t("ptGo")}</button>`}</div></div></div>
-    <div class="sec"><h2 class="h">${t("uiLang")}</h2><div class="grid g4">
-      ${[["auto", t("langAuto")]].concat(UILANGS).map(([k, n]) => `<div class="card pick ${(S.langPref || "auto") === k || (k === "auto" && !UILANGS.some(l => l[0] === S.langPref)) ? "sel" : ""}" data-tag="✓" onclick="setUi('${k}')"><h3 class="h" style="margin:0;font-size:${k === "auto" ? 15 : 20}px">${esc(n)}</h3></div>`).join("")}</div></div>`;
+  const ui = [["auto", t("langAuto")]].concat(UILANGS).map(([k, n]) => `<div class="card pick ${(S.langPref || "auto") === k || (k === "auto" && !UILANGS.some(l => l[0] === S.langPref)) ? "sel" : ""}" data-tag="✓" onclick="setUi('${k}')"><h3 class="h" style="margin:0;font-size:${k === "auto" ? 15 : 19}px">${esc(n)}</h3></div>`).join("");
+  return `<div class="sec"><h2 class="h">${t("uiLang")}</h2><div class="grid g4">${ui}</div></div>
+    <div class="sec" style="margin-top:26px"><h2 class="h">${t("langGameT")}</h2><p>${t("langGameD")}</p>
+      <div class="card"><div style="display:flex;align-items:center;gap:16px">
+        <span class="lbadge">ES-AR</span><div style="flex:1"><h3 class="h" style="margin:0">${t("argT")}</h3><div class="sub">${t("argd")}</div></div>
+        ${sw(S.arg, `act('arg','${S.arg ? "off" : "on"}')`)}</div>
+        <div class="ba"><div>${esc(t("argBefore"))}</div><div style="font-size:22px">➜</div><div class="new">${esc(t("argAfter"))}</div></div></div>
+      <div class="card" style="margin-top:12px"><div style="display:flex;align-items:center;gap:16px"><span class="lbadge">PT-BR</span><div style="flex:1"><h3 class="h" style="margin:0">${t("ptT")}</h3><div class="sub">${t("ptD")}</div></div>
+        ${S.ctl.bootLang === "pt" ? `<b style="color:var(--lime)">✓ ${t("ptOn")}</b>` : `<button class="btn hot" onclick="act('bootlang','pt')">${t("ptGo")}</button>`}</div></div></div>`;
 }
 const UILANGS = [["en","English"],["es","Español"],["pt","Português (Brasil)"],["fr","Français"],["it","Italiano"],["de","Deutsch"],["zh","中文"],["ja","日本語"]];
 // Apariencia: the side deck and the rest of the modder's looks
@@ -1205,6 +1235,8 @@ const radio = (() => {
     menu() { $("gmenu").innerHTML = [["mix","Mix"]].concat(GENRES, favs.length ? [["fav","★ " + t("favs")]] : []).map(([k, l]) => `<button class="${k === genre ? "on" : ""}" onclick="radio.setGenre('${k}')">${l}</button>`).join("");
       const b = $("rgen").getBoundingClientRect(); $("gmenu").style.left = b.left + "px"; $("gmenu").classList.toggle("on"); },
     pause() { if (playing) stop(); },
+    // every time the modder opens: not the track it closed on
+    fresh() { advance(); },
     get playing() { return playing; }
   };
 })();
@@ -1232,6 +1264,7 @@ document.addEventListener("pointerdown", () => { if (AC && AC.state === "suspend
   }
   render();
   $("tip").innerHTML = t("tips")[0];
+  radio.fresh();
   if (!radio.playing) radio.toggle();
   if (S.root && !S.prefs?.seen) setTimeout(wizard, 400); else crashCheck();
   showNews();

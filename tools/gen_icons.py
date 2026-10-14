@@ -46,6 +46,10 @@ STYLES = {
                 sym={'cross': (140, 180, 245), 'circle': (255, 102, 102), 'square': (245, 160, 210), 'triangle': (64, 226, 160)}),
     'ps5': dict(disc=(36, 36, 40, 255), rim=None,
                 sym={k: (232, 232, 236) for k in ('cross', 'circle', 'square', 'triangle')}),
+    # black and white: black PlayStation shapes on a white disc, the most
+    # contrast for a TV across the room or low vision
+    'bn': dict(disc=(246, 246, 246, 255), rim=(20, 20, 22, 255),
+               sym={k: (16, 16, 18) for k in ('cross', 'circle', 'square', 'triangle')}),
 }
 # Letter styles. The game asks for the pad's A/B/X/Y by position (A = bottom),
 # so a Nintendo pad shows its own letter for each position: B bottom, A right,
@@ -60,6 +64,11 @@ LETTERS = {
                     bump=('LB', 'RB'), trig=('LT', 'RT'), menu='xbox', click=('LS', 'RS'), rim=(255, 90, 31, 255)),
     'steamdeck': dict(disc=(52, 56, 64, 255), face={k: k for k in 'ABXY'}, col={k: (236, 238, 242) for k in 'ABXY'},
                       bump=('L1', 'R1'), trig=('L2', 'R2'), menu='xbox', click=('L3', 'R3')),
+    # colour-blind safe: Xbox letters in Okabe-Ito colours (no red against
+    # green; they also differ in lightness), so letter and colour both tell
+    'daltonico': dict(disc=(24, 24, 28, 255), face={k: k for k in 'ABXY'},
+                      col={'A': (86, 180, 233), 'B': (230, 159, 0), 'X': (204, 121, 167), 'Y': (240, 228, 66)},
+                      bump=('LB', 'RB'), trig=('LT', 'RT'), menu='xbox', click=('LS', 'RS'), rim=(235, 235, 240, 255)),
 }
 for _k in LETTERS:
     STYLES[_k] = LETTERS[_k]

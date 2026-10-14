@@ -29,7 +29,18 @@ const (
 var payloadFS embed.FS
 
 var styleNames = map[string]string{"ps3": "PS3", "ps4": "PS4", "ps5": "PS5", "switch": "Switch",
-	"xseries": "Xbox Series", "gamesir": "GameSir", "steamdeck": "Steam Deck"}
+	"xseries": "Xbox Series", "gamesir": "GameSir", "steamdeck": "Steam Deck", "bn": "", "daltonico": ""}
+
+// styleName is the set's name as the modder shows it.
+func styleName(k string) string {
+	switch k {
+	case "bn":
+		return T("blanco y negro", "black and white")
+	case "daltonico":
+		return T("para daltónicos", "colour-blind safe")
+	}
+	return styleNames[k]
+}
 
 // ---------------------------------------------------------------- RefPack
 
@@ -374,7 +385,7 @@ func installIcons(style, game string) error {
 	if err != nil {
 		return err
 	}
-	fmt.Printf(T("Instalando iconos de %s...\n", "Installing %s icons...\n"), styleNames[style])
+	fmt.Printf(T("Instalando iconos de %s...\n", "Installing %s icons...\n"), styleName(style))
 	rx2, err := big.read(idx)
 	if err != nil {
 		return err
@@ -398,7 +409,7 @@ func installIcons(style, game string) error {
 		return err
 	}
 	recordStamp(archive, "icons")
-	fmt.Printf(T("Listo: iconos de %s instalados.\n", "Done: %s icons installed.\n"), styleNames[style])
+	fmt.Printf(T("Listo: iconos de %s instalados.\n", "Done: %s icons installed.\n"), styleName(style))
 	return nil
 }
 
@@ -430,8 +441,8 @@ func iconsStatus(game string) (string, error) {
 	st, err := os.ReadFile(archive + stateSuffix)
 	if err == nil && exists(archive+backupSuffix) {
 		s := strings.TrimSpace(string(st))
-		if n, ok := styleNames[s]; ok {
-			s = n
+		if _, ok := styleNames[s]; ok {
+			s = styleName(s)
 		}
 		return s, nil
 	}

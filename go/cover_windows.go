@@ -15,7 +15,6 @@ import (
 	"path/filepath"
 	"strconv"
 	"strings"
-	"sync/atomic"
 	"syscall"
 	"time"
 	"unsafe"
@@ -49,7 +48,6 @@ var (
 	pDeleteDC               = gdi32.NewProc("DeleteDC")
 	pStretchDIBits          = gdi32.NewProc("StretchDIBits")
 	pSetStretchBltMode      = gdi32.NewProc("SetStretchBltMode")
-	pPlaySoundW             = syscall.NewLazyDLL("winmm.dll").NewProc("PlaySoundW")
 )
 
 const (
@@ -101,9 +99,6 @@ var (
 	coverTipText string
 	coverExpect  time.Duration // how long the last loads took (0 = unknown)
 	coverMuted   bool
-	coverShot    atomic.Pointer[shot] // the game's photo behind the text
-	coverOllie   bool
-	ollieSound   []byte // kept alive while it plays
 	coverProc    = syscall.NewCallback(coverWndProc)
 )
 
@@ -137,18 +132,6 @@ func showCover(root string) {
 	coverText = T("CARGANDO TU PARTIDA", "LOADING YOUR SAVE")
 	coverTipText = loadingTip(iconsKey(root))
 	coverExpect = 0
-	cfg := loadConfig(root)
-	coverOllie = cfg["ui_ollie"] != "0"
-	coverShot.Store(nil)
-	go func(last string) { // a different photo from the game each time
-		if s, err := pickShot(root, last); err == nil {
-			s.dim(.45)
-			coverShot.Store(s)
-			c := loadConfig(root)
-			c["bg_last"] = s.name
-			c.save(root)
-		}
-	}(cfg["bg_last"])
 	if ms, err := strconv.Atoi(loadConfig(root)["boot_ms"]); err == nil && ms > 3000 {
 		coverExpect = time.Duration(ms) * time.Millisecond
 	}
@@ -204,14 +187,6 @@ func hideCover() {
 		muteGame(gamePID, false)
 		coverMuted = false
 	}
-}
-
-// playOllie is the "you can play now" sound.
-func playOllie() {
-	if ollieSound == nil {
-		ollieSound = ollieWav()
-	}
-	pPlaySoundW.Call(uintptr(unsafe.Pointer(&ollieSound[0])), 0, 0x0004|0x0001|0x0002) // SND_MEMORY|SND_ASYNC|SND_NODEFAULT
 }
 
 // recordBoot keeps a running average of how long the direct load takes, for
@@ -313,30 +288,13 @@ func paintCover(h uintptr) {
 	}
 
 	fill(rect{0, 0, w, ht}, rgb(10, 10, 10))
-	if s := coverShot.Load(); s != nil {
-		// fill the screen with the photo, cropping what doesn't fit
-		sx, sy, sw, sh := 0, 0, s.w, s.h
-		if float64(w)/float64(ht) > float64(s.w)/float64(s.h) {
-			sh = s.w * int(ht) / int(w)
-			sy = (s.h - sh) / 2
-		} else {
-			sw = s.h * int(w) / int(ht)
-			sx = (s.w - sw) / 2
-		}
-		bi := bitmapInfoHeader{Width: int32(s.w), Height: -int32(s.h), Planes: 1, BitCount: 32}
-		bi.Size = uint32(unsafe.Sizeof(bi))
-		pSetStretchBltMode.Call(mdc, 4) // HALFTONE
-		pStretchDIBits.Call(mdc, 0, 0, uintptr(w), uintptr(ht), uintptr(sx), uintptr(sy), uintptr(sw), uintptr(sh),
-			uintptr(unsafe.Pointer(&s.bgra[0])), uintptr(unsafe.Pointer(&bi)), 0, srcCopy)
-		draw(shotTitle(s.name), rect{w / 30, ht - ht/12, w / 2, ht - ht/24}, ht/50, "Segoe UI", false, rgb(170, 170, 170), 0)
-	}
 	cy := ht / 2
-	text("SKATE 3", rect{0, cy - ht/5, w, cy}, ht/7, "Impact", true, rgb(238, 238, 238))
+	text("SKATE 3", rect{0, cy - ht/5, w, cy}, ht/7, "Bahnschrift SemiBold Condensed", false, rgb(238, 238, 238))
 	// orange sticker with the message
 	sw, sh := w/4, ht/22
 	fill(rect{(w - sw) / 2, cy + ht/40, (w + sw) / 2, cy + ht/40 + sh}, rgb(255, 90, 31))
 	dots := strings.Repeat(".", int(time.Since(coverStart)/(400*time.Millisecond))%4)
-	text(coverText+dots, rect{(w - sw) / 2, cy + ht/40, (w + sw) / 2, cy + ht/40 + sh}, sh*6/10, "Impact", true, rgb(17, 17, 17))
+	text(coverText+dots, rect{(w - sw) / 2, cy + ht/40, (w + sw) / 2, cy + ht/40 + sh}, sh*6/10, "Bahnschrift SemiBold Condensed", false, rgb(17, 17, 17))
 	// lime bar: how much is left, from how long the last loads took; the
 	// first time it just sweeps like a board rolling by
 	bw, by := w/3, cy+ht/40+sh+ht/18

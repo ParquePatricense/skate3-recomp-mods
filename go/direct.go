@@ -32,7 +32,7 @@ func dropSpot(root string) {
 func loadingTip(style string) string {
 	b := strings.NewReplacer("{A}", "A", "{Y}", "Y", "{LT}", "LT", "{RT}", "RT")
 	switch {
-	case strings.HasPrefix(style, "ps"):
+	case strings.HasPrefix(style, "ps") || style == "bn":
 		b = strings.NewReplacer("{A}", "✕", "{Y}", "△", "{LT}", "L2", "{RT}", "R2")
 	case style == "switch": // the bottom button is B and the top one X on a Nintendo pad
 		b = strings.NewReplacer("{A}", "B", "{Y}", "X", "{LT}", "ZL", "{RT}", "ZR")

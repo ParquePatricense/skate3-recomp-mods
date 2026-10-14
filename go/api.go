@@ -57,7 +57,7 @@ func apiState(root string) map[string]any {
 	st["radio"] = c["radio"]
 	st["ctl"] = controlsState(root)
 	st["afterPlay"] = c["after_play"]
-	st["prefs"] = map[string]string{"deck": c["ui_deck"], "sfx": c["ui_sfx"], "seen": c["ui_seen"], "size": c["ui_size"], "sofa": c["ui_sofa"], "ollie": c["ui_ollie"]}
+	st["prefs"] = map[string]string{"deck": c["ui_deck"], "sfx": c["ui_sfx"], "seen": c["ui_seen"], "size": c["ui_size"], "sofa": c["ui_sofa"]}
 	st["bootHist"] = bootHistory(root)
 	st["langPref"] = c["lang"]
 	st["steam"] = c.on("steam")
@@ -122,7 +122,7 @@ func apiDo(root *string, cmd, arg string) (string, error) {
 		if arg == "xbox" {
 			return T("Iconos originales de Xbox", "Original Xbox icons"), uninstallIcons(r)
 		}
-		return fmt.Sprintf(T("Iconos de %s instalados", "%s icons installed"), styleNames[arg]), installIcons(arg, r)
+		return fmt.Sprintf(T("Iconos de %s instalados", "%s icons installed"), styleName(arg)), installIcons(arg, r)
 	case "preset":
 		if arg == "restore" {
 			return T("Tu configuración de antes volvió", "Your previous settings are back"), restoreToml(r)
@@ -208,7 +208,7 @@ func apiDo(root *string, cmd, arg string) (string, error) {
 		return T("Reflejos ", "Reflections ") + onOff(onArg(arg)), setBool(r, "skate3_native_render_scene_ssr", onArg(arg))
 	case "pref":
 		key, val, _ := strings.Cut(arg, "=")
-		if key != "deck" && key != "sfx" && key != "seen" && key != "size" && key != "sofa" && key != "ollie" && key != "arrival" && key != "bg" {
+		if key != "deck" && key != "sfx" && key != "seen" && key != "size" && key != "sofa" && key != "arrival" && key != "bg" {
 			return "", errors.New("?")
 		}
 		c := loadConfig(r)

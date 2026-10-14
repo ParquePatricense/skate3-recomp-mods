@@ -107,7 +107,7 @@ func paintArrival(h uintptr) {
 		pDeleteObject.Call(b)
 	}
 	draw := func(s string, r rect, size int32, color uintptr) {
-		f, _, _ := pCreateFontW.Call(uintptr(-size), 0, 0, 0, 800, 1, 0, 0, 0, 0, 0, 4, 0, uintptr(unsafe.Pointer(utf16("Impact"))))
+		f, _, _ := pCreateFontW.Call(uintptr(-size), 0, 0, 0, 600, 0, 0, 0, 0, 0, 0, 4, 0, uintptr(unsafe.Pointer(utf16("Bahnschrift SemiBold Condensed"))))
 		old, _, _ := pSelectObject.Call(dc, f)
 		pSetTextColor.Call(dc, color)
 		pSetBkMode.Call(dc, 1)

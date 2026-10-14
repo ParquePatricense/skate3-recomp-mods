@@ -450,9 +450,6 @@ func play(root string) error {
 				if watch.reached() {
 					took := time.Since(coverStart)
 					hideCover()
-					if coverOllie {
-						playOllie()
-					}
 					if loadBoost && !hc.feature("priority") {
 						pSetPriorityClass.Call(uintptr(proc), normalPriorityClass)
 					}
