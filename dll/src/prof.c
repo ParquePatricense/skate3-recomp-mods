@@ -175,12 +175,33 @@ typedef struct {
   u32 in_guest[8];  // RIP inside recompiled code
   u32 total, with_guest;  // all samples / samples with any guest frame
   u8 dropped;       // host-only thread (driver, pool): no longer sampled
+  u8 skip;          // focus mode: not one of the loading threads
 } Slot;
 static Slot g_slots[NSLOT];
 static int g_nslots;
 
 extern volatile int g_phase;  // game.c
 extern const char* kPhaseName(int p);
+
+static void thread_name(HANDLE h, char* out, int cap);
+
+// Focus mode: only the threads that do the world load, only while BootFlow
+// is in the world-load step (827077D8), so the rest of the game never stops.
+static volatile int g_focus, g_window;
+static const char* kFocusNames[] = {"load_thread", "decompress_thread", "rwfilesys", "Main XThread",
+                                    "render_thread", "Job Manager"};
+static int focus_wanted(HANDLE h) {
+  char name[64];
+  thread_name(h, name, sizeof name);
+  for (usize k = 0; k < sizeof kFocusNames / sizeof kFocusNames[0]; k++) {
+    const char* w = kFocusNames[k];
+    usize n = s_len(w);
+    if (memcmp(name, w, n) == 0) return 1;
+  }
+  return 0;
+}
+static u8* g_rt;    // rexruntime.dll image, for samples outside the game code
+static u32 g_rt_size;
 
 static void refresh_threads(DWORD self) {
   HANDLE snap = CreateToolhelp32Snapshot(TH32CS_SNAPTHREAD, 0);
@@ -198,6 +219,7 @@ static void refresh_threads(DWORD self) {
       if (!h) continue;
       g_slots[g_nslots].tid = te.th32ThreadID;
       g_slots[g_nslots].h = h;
+      g_slots[g_nslots].skip = g_focus && !focus_wanted(h);
       g_nslots++;
     } while (Thread32Next(snap, &te));
   CloseHandle(snap);
@@ -251,6 +273,8 @@ static void sample_one(int si, int phase) {
     bump(chain[0], base | 2);  // in runtime / OS, called from this guest function
     for (int i = 0; i < n; i++) bump(chain[i], base | 1);
   }
+  if (!leaf && g_rt && rip >= (u64)g_rt && rip < (u64)g_rt + g_rt_size)
+    bump((u32)(rip - (u64)g_rt) & ~0xFu, base | 3);  // where in rexruntime.dll
 }
 
 static volatile int g_prof_stop;
@@ -275,7 +299,7 @@ static void thread_name(HANDLE h, char* out, int cap) {
 void prof_stop(void) { g_prof_stop = 1; }
 
 static void report(void) {
-  logf("---- perfil (muestras cada 4 ms) ----");
+  logf(g_focus ? "---- perfil del paso del mundo (hilos de carga, cada 2 ms) ----" : "---- perfil (muestras cada 4 ms) ----");
   for (int ph = 0; ph < 5; ph++) {
     for (int si = 0; si < g_nslots; si++) {
       Slot* s = &g_slots[si];
@@ -284,7 +308,7 @@ static void report(void) {
       thread_name(s->h, name, sizeof name);
       logf("[%s] hilo %u \"%s\": %u muestras, %u en código del juego", kPhaseName(ph), s->tid, name,
            s->samples[ph], s->in_guest[ph]);
-      for (int kind = 0; kind < 3; kind++) {
+      for (int kind = 0; kind < 4; kind++) {
         // top 12 by count, selection without sorting the table
         static u32 shown[12];
         int nshown = 0;
@@ -301,7 +325,7 @@ static void report(void) {
           }
           if (!best || best->count * 50 < s->samples[ph]) break;  // < 2 %
           shown[nshown++] = best->guest;
-          logf("   %s %08X  %3u%%  (%u)", kind == 0 ? "propio " : kind == 1 ? "incluye" : "espera ",
+          logf("   %s %08X  %3u%%  (%u)", kind == 0 ? "propio " : kind == 1 ? "incluye" : kind == 2 ? "espera " : "runtime",
                best->guest, best->count * 100 / s->samples[ph], best->count);
         }
       }
@@ -320,10 +344,14 @@ static DWORD WINAPI prof_thread(void* arg) {
     if (t_end != 0 && now_s() > t_end) break;
     if (now_s() > 90) break;
     if ((tick++ % 50) == 0) refresh_threads(self);
+    if (g_focus && !g_window) {
+      Sleep(4);
+      continue;
+    }
     int ph = g_phase;
     for (int i = 0; i < g_nslots; i++)
-      if (!g_slots[i].dropped) sample_one(i, ph);
-    Sleep(4);
+      if (!g_slots[i].dropped && !g_slots[i].skip) sample_one(i, ph);
+    Sleep(g_focus ? 2 : 4);
   }
   int nd = 0;
   for (int i = 0; i < g_nslots; i++) nd += g_slots[i].dropped;
@@ -331,6 +359,20 @@ static DWORD WINAPI prof_thread(void* arg) {
   report();
   for (int i = 0; i < g_nslots; i++) CloseHandle(g_slots[i].h);
   return 0;
+}
+
+int prof_start(void);
+void prof_window(int on) { g_window = on; }
+
+int prof_start_focus(void) {
+  g_focus = 1;
+  HMODULE rt = GetModuleHandleW(L"rexruntime.dll");
+  if (rt) {
+    u8* b = (u8*)rt;
+    g_rt = b;
+    g_rt_size = *(u32*)(b + *(u32*)(b + 0x3C) + 24 + 56);
+  }
+  return prof_start();
 }
 
 int prof_start(void) {

@@ -42,6 +42,7 @@ static int g_press_inside = 0; // START given from inside: off, it skips the scr
                                // handling (which pad/profile pressed it) and the game then
                                // boots into free play with the default skater and no save
 static int g_profile = 0;    // sampling profiler (suspends every thread: slows the load, opt-in)
+static int g_profile_world = 1;  // profiler on the loading threads during the world step only
 
 // ---------------------------------------------------------------- loading frame cap
 // The recomp paces every guest frame to the display (skate3_guest_fps_cap_auto
@@ -140,6 +141,8 @@ volatile int g_phase = PH_BOOT;
 static const char* kPhase[] = {"arranque", "logo", "press-start", "cargando", "juego"};
 const char* kPhaseName(int p) { return p >= 0 && p < 5 ? kPhase[p] : "?"; }
 int prof_start(void);
+int prof_start_focus(void);
+void prof_window(int on);
 int load_map(void);
 u32 host_of(u32 guest);
 void prof_stop(void);
@@ -153,6 +156,7 @@ void prof_stop(void);
 #define ST_FADE 0x826DF8B0u
 #define ST_POST 0x826FE4A8u
 #define ST_F 0x826FE4F8u
+#define ST_WORLD 0x827077D8u  // world load step (loader +0x44 runs 8..18)
 
 static const char* state_name(u32 s) {
   switch (s) {
@@ -267,6 +271,19 @@ static void h_chg(PPCContext* ctx, u8* base) {
   if (to == ST_LOGO) set_phase(PH_LOGO);
   if (to == ST_PRESS) set_phase(PH_PRESS);
   if (to == ST_FADE) set_phase(PH_LOADING);
+  if (g_profile_world && !g_profile) {
+    static int win;
+    if (to == ST_WORLD && !win) {
+      win = 1;
+      prof_window(1);
+      logf("perfil: empieza el paso del mundo");
+    } else if (win == 1 && to != ST_WORLD) {
+      win = 2;
+      prof_window(0);
+      prof_stop();
+      logf("perfil: termina el paso del mundo");
+    }
+  }
   o_chg(ctx, base);
 }
 
@@ -574,10 +591,11 @@ int game_install(void) {
   if (env_on(L"SKATE3_DIRECT_PRESS")) g_fast_press = 1;
   if (env_on(L"SKATE3_DIRECT_START")) g_press_inside = 1;
   if (env_on(L"SKATE3_DIRECT_PERFIL")) g_profile = 1;
+  if (env_off(L"SKATE3_DIRECT_PERFIL_MUNDO")) g_profile_world = 0;
   logf("corte del logo EA: %s | sin tope de FPS al cargar: %s | Press Start lista al toque: %s | START por dentro: %s | turbo post-START: %s | "
-       "perfilador: %s",
+       "perfilador: %s | perfil del mundo: %s",
        g_skip_logo ? "sí" : "no", g_uncap ? "sí" : "no", g_fast_press ? "sí" : "no", g_press_inside ? "sí" : "no", g_fast_fade ? "sí" : "no",
-       g_profile ? "sí" : "no");
+       g_profile ? "sí" : "no", g_profile_world ? "sí" : "no");
   // Each hook is located through the exe's own guest->host table, so a copy
   // of the build laid out differently still gets hooked at the right place;
   // the bytes are then checked exactly as before.
@@ -603,6 +621,7 @@ int game_install(void) {
   for (usize i = 0; i < sizeof hk / sizeof hk[0]; i++) ok &= hook_entry(&hk[i]);
   CreateThread(NULL, 0, monitor, NULL, 0, NULL);
   if (g_profile) prof_start();
+  else if (g_profile_world) prof_start_focus();
   return ok;
 }
 

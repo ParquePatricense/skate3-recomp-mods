@@ -23,7 +23,7 @@ import (
 	"time"
 )
 
-const version = "3.9.5"
+const version = "3.9.6"
 
 var stdin = newStdin()
 
