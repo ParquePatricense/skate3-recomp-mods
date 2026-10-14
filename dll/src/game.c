@@ -21,9 +21,21 @@ static GameplayContextValue_t p_gameplay_ctx;
 #define RT_IMAGESIZE 0x01328000u
 static u8* g_rt_syn;  // rexruntime base when it matches, else NULL
 
+typedef struct {
+  u16 buttons;
+  u32 polls;
+  u8 lt, rt;
+} SynStep;  // rex::kernel::xam::SyntheticInputStep
+_Static_assert(sizeof(SynStep) == 12 && __builtin_offsetof(SynStep, polls) == 4, "SyntheticInputStep");
+typedef void (*QueueSyn_t)(const SynStep* steps, u64 n);
+static QueueSyn_t p_queue_syn;
+
 static void resolve_runtime(void) {
   HMODULE rt = GetModuleHandleW(L"rexruntime.dll");
   if (!rt) return;
+  if (!p_queue_syn)
+    p_queue_syn = (QueueSyn_t)GetProcAddress(
+        rt, "?QueueSyntheticInputSequence@xam@kernel@rex@@YAXPEBUSyntheticInputStep@123@_K@Z");
   p_gameplay_ctx = (GameplayContextValue_t)GetProcAddress(
       rt, "?GameplayContextValue@guest_presence@kernel@rex@@YAIXZ");
   u8* b = (u8*)rt;
@@ -44,6 +56,7 @@ static int g_press_inside = 0; // START given from inside: off, it skips the scr
 static int g_profile = 0;    // sampling profiler (suspends every thread: slows the load, opt-in)
 static int g_profile_world = 1;  // profiler on the loading threads during the world step only
 static int g_press_clock = 1; // Press Start's 1.5 s minimum on screen counted as already elapsed
+static int g_press_tap = 1;   // START tapped the moment Press Start takes it (same synthetic input the recomp uses)
 static int g_no_nap = 1;     // loading threads poll with SleepEx(1): yield instead while loading
 
 // ---------------------------------------------------------------- loading frame cap
@@ -445,7 +458,48 @@ static void h_psupd(PPCContext* ctx, u8* base) {
     }
     gstore32(base, PS_CLOCK, 1501);
   }
+  u32 self = ctx->r3.u32;
   o_psupd(ctx, base);
+  // The recomp taps START on a fixed 0.33 s cycle (5 polls down, 15 up), so
+  // the screen can sit ready for most of a cycle. Once +0x48 is set, one tap
+  // goes through the recomp's own synthetic input (same pad, same path); its
+  // auto-tap carries on by itself afterwards.
+  static int tapped;
+  if (g_press_tap && !tapped && g_phase == PH_PRESS && gload8(base, self + 0x48)) {
+    tapped = 1;
+    if (!p_queue_syn) resolve_runtime();
+    if (p_queue_syn) {
+      static const SynStep tap[] = {{0x0010, 5, 0, 0}, {0, 5, 0, 0}};
+      p_queue_syn(tap, 2);
+      logf("Press Start: START al instante (la pantalla ya lo acepta)");
+    } else {
+      logf("Press Start: no encontré QueueSyntheticInputSequence, queda el toque del recomp");
+    }
+  }
+}
+
+// ---------------------------------------------------------------- last step before gameplay
+// BootFlow 82709338 takes ~0.41 s with no frames counted. On update it waits
+// for both: the fade object [[0x830CFE14]+304] in motion (0 < +12 < 1, see
+// sub_825E8A08) and the state machine [[0x830CFE14]+308] ready (sub_825E6E70:
+// state 0, or 1 with [[[p+8]+208]+232] == 3, or 2 with [[[p+8]+56]+192] == 2).
+// Measurement only: log what it waits on, a few lines per update.
+static PPCFunc* o_prego;
+static float f32_of(u32 v) { return *(float*)&v; }
+static void h_prego(PPCContext* ctx, u8* base) {
+  static int lines;
+  if (ctx->r4.u32 <= 1 && lines < 60) {
+    u32 inst = rd32(0x830CFE14);
+    u32 fade = inst ? rd32(inst + 304) : 0, p = inst ? rd32(inst + 308) : 0;
+    u32 st = p ? rd32(p) : 0xFFFFFFFF, q = p ? rd32(p + 8) : 0;
+    u32 v1 = q && rd32(q + 208) ? rd32(rd32(q + 208) + 232) : 0xFFFFFFFF;
+    u32 v2 = q && rd32(q + 56) ? rd32(rd32(q + 56) + 192) : 0xFFFFFFFF;
+    lines++;
+    logf("antes del juego ev%u: fundido actual %.3f objetivo %.3f banderas %X | máquina estado %u (v1 %d, v2 %d)",
+         ctx->r4.u32, fade ? (double)f32_of(rd32(fade + 12)) : -1.0, fade ? (double)f32_of(rd32(fade + 16)) : -1.0,
+         fade ? rd32(fade + 20) : 0, st, (int)v1, (int)v2);
+  }
+  o_prego(ctx, base);
 }
 
 // ---------------------------------------------------------------- loader naps
@@ -518,6 +572,7 @@ static const HookSpec kHooks[] = {
   {"stA", 0x148B7C0, 5, {0x8B, 0x41, 0x20, 0x85, 0xC0}, h_stA, &o_stA, 0x826FE4A8},  // sub_826FE4A8
   {"stF", 0x148B910, 6, {0x41, 0x57, 0x41, 0x56, 0x41, 0x54}, h_stF, &o_stF, 0x826FE4F8},  // sub_826FE4F8
   {"psupd", 0xF4DC10, 7, {0x56, 0x57, 0x53, 0x48, 0x83, 0xEC, 0x20}, h_psupd, &o_psupd, 0x82609050},  // sub_82609050 Press Start update
+  {"prego", 0x14C1530, 7, {0x56, 0x57, 0x53, 0x48, 0x83, 0xEC, 0x30}, h_prego, &o_prego, 0x82709338},  // sub_82709338
   {"sleep", 0x425CF30, 6, {0x56, 0x57, 0x48, 0x83, 0xEC, 0x28}, h_sleep, &o_sleep, 0x82EE24A8},  // sub_82EE24A8 SleepEx
   {"startcb", 0x148C1B0, 8, {0x48, 0xC7, 0x41, 0x50, 0x00, 0x00, 0x08, 0x83}, h_startcb, &o_startcb, 0x826FE638},  // sub_826FE638
 };
@@ -684,10 +739,11 @@ int game_install(void) {
   if (env_off(L"SKATE3_DIRECT_PERFIL_MUNDO")) g_profile_world = 0;
   if (env_off(L"SKATE3_DIRECT_SIESTA")) g_no_nap = 0;
   if (env_off(L"SKATE3_DIRECT_RELOJ")) g_press_clock = 0;
+  if (env_off(L"SKATE3_DIRECT_TOQUE")) g_press_tap = 0;
   logf("corte del logo EA: %s | sin tope de FPS al cargar: %s | Press Start lista al toque: %s | START por dentro: %s | turbo post-START: %s | "
-       "perfilador: %s | perfil del mundo: %s | cargadores sin siesta: %s | Press Start sin espera mínima: %s",
+       "perfilador: %s | perfil del mundo: %s | cargadores sin siesta: %s | Press Start sin espera mínima: %s | START al instante: %s",
        g_skip_logo ? "sí" : "no", g_uncap ? "sí" : "no", g_fast_press ? "sí" : "no", g_press_inside ? "sí" : "no", g_fast_fade ? "sí" : "no",
-       g_profile ? "sí" : "no", g_profile_world ? "sí" : "no", g_no_nap ? "sí" : "no", g_press_clock ? "sí" : "no");
+       g_profile ? "sí" : "no", g_profile_world ? "sí" : "no", g_no_nap ? "sí" : "no", g_press_clock ? "sí" : "no", g_press_tap ? "sí" : "no");
   // Each hook is located through the exe's own guest->host table, so a copy
   // of the build laid out differently still gets hooked at the right place;
   // the bytes are then checked exactly as before.
@@ -771,6 +827,12 @@ __declspec(dllexport) int s3d_flagtest(wchar* dir) {
   int s3 = set_flag("no_such_flag_x", "1");
   set_flag("vsync", a);
   get_flag("vsync", d, sizeof d);
+  resolve_runtime();
+  if (p_queue_syn) {
+    static const SynStep t[] = {{0x0010, 5, 0, 0}, {0, 5, 0, 0}};
+    p_queue_syn(t, 2);
+    logf("flagtest: QueueSyntheticInputSequence llamado");
+  } else return -3;
   logf("flagtest: vsync %d'%s' set %d -> %d'%s' | fps %d'%s' set0 %d | unknown %d | back '%s'", r1, a, s1, r2, b,
        r3, c, s2, s3, d);
   return r1 && s1 && r2 && b[0] == 't' && !s2 && !s3 && d[0] == a[0];
