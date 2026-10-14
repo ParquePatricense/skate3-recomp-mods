@@ -402,6 +402,7 @@ static void state_ev(u32 st, PPCContext* ctx, u8* base) {
 }
 
 static int g_logo_forced;
+static double g_logo_wait = 0.03;  // SKATE3_DIRECT_LOGO_LENTO=1: 0.2 s
 static void h_lang(PPCContext* c, u8* b) {
   if (c->r4.u32 == 0) {
     g_tick_on = 1;
@@ -413,9 +414,11 @@ static void h_lang(PPCContext* c, u8* b) {
 }
 static void h_stB(PPCContext* c, u8* b) {
   state_ev(ST_LOGO, c, b);
-  // Fallback when the logo is not the movie the widget asks about: after a
-  // few frames the "logo done" flag of FE screen 5 is set by hand.
-  if (g_skip_logo && c->r4.u32 == 1 && !g_logo_forced && now_s() - g_state_t > 0.2) {
+  // The logo is not the movie the widget asks about: screen 5's update
+  // (sub_82608E38) only adds dt to +0x3C and sets +0x40 at 4000 ms, and its
+  // skip (sub_82608E18) sets the same byte, so it is set by hand once the
+  // screen has had a few ticks (0.03 s; it was 0.2 s up to v3.9.16).
+  if (g_skip_logo && c->r4.u32 == 1 && !g_logo_forced && now_s() - g_state_t > g_logo_wait) {
     u32 s5 = screen(5);
     if (s5 && gok(s5 + 0x40, 1) && gload8(b, s5 + 0x40) == 0) {
       gstore8(b, s5 + 0x40, 1);
@@ -799,7 +802,8 @@ static Watch w_s5f = {"pantalla5+40 (logo listo)", -2}, w_s22f = {"pantalla22+3C
              w_g6c = {"global 8308396C", -2}, w_ctx = {"contexto de juego", -2},
              w_tap = {"toque automático (botones, activo)", -2}, w_step = {"toque: paso", -2},
              w_s22on = {"pantalla22+44 (activa)", -2}, w_s22rdy = {"pantalla22+48 (acepta START)", -2},
-             w_s22btn = {"pantalla22+50 (botón apretado)", -2}, w_psclk = {"reloj Press Start (ms)", -2};
+             w_s22btn = {"pantalla22+50 (botón apretado)", -2}, w_psclk = {"reloj Press Start (ms)", -2},
+             w_s29a = {"pantalla29+44 (antes del idioma)", -2}, w_s29b = {"pantalla29+48 (antes del idioma)", -2};
 
 static DWORD WINAPI monitor(void* arg) {
   (void)arg;
@@ -839,6 +843,13 @@ static DWORD WINAPI monitor(void* arg) {
         }
       }
       u32 s5 = last_scr[5], s22 = last_scr[22];
+      // State 826FDC50 (before language, ~0.6 s with no frames) waits for
+      // both of these to stop being -1.
+      if (g_phase == PH_BOOT && !g_t_lang) {
+        u32 s29 = screen(29);
+        watch(&w_s29a, s29 ? (i32)rd32(s29 + 0x44) : -2);
+        watch(&w_s29b, s29 ? (i32)rd32(s29 + 0x48) : -2);
+      }
       watch(&w_s5f, s5 ? rd8(s5 + 0x40) : -1);
       watch(&w_s22f, s22 ? rd8(s22 + 0x3C) : -1);
       if (g_phase == PH_PRESS && s22) {
@@ -913,6 +924,7 @@ static DWORD WINAPI monitor(void* arg) {
 int game_install(void) {
   InitializeCriticalSection(&g_seen_cs);
   if (env_off(L"SKATE3_DIRECT_LOGO")) g_skip_logo = 0;
+  if (env_on(L"SKATE3_DIRECT_LOGO_LENTO")) g_logo_wait = 0.2;
   if (env_off(L"SKATE3_DIRECT_FPS")) g_uncap = 0;
   if (env_on(L"SKATE3_DIRECT_FADE")) g_fast_fade = 1;
   if (env_on(L"SKATE3_DIRECT_PRESS")) g_fast_press = 1;
